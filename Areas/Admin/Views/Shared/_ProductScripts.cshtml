@@ -1,0 +1,219 @@
+﻿@model IEnumerable<SelectListItem>
+@{
+     var listatt = Model;
+}
+<script>
+    $(document).ready(function () {
+        $('#Detail').summernote();
+    });
+
+    const btnTabs = document.querySelectorAll(".btn-tab");
+
+    btnTabs.forEach(btn => {
+        btn.addEventListener("click", function () {
+
+            btnTabs.forEach(nav => nav.classList.remove("actives", "active"));
+
+            this.classList.add("actives");
+        });
+    });
+
+    // upload images
+    $(document).ready(function () {
+        const previewContainer = $('#imagePreview');
+        const fileInput = $('#formValidationFile');
+        const checkedImageInput = $('#checkedImage'); // Hidden input lưu ảnh đại diện
+
+        // Xử lý khi người dùng chọn file mới
+        fileInput.on('change', function (event) {
+            const files = Array.from(event.target.files); // Lấy danh sách file
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    addPreviewImage(e.target.result, index, false, file.name); // false: ảnh từ file mới
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        // Thêm ảnh vào preview container
+        function addPreviewImage(src, index, isExisting, filename = null) {
+            const img = $('<img>').attr('src', src)
+                .attr('data-filename', isExisting ? filename || src : filename)
+                .addClass('col-4 mb-3')
+                .css({ maxWidth: '100%' });
+
+            // Tạo radio button cho ảnh đại diện
+            const radio = $('<input>', {
+                type: 'radio',
+                name: 'imageRep',
+                value: isExisting ? filename || src : filename,
+                id: 'radio' + index,
+                checked: index === 0, // Mặc định chọn ảnh đầu tiên làm đại diện
+            }).addClass('me-2');
+
+            const label = $('<label>', {
+                for: 'radio' + index,
+                text: 'Chọn ảnh này làm đại diện'
+            });
+
+            const radioContainer = $('<div>').append(radio).append(label);
+
+            // Tạo nút xóa
+            const removeBtn = $('<button type="button" class="btn btn-danger btn-sm mt-2">Xóa</button>')
+                .click(function () {
+                    $(this).closest('.col-3').remove(); // Xóa ảnh khỏi giao diện
+                    if (!isExisting) {
+                      
+                        // Xóa ảnh từ input file
+                        const dataTransfer = new DataTransfer();
+                        Array.from(fileInput[0].files).forEach(file => {
+                            if (file.name !== filename) {
+                                dataTransfer.items.add(file);
+                            }
+                        });
+                        fileInput[0].files = dataTransfer.files;
+                    }
+                });
+
+            const col = $('<div class="col-3 mb-3">')
+                .append(img)
+                .append(radioContainer)
+                .append(removeBtn);
+
+            
+            
+            previewContainer.append(col);
+        }
+
+        // Cập nhật giá trị ảnh đại diện
+        $(document).on('change', 'input[name="imageRep"]', function () {
+            const selectedImage = $(this).val(); // Lấy giá trị ảnh được chọn
+            checkedImageInput.val(selectedImage); // Gán giá trị vào input hidden
+        });
+    });
+
+    // end upload images
+
+
+    /// đang xử lý
+    let attributeIndex = 1; // Chỉ số cho thuộc tính trong một biến thể
+    // add attributes to product
+    let variantIndex = 1;
+
+    function addAttribute(variantIndex) {
+
+        const attributesContainer = document.getElementById(`attributes-container_${variantIndex}`);
+
+        // Tạo phần tử mới cho thuộc tính
+        const newAttributeHtml = `
+                          <div class="d-flex align-items-center mb-2">
+                            <div class="form-group me-3">
+                                <label class="control-label">Thuộc tính</label>
+                                    <select name="variants[${variantIndex}].ProductVariantAttributes[${attributeIndex}].AttributeId" id="attributeSelect_[${variantIndex}][${attributeIndex}]" class="form-control" onchange="showvalue(this, ${variantIndex}, ${attributeIndex})">
+                                    <option value="">-- Chọn thuộc tính sản phẩm</option>
+    @foreach (var attribute in (SelectList)listatt)
+    {
+                                             <option value="@(attribute.Value)">@(attribute.Text)</option>
+    }
+                                </select>
+                            </div>
+                            <div class="form-group me-3">
+                                <label for="AttributeValue">Giá trị thuộc tính:</label>
+                                    <select class="form-control" id="attributeValueSelect_[${variantIndex}][${attributeIndex}]" name="variants[${variantIndex}].ProductVariantAttributes[${attributeIndex}].Value">
+                                    <option  value="">-- Chọn giá trị thuộc tính</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
+
+        // Chèn thuộc tính mới vào container thuộc tính
+        attributesContainer.insertAdjacentHTML('beforeend', newAttributeHtml);
+        attributeIndex++; // Tăng chỉ số attribute cho lần thêm sau
+    }
+
+    function addVariant() {
+        const container = document.getElementById('variant-container');
+        const newVariant = document.createElement('div');
+
+        newVariant.className = 'variant mb-3 p-3 border rounded d-flex align-items-center';
+        newVariant.innerHTML = `
+                        <div class="form-group me-3">
+                               <label class="control-label">SKU</label>
+                                        <input class="form-control" type="text" name="variants[${variantIndex}].SKU" />
+                        </div>
+
+                         <button type="button" class="btn btn-link" onclick="addAttribute(${variantIndex})"><i class='bx bx-plus-circle'></i></button>
+
+                         <div class="attributes-container" id="attributes-container_${variantIndex}" style="flex-grow: 1;">
+                                 <div class="d-flex align-items-center mb-2">
+                                      <div class="form-group me-3">
+                                          <label class="control-label">Thuộc tính</label>
+                                          <select name="variants[${variantIndex}].ProductVariantAttributes[0].AttributeId" id="attributeSelect_[${variantIndex}][0]" class="form-control" onchange="showvalue(this, ${variantIndex} , 0)">
+                                               <option  value="">-- Chọn thuộc tính sản phẩm</option>
+                                                        @foreach (var attribute in (SelectList)listatt)
+                                                        {
+                                                        <option value="@(attribute.Value)">@(attribute.Text)</option>
+                                                        }
+                                          </select>
+                                      </div>
+                                      <div class="form-group me-3">
+                                          <label for="AttributeValue">Giá trị thuộc tính:</label>
+                                          <select class="form-control" name="variants[${variantIndex}].ProductVariantAttributes[0].Value" id="attributeValueSelect_[${variantIndex}][0]">
+                                               <option  value="">-- Chọn giá trị thuộc tính</option>
+
+                                          </select>
+                                      </div>
+                               </div>
+                       </div>
+
+                        <div class="form-group me-3" id="price-input_${variantIndex}">
+                            <label for="AdditionalPrice">Giá bổ sung:</label>
+                            <input class="form-control" type="number" name="variants[${variantIndex}].AdditionalPrice" placeholder="Nhập giá bổ sung" />
+                        </div>
+                        <div class="form-group me-3" id="quantity-input_${variantIndex}">
+                            <label for="Quantity">Số lượng:</label>
+                            <input class="form-control" type="number" name="variants[${variantIndex}].Quantity" placeholder="Nhập số lượng" />
+                        </div>
+                    `;
+
+        container.appendChild(newVariant);
+        variantIndex++; // Tăng chỉ số cho biến thể mới
+        attributeIndex = 1; // Reset chỉ số thuộc tính cho biến thể mới
+    }
+
+    function showvalue(selectElement, variantIndex, attrIndex) {
+
+        const attributeId = selectElement.value;
+        const attributeValueSelect = document.getElementById(`attributeValueSelect_[${variantIndex}][${attrIndex}]`);
+
+
+        if (selectElement.value) {
+            const selectedAttributeId = selectElement.value;
+            $.ajax({
+                url: '@Url.Action("GetValuesAttribute", "Products")',
+                type: 'POST',
+                data: { attributeId: selectedAttributeId },
+                success: function (rs) {
+                    if (rs.success) {
+                        attributeValueSelect.innerHTML = '';
+                        attributeValueSelect.innerHTML = '<option selected>-- Chọn giá trị thuộc tính</option>';
+                        // Thêm tùy chọn mặc định
+                        rs.data.forEach(function (item) {
+                            const option = document.createElement('option');
+                            option.value = item.id;
+                            option.text = item.value;
+                            attributeValueSelect.appendChild(option);
+                        });
+
+
+                    }
+                },
+                error: function () {
+                    alert('Đã xảy ra lỗi.');
+                }
+            });
+
+        }
+    }
+</script>

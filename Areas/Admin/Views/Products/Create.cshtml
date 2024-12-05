@@ -1,0 +1,233 @@
+﻿@model Coza_Ecommerce_Shop.Models.Entities.Product
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var listatt = ViewBag.Attributes;
+}
+
+<style>
+    .btn-tab.actives {
+        color: #696cff !important;
+        box-shadow: 0 -4px 0 #696cff inset;
+    }
+
+    #imagePreview img {
+        width: 150px; /* Đặt chiều rộng ảnh là 200px */
+        height: 150px; /* Đặt chiều cao ảnh là 200px */
+        object-fit: cover; /* Giữ tỷ lệ 1:1 và cắt ảnh nếu cần */
+        margin-right: 10px; /* Thêm khoảng cách giữa các ảnh */
+        margin-bottom: 10px; /* Thêm khoảng cách giữa các hàng ảnh */
+    }
+
+</style>
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Home</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a asp-controller="Products" asp-action="Index">Products</a>
+        </li>
+        <li class="breadcrumb-item active">@ViewData["Title"]</li>
+    </ol>
+</nav>
+
+
+<hr />
+
+<div class="card mb-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Thông tin sản phẩm mới</h5>
+            </div>
+            <div class="card-body">
+                <div class="nav-align-top nav-tabs-shadow mb-6">
+                    <ul class="nav nav-tabs nav-fill" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button type="button" class="nav-link btn-tab actives" role="tab" data-bs-toggle="tab" data-bs-target="#navs-justified-home" aria-controls="navs-justified-home" aria-selected="false" tabindex="-1"><span class="d-none d-sm-block"> Thông tin chung </span></button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button type="button" class="nav-link btn-tab" role="tab" data-bs-toggle="tab" data-bs-target="#navs-justified-profile" aria-controls="navs-justified-profile" aria-selected="false" tabindex="-1"><span class="d-none d-sm-block"> Ảnh </span></button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button type="button" class="nav-link btn-tab" role="tab" data-bs-toggle="tab" data-bs-target="#navs-justified-messages" aria-controls="navs-justified-messages" aria-selected="true"><span class="d-none d-sm-block"> Thuộc tính </span></button>
+                        </li>
+                    </ul>
+                    <form asp-action="Create" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="tab-content">
+                            <!-- 1 -->
+
+                            <div class="tab-pane fade active show" id="navs-justified-home" role="tabpanel">
+
+                                <div class="mb-3">
+                                    <label asp-for="ProductCode" class="control-label"></label>
+                                    <input asp-for="ProductCode" class="form-control" />
+                                    <span asp-validation-for="ProductCode" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Title" class="control-label"></label>
+                                    <input asp-for="Title" class="form-control" />
+                                    <span asp-validation-for="Title" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Description" class="control-label"></label>
+                                    <input asp-for="Description" class="form-control" />
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="Detail" class="form-label"></label>
+                                    <textarea asp-for="Detail" id="Detail" class="form-control"></textarea>
+                                    <span asp-validation-for="Detail" class="text-danger"></span>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col">
+                                        <label asp-for="Quantity" class="control-label"></label>
+                                        <input asp-for="Quantity" class="form-control" />
+                                        <span asp-validation-for="Quantity" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col">
+                                        <label asp-for="Price" class="control-label"></label>
+                                        <input asp-for="Price" class="form-control" />
+                                        <span asp-validation-for="Price" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col">
+                                        <label asp-for="PriceSale" class="control-label"></label>
+                                        <input asp-for="PriceSale" class="form-control" />
+                                        <span asp-validation-for="PriceSale" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="ProductCategoryId" class="control-label"></label>
+                                    <select asp-for="ProductCategoryId" class="form-control" asp-items="ViewBag.ProductCategoryId">
+                                        <option selected>-- Chọn danh mục sản phẩm</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="SeoTitile" class="control-label"></label>
+                                    <input asp-for="SeoTitile" class="form-control" />
+                                    <span asp-validation-for="SeoTitile" class="text-danger"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="SeoDescription" class="control-label"></label>
+                                    <input asp-for="SeoDescription" class="form-control" />
+                                    <span asp-validation-for="SeoDescription" class="text-danger"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="SeoKeywords" class="control-label"></label>
+                                    <input asp-for="SeoKeywords" class="form-control" />
+                                    <span asp-validation-for="SeoKeywords" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3 d-flex align-items-center gap-4">
+                                    <label asp-for="IsSale" class="control-label col-3 col-md-1 col-sm-2 "></label>
+                                    <div class="form-check form-switch mb-0">
+                                        <input asp-for="IsSale" type="checkbox" class="form-check-input">
+                                    </div>
+                                </div>
+
+                                <div class="mb-3 d-flex align-items-center gap-4">
+                                    <label asp-for="IsFeature" class="control-label col-3 col-md-1 col-sm-2 "></label>
+                                    <div class="form-check form-switch mb-0">
+                                        <input asp-for="IsFeature" type="checkbox" class="form-check-input">
+                                    </div>
+                                </div>
+
+                                <div class="mb-3 d-flex align-items-center gap-4">
+                                    <label asp-for="IsHot" class="control-label col-3 col-md-1 col-sm-2 "></label>
+                                    <div class="form-check form-switch mb-0">
+                                        <input asp-for="IsHot" type="checkbox" class="form-check-input">
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+                            <!-- 2 -->
+                            <div class="tab-pane fade" id="navs-justified-profile" role="tabpanel">
+                                <div class="mb-3">
+                                    <label asp-for="Image" class="form-label"></label>
+                                    <input name="files" multiple class="form-control" type="file" id="formValidationFile">
+                                    <span asp-validation-for="Image" class="text-danger"></span>
+                                    <input asp-for="Image" id="checkedImage" type="hidden" value="" />
+                                </div>
+
+                                <div class="mb-5">
+                                    <div id="imagePreview" class="row"></div>
+                                   
+                                </div>
+                            </div>
+
+                            <!-- 3 -->
+                            <div class="tab-pane fade" id="navs-justified-messages" role="tabpanel">
+                                <!--List<ProductVariant> variants-->
+                                <h3 class="mt-4">Chi tiết sản phẩm</h3>
+                                <div id="variant-container" class="mb-3">
+                                    <div class="variant mb-3 p-3 border rounded d-flex align-items-center">
+                                        <div class="form-group me-3">
+                                            <label class="control-label">SKU</label>
+                                            <input class="form-control" type="text" name="variants[0].SKU" />
+                                        </div>
+                                        <button type="button" class="btn btn-link" onclick="addAttribute(0)"><i class='bx bx-plus-circle'></i></button>
+
+                                        <div class="attributes-container" id="attributes-container_0" style="flex-grow: 1;">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="form-group me-3">
+                                                    <label class="control-label">Thuộc tính</label>
+                                                    <select name="variants[0].ProductVariantAttributes[0].AttributeId" id="attributeSelect_[0][0]" class="form-control" asp-items="ViewBag.Attributes" onchange="showvalue(this, 0, 0)">
+                                                        <option  value="">-- Chọn thuộc tính sản phẩm</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group me-3">
+                                                    <label for="AttributeValue">Giá trị thuộc tính:</label>
+                                                    <select class="form-control" name="variants[0].ProductVariantAttributes[0].Value" id="attributeValueSelect_[0][0]">
+                                                        <option  value="">-- Chọn giá trị thuộc tính</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="form-group me-3" id="price-input_0">
+                                            <label for="AdditionalPrice">Giá bổ sung:</label>
+                                            <input class="form-control" type="number" name="variants[0].AdditionalPrice" placeholder="Nhập giá bổ sung" />
+                                        </div>
+                                        <div class="form-group me-3" id="quantity-input_0">
+                                            <label for="Quantity">Số lượng:</label>
+                                            <input class="form-control" type="number" name="variants[0].Quantity" placeholder="Nhập số lượng" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn btn-secondary mb-5" onclick="addVariant()">Thêm Biến Thể</button>
+
+
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a asp-action="Index" class="btn btn-danger">Danh sách</a>
+                                <input type="submit" value="Thêm mới" class="btn btn-primary" />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+@section scripts {
+    @Html.RenderPartialAsync("_ProductScripts", (SelectList)listatt)
+}
+
+

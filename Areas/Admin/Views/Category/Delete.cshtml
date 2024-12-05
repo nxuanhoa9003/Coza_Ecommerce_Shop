@@ -1,0 +1,74 @@
+﻿@model Coza_Ecommerce_Shop.Models.Entities.Category
+
+@{
+    ViewData["Title"] = "Delete";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Home</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a asp-controller="Category" asp-action="Index">Category</a>
+        </li>
+        <li class="breadcrumb-item active">@ViewData["Title"]</li>
+    </ol>
+</nav>
+
+<hr />
+<div>
+    <div class="card mb-4">
+
+        <div class="card-header">
+            <h4 class="mb-0">@Model.Title</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3"><strong>@Html.DisplayNameFor(model => model.Title)</strong></dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Title)</dd>
+
+                <dt class="col-sm-3"><strong>@Html.DisplayNameFor(model => model.Description)</strong></dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Description)</dd>
+
+                <dt class="col-sm-3"><strong>@Html.DisplayNameFor(model => model.SeoTitle)</strong></dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.SeoTitle)</dd>
+
+                <dt class="col-sm-3"><strong>@Html.DisplayNameFor(model => model.SeoDescription)</strong></dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.SeoDescription)</dd>
+
+                <dt class="col-sm-3"><strong>@Html.DisplayNameFor(model => model.SeoKeywords)</strong></dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.SeoKeywords)</dd>
+
+                <dt class="col-sm-3"><strong>@Html.DisplayNameFor(model => model.Position)</strong></dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Position)</dd>
+
+                <dt class="col-sm-3"><strong>@Html.DisplayNameFor(model => model.CreateBy)</strong></dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.CreateBy)</dd>
+
+                <dt class="col-sm-3"><strong>@Html.DisplayNameFor(model => model.CreateDate)</strong></dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.CreateDate)</dd>
+
+                <dt class="col-sm-3"><strong>@Html.DisplayNameFor(model => model.ModifierDate)</strong></dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.ModifierDate)</dd>
+
+                <dt class="col-sm-3"><strong>@Html.DisplayNameFor(model => model.ModifiedBy)</strong></dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.ModifiedBy)</dd>
+            </dl>
+
+            <form class="mt-4" asp-action="Delete">
+                <div class="d-flex gap-2">
+                    <a asp-action="Index" class="btn btn-secondary">Danh sách</a>
+                    <input type="hidden" asp-for="Id" />
+                    <input type="submit" value="Delete" class="btn btn-danger" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    
+
+</div>
+

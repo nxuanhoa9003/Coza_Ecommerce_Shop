@@ -1,0 +1,118 @@
+﻿@model IEnumerable<Coza_Ecommerce_Shop.Models.Entities.Product>
+
+@{
+    ViewData["Title"] = "Products";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Home</a>
+        </li>
+        <li class="breadcrumb-item active">@ViewData["Title"]</li>
+    </ol>
+</nav>
+
+
+<div class="card">
+    <div class="d-flex justify-content-between align-items-center">
+        <h5 class="card-header mb-0">@ViewData["Title"]</h5>
+        <div class="d-flex gap-2">
+            <a asp-action="Create" class="btn btn-primary">Tạo mới</a> <!-- Thêm margin bên phải -->
+            <button type="button" id="btnDeleteSelected" class="btn btn-danger me-4">Xoá đã chọn</button>
+        </div>
+    </div>
+
+    <!-- form search -->
+    <form class="px-4 pb-2 d-flex w-25" method="get" asp-action="Index" asp-controller="Posts">
+        <div class="input-group input-group-merge">
+            <button type="submit" class="input-group-text" id="basic-addon-search31" aria-label="icon">
+                <i class="bx bx-search"></i>
+            </button>
+            <input type="text" name="search" class="form-control" placeholder="Tìm kiếm..." aria-label="Search..." aria-describedby="basic-addon-search31">
+        </div>
+    </form>
+    <!-- // form search -->
+    @if (Model != null && Model.Any())
+    {
+        <hr class="border border-primary border-3 opacity-75">
+        <div class="table-responsive text-nowrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th colspan="1" style="width: 5%;">
+                            <div class="d-flex align-items-center">
+                                <input class="form-check-input me-2" type="checkbox" name="SelectAll" id="SelectAll" value="" />
+                                <span>STT</span>
+                            </div>
+                        </th>
+                        <th class="text-center" style="width: 10%;">
+                            @Html.DisplayNameFor(model => model.Image)
+                        </th>
+                        <th class="text-center" style="width: 10%;">
+                            @Html.DisplayNameFor(model => model.ProductCode)
+                        </th>
+                        <th class="text-center" style="width: 25%;">
+                            @Html.DisplayNameFor(model => model.Title)
+                        </th>
+                        <th class="text-center" style="width: 10%;">
+                            @Html.DisplayNameFor(model => model.Price)
+                        </th>
+                        <th class="text-center" colspan="1" style="width: 10%;">
+                            @Html.DisplayNameFor(model => model.Quantity)
+                        </th>
+                        <th class="text-center" colspan="1" style="width: 10%;">
+                            @Html.DisplayNameFor(model => model.IsActive)
+                        </th>
+                        <th style="width: 20%;" class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int i = 0;
+                    }
+                    @foreach (var item in Model)
+                    {
+                        string iconStatus = item.IsActive ? "<i class='bx bx-check-circle text-success' ></i>" : "<i class='bx bx-x-circle text-danger'></i>";
+
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <input class="form-check-input select-item me-2" type="checkbox" value="@item.Id" />
+                                    <span>@(++i)</span>
+                                </div>
+                            </td>
+                            <td class="d-flex justify-content-center" >
+                                <img src="@(string.IsNullOrEmpty(item.Image) ? "https://placehold.co/400x400" : item.Image)" style="object-fit: cover; width: 50px; height: 50px;" class="img-thumbnail" alt="...">
+                            </td>
+                            <td class="text-center">
+                                @Html.DisplayFor(modelItem => item.ProductCode)
+                            </td>
+                            <td class="text-truncate" style="max-width: 300px;">
+                                @Html.DisplayFor(modelItem => item.Title)
+                            </td>
+
+                            <td class="text-center">
+                                @Html.DisplayFor(modelItem => item.Price)
+                            </td>
+                            <td class="text-center">
+                                @Html.DisplayFor(modelItem => item.Quantity)
+                            </td>
+                            <td class="text-center">
+                                @Html.Raw(iconStatus)
+                            </td>
+
+                            <td class="text-center">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info mx-2">Detail </a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Delete </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </div>
+    }
+</div>

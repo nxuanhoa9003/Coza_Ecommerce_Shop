@@ -1,0 +1,26 @@
+﻿@model dynamic
+
+@{
+    string input = Model.input;
+    string img = Model.img;
+}
+
+<script>
+    document.getElementById("@input").addEventListener("change", function (event) {
+        var input = event.target;
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                var imgElement = document.getElementById("@img");
+                imgElement.src = e.target.result;
+                if (imgElement.classList.contains("d-none")) {
+                    imgElement.classList.remove("d-none");
+                }
+                imgElement.style.display = "block"; // Hiển thị ảnh
+            };
+
+            reader.readAsDataURL(input.files[0]); // Đọc file và chuyển thành URL
+        }
+    });
+</script>

@@ -1,0 +1,79 @@
+﻿@model IEnumerable<Coza_Ecommerce_Shop.Models.Entities.Attributes>
+
+@{
+    ViewData["Title"] = "Attributes";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Home</a>
+        </li>
+        <li class="breadcrumb-item active">@ViewData["Title"]</li>
+    </ol>
+</nav>
+<div class="card">
+    <div class="d-flex justify-content-between align-items-center">
+        <h5 class="card-header mb-0">@ViewData["Title"]</h5>
+        <div class="d-grid gap-2 me-4">
+            <a asp-action="Create" class="btn btn-primary me-2">Create</a> <!-- Thêm margin bên phải -->
+        </div>
+    </div>
+    @if (Model.Any())
+    {
+        <hr class="border border-primary border-3 opacity-75">
+        <div class="table-responsive text-nowrap">
+
+
+
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th class="text-center">STT</th>
+                        <th class="text-center">
+                            @Html.DisplayNameFor(model => model.AttributeName)
+                        </th>
+                        <th class="text-center">Giá trị thuộc tính</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        int index = 1;
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="text-center">@index</td>
+                                <td class="text-center">@item.AttributeName</td>
+                                <td class="text-center">
+                                    <ul class="list-unstyled">
+                                        @if (item.AttributeValues != null)
+                                        {
+                                            @foreach (var value in item.AttributeValues)
+                                            {
+                                                <li>@value.Value</li>
+                                            }
+                                        }
+
+                                    </ul>
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Delete </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            index++;
+                        }
+                    }
+
+                </tbody>
+            </table>
+
+        </div>
+    }
+</div>
+

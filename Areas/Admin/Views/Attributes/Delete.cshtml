@@ -1,0 +1,69 @@
+﻿@model Coza_Ecommerce_Shop.Models.Entities.Attributes
+
+@{
+    ViewData["Title"] = "Delete";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<style>
+    dt, dd {
+        border: 1px solid #ccc; /* Border mỏng màu xám */
+        padding: 10px; /* Khoảng cách bên trong */
+        margin: 5px 0; /* Khoảng cách giữa các phần tử */
+    }
+</style>
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Home</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a asp-controller="Attributes" asp-action="Index">Attributes</a>
+        </li>
+        <li class="breadcrumb-item active">@ViewData["Title"]</li>
+    </ol>
+</nav>
+<hr />
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h4 class="mb-0">@Model.AttributeName</h4>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.AttributeName)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.AttributeName)
+            </dd>
+            <dt class="col-sm-2">
+                Giá trị
+            </dt>
+            <dd class="col-sm-10">
+                <ul>
+                    @{
+                        if (Model.AttributeValues != null && Model.AttributeValues.Any())
+                        {
+                            foreach (var item in Model.AttributeValues)
+                            {
+                                <li>@item.Value</li>
+                            }
+                        }
+                    }
+                </ul>
+            </dd>
+
+        </dl>
+
+        <form class="mt-4" asp-action="Delete">
+            <div class="d-flex gap-2">
+                <a asp-action="Index" class="btn btn-secondary">Danh sách</a>
+                <input type="hidden" asp-for="Id" />
+                <input type="submit" value="Delete" class="btn btn-danger" />
+            </div>
+        </form>
+    </div>
+</div>
+
