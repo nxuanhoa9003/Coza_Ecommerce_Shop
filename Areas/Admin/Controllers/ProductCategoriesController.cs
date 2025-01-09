@@ -10,25 +10,55 @@ using Coza_Ecommerce_Shop.Models.Entities;
 using AspNetCoreHero.ToastNotification.Abstractions;
 using Coza_Ecommerce_Shop.Models.Common;
 using Microsoft.Extensions.Hosting;
+using Coza_Ecommerce_Shop.Repositories.Implementations;
+using Coza_Ecommerce_Shop.Repositories.Interfaces;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using X.PagedList.Extensions;
+using Coza_Ecommerce_Shop.ViewModels;
 
 namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 {
     [Area("Admin")]
     public class ProductCategoriesController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly IProductCategoryRepository _productcategoryRepository;
         public INotyfService _notifyService { get; }
 
-        public ProductCategoriesController(AppDbContext context, INotyfService notifyService)
+        public ProductCategoriesController(IProductCategoryRepository productcategoryRepository, INotyfService notifyService)
         {
-            _context = context;
+            _productcategoryRepository = productcategoryRepository;
             _notifyService = notifyService;
         }
 
         // GET: Admin/ProductCategories
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string search, int? page = 1)
         {
-            return View(await _context.ProductCategories.ToListAsync());
+            int pageSize = 10;
+            int pageNumber = page ?? 1;
+            var listproductcategories = await _productcategoryRepository.GetAllAsync();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                listproductcategories = listproductcategories.Where(x => x.Title.Contains(search) || (x.Slug != null && x.Slug.Contains(search)));
+            }
+
+            var totalProductCategory = listproductcategories.Count();
+            var pagedList = listproductcategories.OrderByDescending(x => x.Id).ToPagedList(pageNumber, pageSize);
+
+            var productCategoryViewModel = new ProductCategoryViewModel
+            {
+                ProductCategories = pagedList,
+                PagingInfo = new PagingViewModel
+                {
+                    CurrentPage = pageNumber,
+                    TotalCount = pagedList.Count,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling((double)totalProductCategory / pageSize),
+                    SearchTerm = search,
+                }
+            };
+
+            return View(productCategoryViewModel);
         }
 
         // GET: Admin/ProductCategories/Details/5
@@ -39,8 +69,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var productCategory = await _context.ProductCategories
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var productCategory = await _productcategoryRepository.GetByIdAsync(id);
             if (productCategory == null)
             {
                 return NotFound();
@@ -68,10 +97,8 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                 productCategory.CreateDate = DateTime.Now;
                 productCategory.ModifierDate = DateTime.Now;
                 productCategory.Slug = FilterChar.GenerateSlug(productCategory.Title);
-                _context.Add(productCategory);
-                await _context.SaveChangesAsync();
+                await _productcategoryRepository.AddAsync(productCategory);
                 _notifyService.Success("Thêm tin tức thành công");
-
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -89,7 +116,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var productCategory = await _context.ProductCategories.FindAsync(id);
+            var productCategory = await _productcategoryRepository.GetByIdAsync(id);
             if (productCategory == null)
             {
                 return NotFound();
@@ -113,12 +140,12 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
             {
                 try
                 {
-                    _context.Update(productCategory);
-                    await _context.SaveChangesAsync();
+                    await _productcategoryRepository.UpdateAsync(productCategory);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductCategoryExists(productCategory.Id))
+                    var productcategoryfind = await _productcategoryRepository.GetByIdAsync(id);
+                    if (productcategoryfind == null)
                     {
                         return NotFound();
                     }
@@ -140,8 +167,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var productCategory = await _context.ProductCategories
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var productCategory = await _productcategoryRepository.GetByIdAsync(id);
             if (productCategory == null)
             {
                 return NotFound();
@@ -155,19 +181,13 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var productCategory = await _context.ProductCategories.FindAsync(id);
+            var productCategory = await _productcategoryRepository.GetByIdAsync(id);
             if (productCategory != null)
             {
-                _context.ProductCategories.Remove(productCategory);
+                await _productcategoryRepository.RemoveAsync(productCategory);
             }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProductCategoryExists(int id)
-        {
-            return _context.ProductCategories.Any(e => e.Id == id);
-        }
     }
 }

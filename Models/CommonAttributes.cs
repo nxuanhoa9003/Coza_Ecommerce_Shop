@@ -9,7 +9,7 @@ namespace Coza_Ecommerce_Shop.Models
         [Display(Name = "Ngày tạo")]
         public DateTime CreateDate { set; get; }
         [Display(Name = "Ngày cập nhật")]
-        public DateTime ModifierDate { set; get; }
+        public DateTime ModifierDate { set; get; } = DateTime.Now;
         [Display(Name = "Cập nhập bởi")]
         public string? ModifiedBy { set; get; }
     }

@@ -1,7 +1,10 @@
 using AspNetCoreHero.ToastNotification;
 using AspNetCoreHero.ToastNotification.Extensions;
 using Coza_Ecommerce_Shop.Data;
+using Coza_Ecommerce_Shop.Mappings;
 using Coza_Ecommerce_Shop.Models;
+using Coza_Ecommerce_Shop.Repositories.Implementations;
+using Coza_Ecommerce_Shop.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -13,6 +16,8 @@ namespace Coza_Ecommerce_Shop
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
@@ -28,7 +33,19 @@ namespace Coza_Ecommerce_Shop
                     .AddEntityFrameworkStores<AppDbContext>()
                     .AddDefaultTokenProviders();
 
+            builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
+            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+            builder.Services.AddScoped<INewRepository, NewRepository>();
+            builder.Services.AddScoped<IPostRepository, PostRepository>();
+            builder.Services.AddScoped<IAttributesRepository, AttributesRepository>();
+            builder.Services.AddScoped<IAttributesValuesRepository, AttributesValuesRepository>();
+            builder.Services.AddScoped<IProductRepository, ProductRepository>();
+            builder.Services.AddScoped<IProductVariantRepository, ProductVariantRepository>();
+
+
             builder.Services.AddNotyf(config => { config.DurationInSeconds = 5; config.IsDismissable = true; config.Position = NotyfPosition.TopRight; });
+
+            
 
             var app = builder.Build();
 

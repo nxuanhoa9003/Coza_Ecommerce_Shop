@@ -8,23 +8,29 @@ using Microsoft.EntityFrameworkCore;
 using Coza_Ecommerce_Shop.Data;
 using Coza_Ecommerce_Shop.Models.Entities;
 using Newtonsoft.Json.Linq;
+using AspNetCoreHero.ToastNotification.Abstractions;
+using Coza_Ecommerce_Shop.Repositories.Interfaces;
+using Coza_Ecommerce_Shop.Repositories.Implementations;
 
 namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 {
     [Area("Admin")]
     public class AttributesController : Controller
     {
-        private readonly AppDbContext _context;
-
-        public AttributesController(AppDbContext context)
+        private readonly IAttributesRepository _attributesRepository;
+        private readonly IAttributesValuesRepository _attributesValuesRepository;
+        public INotyfService _notifyService { get; }
+        public AttributesController(IAttributesRepository attributesRepository, IAttributesValuesRepository attributesValuesRepository, INotyfService notifyService)
         {
-            _context = context;
+            _attributesRepository = attributesRepository;
+            _attributesValuesRepository = attributesValuesRepository;
+            _notifyService = notifyService;
         }
 
         // GET: Admin/Attributes
         public async Task<IActionResult> Index()
         {
-            var attributes = await _context.Attributes.Include(x => x.AttributeValues).ToListAsync();
+            var attributes = await _attributesRepository.GetAllAsync();
             return View(attributes);
         }
 
@@ -44,20 +50,18 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(attributes);
-                await _context.SaveChangesAsync();
+                await _attributesRepository.AddAsync(attributes);
+                var validAttributeValues = attributeValues.Where(item => !string.IsNullOrWhiteSpace(item.Value)).ToList();
 
-                foreach (var item in attributeValues)
+                foreach (var item in validAttributeValues)
                 {
-                    if (!string.IsNullOrWhiteSpace(item.Value))
-                    {
-                        item.AttributeId = attributes.Id; // Gán ID thuộc tính cho giá trị thuộc tính
-                        _context.AttributeValues.Add(item);
-                    };
-
+                    item.AttributeId = attributes.Id;
                 }
-                await _context.SaveChangesAsync();
-
+                if (validAttributeValues.Any())
+                {
+                    await _attributesValuesRepository.AddRangeAsync(validAttributeValues);
+                }
+                _notifyService.Success("Thêm thuộc tính thành công");
                 return RedirectToAction(nameof(Index));
             }
             return View(attributes);
@@ -71,7 +75,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var attributes = await _context.Attributes.Include(x => x.AttributeValues).FirstOrDefaultAsync(x => x.Id == id);
+            var attributes = await _attributesRepository.GetByIdAsync(id);
             if (attributes == null)
             {
                 return NotFound();
@@ -88,62 +92,66 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         {
             if (id != attributes.Id)
             {
-                return NotFound(); // đang làm ở đây
+                return NotFound();
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(attributes);
-                    await _context.SaveChangesAsync();
+                    await _attributesRepository.UpdateAsync(attributes);
 
-                    foreach (var item in attributeValues)
+                    var newAttributeValues = attributeValues.Where(item => item.Id == 0 && !string.IsNullOrWhiteSpace(item.Value)).ToList();
+                    var existingAttributeValues = attributeValues.Where(item => item.Id != 0).ToList();
+
+                    if (newAttributeValues.Any())
                     {
-                        if (item.Id == 0)
+                        foreach (var item in newAttributeValues)
+                        {
+                            item.AttributeId = attributes.Id;
+                        }
+                        await _attributesValuesRepository.AddRangeAsync(newAttributeValues);
+                    }
+
+                    var existingAttributeValueIds = existingAttributeValues.Select(item => item.Id).ToList();
+                    var attributeValuesToUpdate = await _attributesValuesRepository.GetListByIdsAsync(existingAttributeValueIds);
+
+                    var attributeValuesToUpdateDict = attributeValuesToUpdate.ToDictionary(x => x.Id);
+
+                    foreach (var item in existingAttributeValues)
+                    {
+                        var atvl = attributeValuesToUpdateDict.ContainsKey(item.Id) ? attributeValuesToUpdateDict[item.Id] : null;
+
+                        if (atvl == null)
                         {
                             if (!string.IsNullOrWhiteSpace(item.Value))
                             {
                                 item.AttributeId = attributes.Id;
-                                _context.AttributeValues.Add(item);
+                                await _attributesValuesRepository.AddAsync(item);
                             }
                         }
                         else
                         {
-                            var atvl = _context.AttributeValues.FirstOrDefault(x => x.Id == item.Id);
-                            if (atvl == null)
+                            if (item.IsDeleted)
                             {
-                                if (!string.IsNullOrWhiteSpace(item.Value))
-                                {
-                                    item.AttributeId = attributes.Id; // Gán ID thuộc tính cho giá trị thuộc tính
-                                    _context.AttributeValues.Add(item);
-                                };
+                                await _attributesValuesRepository.RemoveAsync(atvl);
                             }
                             else
                             {
-                                if (item.IsDeleted) // Kiểm tra xem có đánh dấu xóa không
+                                if (!string.IsNullOrWhiteSpace(item.Value))
                                 {
-                                    _context.AttributeValues.Remove(atvl); // Xóa thuộc tính
-                                }
-                                else
-                                {
-                                    if (!string.IsNullOrWhiteSpace(item.Value))
-                                    {
-                                        // Cập nhật giá trị thuộc tính
-                                        atvl.Value = item.Value; // Cập nhật giá trị
-                                        _context.Update(atvl); // Cập nhật đối tượng trong ngữ cảnh
-                                    }
+                                    atvl.Value = item.Value;
+                                    await _attributesValuesRepository.UpdateAsync(atvl);
                                 }
                             }
                         }
-
                     }
-                    await _context.SaveChangesAsync();
 
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!AttributesExists(attributes.Id))
+                    var AttributesExists = await _attributesRepository.GetByIdAsync(attributes.Id);
+                    if (AttributesExists is null)
                     {
                         return NotFound();
                     }
@@ -165,8 +173,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var attributes = await _context.Attributes.Include(x => x.AttributeValues)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var attributes = await _attributesRepository.GetByIdAsync(id);
             if (attributes == null)
             {
                 return NotFound();
@@ -180,28 +187,20 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var attributes = await _context.Attributes.FindAsync(id);
+            
+            var attributes = await _attributesRepository.GetByIdAsync(id);
             if (attributes != null)
             {
                 var attributesvalues = attributes.AttributeValues;
                 if (attributesvalues != null && attributesvalues.Any())
-                {
-                    foreach (var item in attributesvalues)
-                    {
-                        _context.AttributeValues.Remove(item);
-                    }
-                    await _context.SaveChangesAsync();
+                { 
+                   await _attributesValuesRepository.RemoveRangeAsync(attributesvalues);
                 }
-                _context.Attributes.Remove(attributes);
+                await _attributesRepository.RemoveAsync(attributes);
             }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool AttributesExists(int id)
-        {
-            return _context.Attributes.Any(e => e.Id == id);
-        }
+     
     }
 }

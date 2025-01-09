@@ -9,25 +9,26 @@ using Coza_Ecommerce_Shop.Data;
 using Coza_Ecommerce_Shop.Models.Entities;
 using Coza_Ecommerce_Shop.Models.Common;
 using AspNetCoreHero.ToastNotification.Abstractions;
+using Coza_Ecommerce_Shop.Repositories.Interfaces;
 
 namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 {
     [Area("Admin")]
     public class CategoryController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly ICategoryRepository _categoryRepository;
         public INotyfService _notifyService { get; }
-        public CategoryController(AppDbContext context, INotyfService notifyService)
+        public CategoryController(ICategoryRepository categoryRepository, INotyfService notifyService)
         {
-            _context = context;
+            _categoryRepository = categoryRepository;
             _notifyService = notifyService;
         }
 
         // GET: Admin/Category
         public async Task<IActionResult> Index()
         {
-            var data = await _context.Categories.ToListAsync();
-            return View(data);
+            var listcategories = await _categoryRepository.GetAllAsync();
+            return View(listcategories);
         }
 
         // GET: Admin/Category/Details/5
@@ -38,8 +39,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var category = await _context.Categories
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var category = await _categoryRepository.GetByIdAsync(id);
             if (category == null)
             {
                 return NotFound();
@@ -67,23 +67,12 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                 category.CreateDate = DateTime.Now;
                 category.ModifierDate = DateTime.Now;
                 category.Slug = FilterChar.GenerateSlug(category.Title);
-                _context.Add(category);
-                await _context.SaveChangesAsync();
+
+                await _categoryRepository.AddAsync(category);
                 _notifyService.Success("Thêm danh mục thành công");
                 return RedirectToAction(nameof(Index));
             }
-            else
-            {
-                foreach (var entry in ModelState)
-                {
-                    if (entry.Value.Errors.Count > 0)
-                    {
-                        string propertyName = entry.Key; // Tên thuộc tính
-                        var errors = entry.Value.Errors.Select(e => e.ErrorMessage).ToList(); // Danh sách lỗi
-                        Console.WriteLine($"Thuộc tính {propertyName} có lỗi: {string.Join(", ", errors)}");
-                    }
-                }
-            }
+            
             return View(category);
         }
 
@@ -95,7 +84,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var category = await _context.Categories.FindAsync(id);
+            var category = await _categoryRepository.GetByIdAsync(id);
             if (category == null)
             {
                 return NotFound();
@@ -120,7 +109,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
             {
                 try
                 {
-                    var existingCategory = await _context.Categories.FindAsync(id);
+                    var existingCategory = await _categoryRepository.GetByIdAsync(id);
 
                     if (existingCategory == null)
                     {
@@ -133,21 +122,19 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                     existingCategory.SeoTitle = category.SeoTitle;
                     existingCategory.SeoDescription = category.SeoDescription;
                     existingCategory.SeoKeywords = category.SeoKeywords;
-
                     existingCategory.CreateDate = existingCategory.CreateDate;
-
                     existingCategory.ModifierDate = DateTime.Now;
-
                     existingCategory.Slug = FilterChar.GenerateSlug(category.Title);
-                    
-                    _context.Update(existingCategory);
-                    await _context.SaveChangesAsync();
+
+                    await _categoryRepository.UpdateAsync(existingCategory);
+
                     _notifyService.Success("Cập nhật danh mục thành công");
 
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CategoryExists(category.Id))
+                    var catgoryfind = await _categoryRepository.GetByIdAsync(id);
+                    if (catgoryfind == null)
                     {
                         return NotFound();
                     }
@@ -169,8 +156,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var category = await _context.Categories
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var category = await _categoryRepository.GetByIdAsync(id);
             if (category == null)
             {
                 return NotFound();
@@ -184,20 +170,16 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
+            var category = await _categoryRepository.GetByIdAsync(id);
             if (category != null)
             {
-                _context.Categories.Remove(category);
+               await _categoryRepository.RemoveAsync(category);
             }
 
-            await _context.SaveChangesAsync();
             _notifyService.Information("Xoá danh mục thành công");
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CategoryExists(int id)
-        {
-            return _context.Categories.Any(e => e.Id == id);
-        }
+        
     }
 }

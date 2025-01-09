@@ -12,7 +12,7 @@ namespace Coza_Ecommerce_Shop.Models.Entities
         public int Id { get; set; }
         [StringLength(50)]
         [DisplayName("SKU")]
-        public string ProductCode { get; set; }
+        public string? ProductCode { get; set; }
         [Required]
         [StringLength(250)]
         [DisplayName("Tên sản phẩm")]
@@ -27,15 +27,17 @@ namespace Coza_Ecommerce_Shop.Models.Entities
         [DisplayName("Ảnh đại diện")]
         public string? Image { get; set; }
         [DisplayName("Giá")]
+        [Required]
         [Range(0, double.MaxValue)]
-        public decimal Price { get; set; }
+        public decimal? Price { get; set; }
 
         [DisplayName("Giá khuyến mãi")]
         [Range(0, double.MaxValue)]
         public decimal? PriceSale { get; set; }
         [DisplayName("Số lượng tổng")]
+        [Required]
         [Range(0, int.MaxValue)]
-        public int Quantity { get; set; }
+        public int? Quantity { get; set; }
         public bool IsHome { get; set; } = true;
         [DisplayName("Khuyến mãi")]
         public bool IsSale { get; set; }
@@ -44,7 +46,8 @@ namespace Coza_Ecommerce_Shop.Models.Entities
         [DisplayName("Hot")]
         public bool IsHot { get; set; }
         [DisplayName("Danh mục sản phẩm")]
-        public int ProductCategoryId { get; set; }
+        [Required(ErrorMessage = "Chọn danh mục sản phẩm.")]
+        public int? ProductCategoryId { get; set; }
         [StringLength(250)]
         public string? SeoTitile { get; set; }
         [StringLength(500)]
@@ -54,10 +57,17 @@ namespace Coza_Ecommerce_Shop.Models.Entities
 
         [DisplayName("Hiển thị")]
         public bool IsActive { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
+
         [DisplayName("Danh mục sản phẩm")]
         public virtual ProductCategory? ProductCategory { get; set; }
+
         [NotMapped]
-        [Required(ErrorMessage = "Vui lòng chọn ít nhất một ảnh.")]
+        public string? VariantSKU { get; set; }
+
+        [NotMapped]
+        [Required(ErrorMessage = "Chọn ít nhất một ảnh.")]
         public List<IFormFile> Files { get; set; } = new List<IFormFile>();
         public virtual ICollection<ProductVariant>? Variants { get; set; }
         public virtual ICollection<ProductImage>? ProductImages { get; set; }

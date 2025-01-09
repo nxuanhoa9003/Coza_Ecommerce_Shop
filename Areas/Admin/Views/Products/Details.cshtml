@@ -1,169 +1,262 @@
-﻿@model Coza_Ecommerce_Shop.Models.Entities.Product
+﻿@model Coza_Ecommerce_Shop.ViewModels.Product.ProductDetailViewModel;
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Chi tiết sản phẩm";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+
+    var ProductDetailInfo = Model.ProductInfo;
+    var ProductImages = Model.Images;
+    var ProductVariants = Model.Variants;
 }
 
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-            <a asp-controller="Home" asp-action="Index">Home</a>
-        </li>
-        <li class="breadcrumb-item">
-            <a asp-controller="Products" asp-action="Index">Product</a>
-        </li>
-        <li class="breadcrumb-item active">@ViewData["Title"]</li>
-    </ol>
-</nav>
-<hr />
-<div class="card mb-4">
-    <div class="card-header">
-        <h5 class="mb-0">Chi tiết Tin tức</h5>
+<div class="pb-5">
+    <!-- Breadcrumb -->
+    <nav class="mb-4">
+        <ol class="breadcrumb bg-light px-4 py-3 shadow-sm">
+            <li class="breadcrumb-item"><a class="text-decoration-none" asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item"><a class="text-decoration-none" asp-controller="Products" asp-action="Index">Products</a></li>
+            <li class="breadcrumb-item active">@ViewData["Title"]</li>
+        </ol>
+    </nav>
+
+    <!-- Card Chính -->
+    <div class="card shadow border-0 mb-5">
+        <div class="row g-0">
+            <!-- Ảnh sản phẩm chính -->
+            <div class="col-lg-5">
+                <div class="p-4">
+                    <img src="@(string.IsNullOrEmpty(ProductDetailInfo.Image) ? "https://placehold.co/400x400" : ProductDetailInfo.Image)"
+                         alt="Ảnh sản phẩm"
+                         class="img-fluid rounded shadow-sm mb-3">
+                </div>
+            </div>
+
+            <!-- Chi tiết sản phẩm -->
+            <div class="col-lg-7">
+                <div class="card-body">
+                    <h2 class="card-title fw-bold text-dark">@ProductDetailInfo.Title</h2>
+                    <p class="text-muted small">@ProductDetailInfo.Description</p>
+
+                    <dl class="row mt-4">
+                        <dt class="col-sm-4">Mã sản phẩm:</dt>
+                        <dd class="col-sm-8 text-secondary">@ProductDetailInfo.ProductCode</dd>
+
+                        <dt class="col-sm-4">Danh mục:</dt>
+                        <dd class="col-sm-8 text-secondary">@ProductDetailInfo.CategoryName</dd>
+
+                        <dt class="col-sm-4">Trạng thái:</dt>
+                        <dd class="col-sm-8">
+                            @if (ProductDetailInfo.IsActive)
+                            {
+                                <span class="badge bg-success">Đang hiển thị</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Đã ẩn</span>
+                            }
+
+                            @if(ProductDetailInfo.IsHot)
+                            {
+                                <span class="badge bg-danger">Hot</span>
+                            }
+                            @if (ProductDetailInfo.IsFeature)
+                            {
+                                <span class="badge bg-warning">Feature</span>
+                            }
+                        </dd>
+                    </dl>
+
+                    <div class="mt-4">
+                        <h3 class="text-success fw-bold mb-1">@ProductDetailInfo.PriceSale</h3>
+                        <p class="text-muted text-decoration-line-through">@ProductDetailInfo.Price</p>
+                    </div>
+
+                    <div class="mt-4 d-flex">
+                        <a asp-action="Edit" asp-route-id="@ProductDetailInfo?.Id" class="btn btn-warning me-2 px-4 rounded-pill">
+                            <i class="fa fa-edit"></i> Edit
+                        </a>
+                        <a asp-action="Index" class="btn btn-outline-secondary px-4 rounded-pill">
+                            <i class="fa fa-list"></i> Back to list
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="card-body">
 
-        <dl class="row">
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.ProductCode)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.ProductCode)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Title)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Title)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Slug)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Slug)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Description)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Description)
-            </dd>
-
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Detail)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Detail)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Image)
-            </dt>
-            <dd class="col-sm-10">
-                <img src="@(string.IsNullOrEmpty(Model.Image) ? "https://placehold.co/400x400" : Model.Image)" style="object-fit: contain; width: 300px; height: 300px;" class="img-thumbnail" />
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Price)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Price)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.PriceSale)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.PriceSale)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Quantity)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Quantity)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.IsSale)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.IsSale)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.IsFeature)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.IsFeature)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.IsHot)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.IsHot)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.SeoTitile)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.SeoTitile)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.SeoDescription)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.SeoDescription)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.SeoKeywords)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.SeoKeywords)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.IsActive)
-            </dt>
-            <dd class="col-sm-10">
-               @if (Model.IsActive)
+    <!-- Ảnh chi tiết -->
+    <div class="card shadow border-0 mb-5">
+        <div class="card-header bg-light rounded-pill">
+            <h4 class="mb-0 text-dark fw-bold">Hình ảnh sản phẩm</h4>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                @if (ProductImages.Any())
                 {
-                    <span class="badge bg-info">Đang hiển thị</span> <!-- Hiển thị thông báo với badge màu xanh -->
+                    @foreach (var img in ProductImages)
+                    {
+                        <div class="col-md-3">
+                            <img src="@img.Image"
+                                 alt="Ảnh sản phẩm"
+                                 class="img-fluid rounded shadow-sm"
+                                 style="object-fit: cover; height: 300px; width: 100%">
+                        </div>
+                    }
                 }
                 else
                 {
-                    <span class="badge bg-danger">Đã ẩn</span> <!-- Thêm thông báo cho trường hợp không hiển thị -->
+                    <p class="text-muted">Chưa có hình ảnh nào được tải lên.</p>
                 }
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.ProductCategory)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.ProductCategory.Title)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.CreateBy)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.CreateBy)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.CreateDate)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.CreateDate)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.ModifierDate)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.ModifierDate)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.ModifiedBy)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.ModifiedBy)
-            </dd>
-        </dl>
-
-
-        <div class="d-flex gap-2 mt-4">
-            <a asp-action="Index" class="btn btn-secondary">Danh sách</a>
-            <a asp-action="Edit" class="btn btn-warning" asp-route-id="@Model?.Id">Chỉnh sửa</a>
+            </div>
         </div>
     </div>
+
+    <!-- chi tiết sản phẩm (detail) -->
+    <div class="card shadow border-0 mb-5">
+        <div class="card-header bg-light rounded-pill">
+            <h4 class="mb-0 text-dark fw-bold">Mô tả sản phẩm</h4>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                @Html.Raw(ProductDetailInfo?.Detail)
+            </div>
+        </div>
+    </div>
+    <!-- Biến thể sản phẩm -->
+    <div class="card shadow border-0 mb-5">
+        <div class="card-header bg-light rounded-pill">
+            <h4 class="mb-0 text-dark fw-bold">Biến thể sản phẩm</h4>
+        </div>
+        <div class="card-body">
+            @if (ProductVariants.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>SKU</th>
+                                <th>Số lượng</th>
+                                <th>Giá bổ sung</th>
+                                <th>Thuộc tính</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var variant in ProductVariants)
+                            {
+                                <tr>
+                                    <td>@variant.SKU</td>
+                                    <td>@variant.Quantity</td>
+                                    <td>@variant.AdditionalPrice</td>
+                                    <td>
+                                        @if (variant.Attributes != null)
+                                        {
+                                            <ul class="list-unstyled mb-0">
+                                                @foreach (var attr in variant.Attributes)
+                                                {
+                                                    <li><strong>@attr.AttributeName:</strong> @attr.Value</li>
+                                                }
+                                            </ul>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Không có thuộc tính</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (variant.IsActive)
+                                        {
+                                            <span class="badge bg-info">Đang hiển thị</span> <!-- Hiển thị thông báo với badge màu xanh -->
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Đã ẩn</span> <!-- Thêm thông báo cho trường hợp không hiển thị -->
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">Chưa có biến thể nào.</p>
+            }
+        </div>
+    </div>
+
+    <div class="card shadow border-0 mb-5">
+        <div class="card-header bg-light rounded-pill">
+            <h4 class="mb-0 text-dark fw-bold">SEO</h4>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <!-- Tiêu đề SEO -->
+                <div class="col-md-12">
+                    <label class="form-label fw-bold">Tiêu đề SEO</label>
+                    <p class="form-control-plaintext text-muted">@(ProductDetailInfo.SeoTitile ?? "Chưa có tiêu đề SEO")</p>
+                </div>
+
+                <!-- Mô tả SEO -->
+                <div class="col-md-12">
+                    <label class="form-label fw-bold">Mô tả SEO</label>
+                    <p class="form-control-plaintext text-muted">@(ProductDetailInfo.SeoDescription ?? "Chưa có mô tả SEO")</p>
+                </div>
+
+                <!-- Từ khóa SEO -->
+                <div class="col-md-12">
+                    <label class="form-label fw-bold">Từ khóa SEO</label>
+                    <p class="form-control-plaintext text-muted">@(ProductDetailInfo.SeoKeywords ?? "Chưa có từ khóa SEO")</p>
+                </div>
+
+                <!-- Nút quay lại -->
+                
+            </div>
+        </div>
+    </div>
+   
+    <div class="card shadow border-0 mb-5">
+        <div class="card-header bg-light rounded-pill">
+            <h4 class="mb-0 text-dark fw-bold">Khác</h4>
+        </div>
+        <div class="card-body">
+            <div class="row g-md-1">
+                
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Ngày tạo</label>
+                </div>
+                <div class="col-md-8">
+                    <p class="form-control-plaintext text-muted">@(ProductDetailInfo.CreateDate.ToString("d/MM/yyyy hh:mm:ss tt"))</p>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Người tạo</label>
+                </div>
+                <div class="col-md-8">
+                    <p class="form-control-plaintext text-muted">@(ProductDetailInfo.CreateBy)</p>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Ngày cập nhật</label>
+                </div>
+                <div class="col-md-8">
+                    <p class="form-control-plaintext text-muted">@(ProductDetailInfo.ModifierDate.ToString("d/MM/yyyy hh:mm:ss tt"))</p>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Cập nhật bởi</label>
+                </div>
+                <div class="col-md-8">
+                    <p class="form-control-plaintext text-muted">@(ProductDetailInfo.ModifiedBy)</p>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <a asp-action="Index" class="btn btn-secondary px-4 rounded-pill">
+        <i class="fa fa-list"></i> Back to list
+    </a>
 </div>

@@ -14,7 +14,7 @@ namespace Coza_Ecommerce_Shop.Models.Entities
         [Required]
         [StringLength(150)]
         [Display(Name = "Tiêu đề")]
-        public string Title { get; set; }
+        public string? Title { get; set; }
         [Display(Name = "Slug URL")]
         public string? Slug { get; set; }
         [Display(Name = "Mô tả")]

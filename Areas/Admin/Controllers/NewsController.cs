@@ -14,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Drawing.Printing;
 using X.PagedList.Extensions;
 using Coza_Ecommerce_Shop.ViewModels;
+using Coza_Ecommerce_Shop.Repositories.Interfaces;
 
 
 
@@ -22,12 +23,16 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
     [Area("Admin")]
     public class NewsController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly INewRepository _newRepository;
+        private readonly ICategoryRepository _categoryRepository;
+
         public INotyfService _notifyService { get; }
 
-        public NewsController(AppDbContext context, INotyfService notifyService)
+        public NewsController(INewRepository newRepository, ICategoryRepository categoryRepository, INotyfService notifyService)
         {
-            _context = context;
+           
+            _newRepository = newRepository;
+            _categoryRepository = categoryRepository;
             _notifyService = notifyService;
         }
 
@@ -37,14 +42,13 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
             int pageSize = 10;
             int pageNumber = page ?? 1;
 
-            //var appDbContext = await _context.News.Include(x => x.Category).OrderByDescending(x => x.Id).ToListAsync();
-            var query = _context.News.Include(x => x.Category).AsQueryable();
+            var query = await _newRepository.GetAllAsync();
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(x => x.Title.Contains(search) || (x.Slug != null && x.Slug.Contains(search)));
             }
 
-            var totalPosts = await query.CountAsync();
+            var totalPosts = query.Count();
 
             var pagedList = query.OrderByDescending(x => x.Id).ToPagedList(pageNumber, pageSize);
 
@@ -72,9 +76,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var news = await _context.News
-                .Include(x => x.Category)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var news = await _newRepository.GetByIdAsync(id);
             if (news == null)
             {
                 return NotFound();
@@ -84,9 +86,9 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/News/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Title");
+            ViewData["CategoryId"] = new SelectList(await _categoryRepository.GetAllAsync(), "Id", "Title");
             return View();
         }
 
@@ -108,9 +110,9 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                     news.ModifierDate = DateTime.Now;
                     news.Slug = FilterChar.GenerateSlug(news.Title);
                     news.Image = await Utilities.UploadFileAsync(file, "News");
-                    news.Category = _context.Categories.Find(news.CategoryId);
-                    _context.Add(news);
-                    await _context.SaveChangesAsync();
+                    news.Category = await _categoryRepository.GetByIdAsync(news.CategoryId);
+
+                    await _newRepository.AddAsync(news);
                     _notifyService.Success("Thêm tin tức thành công");
 
                     return RedirectToAction(nameof(Index));
@@ -122,21 +124,9 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
 
             }
-            else
-            {
-                foreach (var entry in ModelState)
-                {
-                    if (entry.Value.Errors.Count > 0)
-                    {
-                        string propertyName = entry.Key; // Tên thuộc tính
-                        var errors = entry.Value.Errors.Select(e => e.ErrorMessage).ToList(); // Danh sách lỗi
 
-                        Console.WriteLine($"Thuộc tính {propertyName} có lỗi: {string.Join(", ", errors)}");
-                    }
-                }
-            }
-
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Title", news.CategoryId);
+            var listcategory = await _categoryRepository.GetAllAsync();
+            ViewData["CategoryId"] = new SelectList(listcategory, "Id", "Title", news.CategoryId);
             return View(news);
         }
 
@@ -148,12 +138,13 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var news = await _context.News.FindAsync(id);
+            var news = await _newRepository.GetByIdAsync(id);
             if (news == null)
             {
                 return NotFound();
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Title", news.CategoryId);
+            var listcategory = await _categoryRepository.GetAllAsync();
+            ViewData["CategoryId"] = new SelectList(listcategory, "Id", "Title", news.CategoryId);
             return View(news);
         }
 
@@ -179,7 +170,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
                 try
                 {
-                    var existingNew = await _context.News.FindAsync(id);
+                    var existingNew = await _newRepository.GetByIdAsync(id);
                     if (existingNew == null)
                     {
                         return NotFound();
@@ -208,10 +199,9 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
                     }
 
-                    existingNew.Category = _context.Categories.Find(news.CategoryId);
+                   
+                    await _newRepository.UpdateAsync(existingNew);
 
-                    _context.Update(existingNew);
-                    await _context.SaveChangesAsync();
                     _notifyService.Success("Cập nhập tin tức thành công");
 
                     return RedirectToAction(nameof(Index));
@@ -220,22 +210,11 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                 {
                     ModelState.AddModelError(string.Empty, ex.Message);
                 }
-                return RedirectToAction(nameof(Index));
+                
             }
-            else
-            {
-                foreach (var entry in ModelState)
-                {
-                    if (entry.Value.Errors.Count > 0)
-                    {
-                        string propertyName = entry.Key; // Tên thuộc tính
-                        var errors = entry.Value.Errors.Select(e => e.ErrorMessage).ToList(); // Danh sách lỗi
 
-                        Console.WriteLine($"Thuộc tính {propertyName} có lỗi: {string.Join(", ", errors)}");
-                    }
-                }
-            }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Title", news.CategoryId);
+            var listcategory = await _categoryRepository.GetAllAsync();
+            ViewData["CategoryId"] = new SelectList(listcategory, "Id", "Title", news.CategoryId);
             return View(news);
         }
 
@@ -247,9 +226,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var news = await _context.News
-                .Include(x => x.Category)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var news = await _newRepository.GetByIdAsync(id);
             if (news == null)
             {
                 return NotFound();
@@ -263,14 +240,13 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var news = await _context.News.FindAsync(id);
+            var news = await _newRepository.GetByIdAsync(id);
             if (news != null)
             {
                 Utilities.DeleteImage(news.Image);
-                _context.News.Remove(news);
+                await _newRepository.RemoveAsync(news);
             }
 
-            await _context.SaveChangesAsync();
             _notifyService.Information("Xoá tin tức thành công");
 
             return RedirectToAction(nameof(Index));
@@ -279,21 +255,19 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
         // Post: delete select
         [HttpPost]
-        public ActionResult DeleteNewsSelect([FromBody] List<int> ids)
+        public async Task<IActionResult> DeleteNewsSelect([FromBody] List<int> ids)
         {
             if (!ids.IsNullOrEmpty())
             {
                 foreach (var id in ids)
                 {
-                    var objnews = _context.News.Find(id);
+                    var objnews = await _newRepository.GetByIdAsync(id);
                     if (objnews != null)
                     {
                         Utilities.DeleteImage(objnews.Image);
-                        _context.News.Remove(objnews);
+                        await _newRepository.RemoveAsync(objnews);
                     }
-
                 }
-                _context.SaveChanges();
                 _notifyService.Success("Xoá thành công");
                 return Json(new { success = true });
             }
@@ -301,9 +275,5 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
             return Json(new { success = false });
         }
 
-        private bool NewExists(int id)
-        {
-            return _context.News.Any(e => e.Id == id);
-        }
     }
 }

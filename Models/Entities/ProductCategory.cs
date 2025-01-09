@@ -9,16 +9,17 @@ namespace Coza_Ecommerce_Shop.Models.Entities
         public ProductCategory() { 
             this.Products = new HashSet<Product>();
         }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         [Required]
         [StringLength(150)]
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
         [StringLength(150)]
-        public string Slug { get; set; }
+        public string? Slug { get; set; }
         public string? Description { get; set; }
 
         [StringLength(150)]

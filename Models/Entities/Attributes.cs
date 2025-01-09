@@ -13,7 +13,7 @@ namespace Coza_Ecommerce_Shop.Models.Entities
         [StringLength(150)]
         [Display(Name = "Tên thuộc tính")]
         public string? AttributeName { get; set; }
-        public virtual ICollection<ProductVariantAttribute>? ProductVariantAttributes { get; set; }
+       
         public virtual ICollection<AttributeValue>? AttributeValues { get; set; }
     }
 }

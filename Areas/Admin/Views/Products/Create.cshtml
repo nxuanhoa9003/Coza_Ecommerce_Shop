@@ -108,8 +108,9 @@
                                 <div class="mb-3">
                                     <label asp-for="ProductCategoryId" class="control-label"></label>
                                     <select asp-for="ProductCategoryId" class="form-control" asp-items="ViewBag.ProductCategoryId">
-                                        <option selected>-- Chọn danh mục sản phẩm</option>
+                                        <option value="" selected>-- Chọn danh mục sản phẩm --</option>
                                     </select>
+                                    <span asp-validation-for="ProductCategoryId" class="text-danger"></span>
                                 </div>
                                 <div class="mb-3">
                                     <label asp-for="SeoTitile" class="control-label"></label>
@@ -162,7 +163,7 @@
 
                                 <div class="mb-5">
                                     <div id="imagePreview" class="row"></div>
-                                   
+
                                 </div>
                             </div>
 
@@ -172,27 +173,28 @@
                                 <h3 class="mt-4">Chi tiết sản phẩm</h3>
                                 <div id="variant-container" class="mb-3">
                                     <div class="variant mb-3 p-3 border rounded d-flex align-items-center">
-                                        <div class="form-group me-3">
-                                            <label class="control-label">SKU</label>
-                                            <input class="form-control" type="text" name="variants[0].SKU" />
-                                        </div>
+                                       @*   <div class="form-group me-3">
+                                             <label class="control-label">SKU</label>
+                                             <input class="form-control" type="text" name="variants[0].SKU" />
+                                         </div> *@
                                         <button type="button" class="btn btn-link" onclick="addAttribute(0)"><i class='bx bx-plus-circle'></i></button>
 
                                         <div class="attributes-container" id="attributes-container_0" style="flex-grow: 1;">
                                             <div class="d-flex align-items-center mb-2">
                                                 <div class="form-group me-3">
                                                     <label class="control-label">Thuộc tính</label>
-                                                    <select name="variants[0].ProductVariantAttributes[0].AttributeId" id="attributeSelect_[0][0]" class="form-control" asp-items="ViewBag.Attributes" onchange="showvalue(this, 0, 0)">
-                                                        <option  value="">-- Chọn thuộc tính sản phẩm</option>
+                                                    <select name="attribute-select" id="attributeSelect_[0][0]" class="form-control attribute-select" asp-items="ViewBag.Attributes" onchange="showvalue(this, 0, 0)">
+                                                        <option value="">-- Chọn thuộc tính sản phẩm</option>
                                                     </select>
                                                 </div>
                                                 <div class="form-group me-3">
                                                     <label for="AttributeValue">Giá trị thuộc tính:</label>
-                                                    <select class="form-control" name="variants[0].ProductVariantAttributes[0].Value" id="attributeValueSelect_[0][0]">
-                                                        <option  value="">-- Chọn giá trị thuộc tính</option>
+                                                    <select class="form-control attribute-select" name="attributevalue-select" id="attributeValueSelect_[0][0]">
+                                                        <option value="">-- Chọn giá trị thuộc tính</option>
                                                     </select>
                                                 </div>
                                             </div>
+                                            <input type="hidden" id="variants[0].AttributesJson" name="variants[0].AttributesJson" />
                                         </div>
 
 
@@ -204,7 +206,9 @@
                                             <label for="Quantity">Số lượng:</label>
                                             <input class="form-control" type="number" name="variants[0].Quantity" placeholder="Nhập số lượng" />
                                         </div>
+                                        <button type="button" class="btn btn-danger ms-3" onclick="removeVariant(this)">Xóa</button>
                                     </div>
+                                    <span asp-validation-for="VariantSKU" class="text-danger"></span>
                                 </div>
 
                                 <button type="button" class="btn btn-secondary mb-5" onclick="addVariant()">Thêm Biến Thể</button>

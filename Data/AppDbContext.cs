@@ -28,16 +28,10 @@ namespace Coza_Ecommerce_Shop.Data
                 .HasIndex(p => p.SKU)
                 .IsUnique();
 
-            builder.Entity<ProductVariant>()
-               .HasMany(pv => pv.ProductVariantAttributes)
-               .WithOne(pva => pva.ProductVariant)
-               .HasForeignKey(pva => pva.ProductVariantId);
+            builder.Entity<Product>()
+                .HasIndex(p => p.Slug)
+                .IsUnique();
 
-            builder.Entity<Attributes>()
-               .HasMany(a => a.ProductVariantAttributes)
-               .WithOne(pva => pva.Attributes)
-               .HasForeignKey(pva => pva.AttributeId)
-               .OnDelete(DeleteBehavior.SetNull);
 
             foreach (var entityType in builder.Model.GetEntityTypes())
             {
@@ -53,7 +47,7 @@ namespace Coza_Ecommerce_Shop.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductCategory> ProductCategories { get; set; }
-        public DbSet<ProductImage> productImages { get; set; }
+        public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<New> News { get; set; }
         public DbSet<Banner> Banners { get; set; }
         public DbSet<Contact> Contacts { get; set; }
@@ -64,7 +58,8 @@ namespace Coza_Ecommerce_Shop.Data
         public DbSet<ProductVariant> ProductVariants { get; set; }
         public DbSet<Attributes> Attributes { get; set; }
         public DbSet<AttributeValue> AttributeValues { get; set; }
-        public DbSet<ProductVariant> ProductVariant { get; set; }
+        
+      
 
     }
 }

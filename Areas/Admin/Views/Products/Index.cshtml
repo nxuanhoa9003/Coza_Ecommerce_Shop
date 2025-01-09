@@ -18,14 +18,13 @@
 <div class="card">
     <div class="d-flex justify-content-between align-items-center">
         <h5 class="card-header mb-0">@ViewData["Title"]</h5>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 me-4">
             <a asp-action="Create" class="btn btn-primary">Tạo mới</a> <!-- Thêm margin bên phải -->
-            <button type="button" id="btnDeleteSelected" class="btn btn-danger me-4">Xoá đã chọn</button>
         </div>
     </div>
 
     <!-- form search -->
-    <form class="px-4 pb-2 d-flex w-25" method="get" asp-action="Index" asp-controller="Posts">
+    <form class="px-4 pb-2 d-flex w-25" method="get" asp-action="Index" asp-controller="Products">
         <div class="input-group input-group-merge">
             <button type="submit" class="input-group-text" id="basic-addon-search31" aria-label="icon">
                 <i class="bx bx-search"></i>
@@ -41,12 +40,7 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th colspan="1" style="width: 5%;">
-                            <div class="d-flex align-items-center">
-                                <input class="form-check-input me-2" type="checkbox" name="SelectAll" id="SelectAll" value="" />
-                                <span>STT</span>
-                            </div>
-                        </th>
+                        
                         <th class="text-center" style="width: 10%;">
                             @Html.DisplayNameFor(model => model.Image)
                         </th>
@@ -77,12 +71,7 @@
                         string iconStatus = item.IsActive ? "<i class='bx bx-check-circle text-success' ></i>" : "<i class='bx bx-x-circle text-danger'></i>";
 
                         <tr>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <input class="form-check-input select-item me-2" type="checkbox" value="@item.Id" />
-                                    <span>@(++i)</span>
-                                </div>
-                            </td>
+                            
                             <td class="d-flex justify-content-center" >
                                 <img src="@(string.IsNullOrEmpty(item.Image) ? "https://placehold.co/400x400" : item.Image)" style="object-fit: cover; width: 50px; height: 50px;" class="img-thumbnail" alt="...">
                             </td>

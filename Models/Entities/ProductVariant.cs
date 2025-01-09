@@ -9,7 +9,6 @@ namespace Coza_Ecommerce_Shop.Models.Entities
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        
         public string? SKU { get; set; }
         public int ProductId { get; set; }
         public decimal? AdditionalPrice { get; set; }
@@ -18,8 +17,10 @@ namespace Coza_Ecommerce_Shop.Models.Entities
         public bool IsActive { get; set; } = false;
         // Navigation property
         public virtual Product? Product { get; set; }
-        public virtual ICollection<ProductVariantAttribute>? ProductVariantAttributes { get; set; }
-      
+
+        [Column(TypeName = "nvarchar(max)")]
+        public string? AttributesJson { get; set; }
+       
 
     }
 }

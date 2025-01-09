@@ -1,5 +1,5 @@
-﻿@model IEnumerable<Coza_Ecommerce_Shop.Models.Entities.ProductCategory>
-
+﻿@using Coza_Ecommerce_Shop.ViewModels
+@model ProductCategoryViewModel
 @{
     ViewData["Title"] = "Product Category";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
@@ -23,7 +23,7 @@
     </div>
 
     <!-- form search -->
-    <form class="px-4 pb-2 d-flex w-25" method="get" asp-action="Index" asp-controller="Posts">
+    <form class="px-4 pb-2 d-flex w-25" method="get" asp-action="Index" asp-controller="ProductCategories">
         <div class="input-group input-group-merge">
             <button type="submit" class="input-group-text" id="basic-addon-search31" aria-label="icon">
                 <i class="bx bx-search"></i>
@@ -32,7 +32,7 @@
         </div>
     </form>
     <!-- // form search -->
-    @if (Model != null && Model.Any())
+    @if (Model.ProductCategories != null && Model.ProductCategories.Any())
     {
         <hr class="border border-primary border-3 opacity-75">
         <div class="table-responsive text-nowrap">
@@ -42,10 +42,10 @@
                         <th>STT</th>
 
                         <th>
-                            @Html.DisplayNameFor(model => model.Title)
+                            @Html.DisplayNameFor(model => model.ProductCategories[0].Title)
                         </th>
                         <th>
-                            @Html.DisplayNameFor(model => model.CreateDate)
+                            @Html.DisplayNameFor(model => model.ProductCategories[0].CreateDate)
                         </th>
 
                         <th class="text-center">Action</th>
@@ -53,15 +53,12 @@
                 </thead>
                 <tbody>
                     @{
-                        int i = 0;
+                        int stt = (Model.PagingInfo.CurrentPage - 1) * Model.PagingInfo.PageSize;
                     }
-                    @foreach (var item in Model)
+                    @foreach (var item in Model.ProductCategories)
                     {
                         <tr>
-                            <td>
-                                @(++i)
-                            </td>
-
+                            <td>@(++stt)</td>
                             <td>
                                 @Html.DisplayFor(modelItem => item.Title)
                             </td>
@@ -70,9 +67,9 @@
                             </td>
 
                             <td class="text-center">
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary">Edit</a>
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info mx-2">Detail </a>
-                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-secondary">Delete </a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info mx-2">Detail </a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Delete </a>
                             </td>
                         </tr>
                     }
@@ -83,3 +80,5 @@
 
     }
 </div>
+
+<partial name="_Paging" model="Model.PagingInfo" />

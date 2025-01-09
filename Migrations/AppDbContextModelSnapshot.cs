@@ -524,6 +524,9 @@ namespace Coza_Ecommerce_Shop.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsFeature")
                         .HasColumnType("bit");
 
@@ -542,21 +545,23 @@ namespace Coza_Ecommerce_Shop.Migrations
                     b.Property<DateTime>("ModifierDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("Price")
+                    b.Property<decimal?>("Price")
+                        .IsRequired()
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("PriceSale")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("ProductCategoryId")
+                    b.Property<int?>("ProductCategoryId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("ProductCode")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("Quantity")
+                    b.Property<int?>("Quantity")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("SeoDescription")
@@ -624,7 +629,6 @@ namespace Coza_Ecommerce_Shop.Migrations
                         .HasColumnType("nvarchar(150)");
 
                     b.Property<string>("Slug")
-                        .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
@@ -674,6 +678,9 @@ namespace Coza_Ecommerce_Shop.Migrations
                     b.Property<decimal?>("AdditionalPrice")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("AttributesJson")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CreateBy")
                         .HasColumnType("nvarchar(max)");
 
@@ -706,45 +713,7 @@ namespace Coza_Ecommerce_Shop.Migrations
                         .IsUnique()
                         .HasFilter("[SKU] IS NOT NULL");
 
-                    b.ToTable("ProductVariant");
-                });
-
-            modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.ProductVariantAttribute", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("AttributeId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("ModifierDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ProductVariantId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Value")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AttributeId");
-
-                    b.HasIndex("ProductVariantId");
-
-                    b.ToTable("ProductVariantAttribute");
+                    b.ToTable("ProductVariants");
                 });
 
             modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.SettingConfiguration", b =>
@@ -1020,24 +989,6 @@ namespace Coza_Ecommerce_Shop.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.ProductVariantAttribute", b =>
-                {
-                    b.HasOne("Coza_Ecommerce_Shop.Models.Entities.Attributes", "Attributes")
-                        .WithMany("ProductVariantAttributes")
-                        .HasForeignKey("AttributeId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("Coza_Ecommerce_Shop.Models.Entities.ProductVariant", "ProductVariant")
-                        .WithMany("ProductVariantAttributes")
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Attributes");
-
-                    b.Navigation("ProductVariant");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -1092,8 +1043,6 @@ namespace Coza_Ecommerce_Shop.Migrations
             modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.Attributes", b =>
                 {
                     b.Navigation("AttributeValues");
-
-                    b.Navigation("ProductVariantAttributes");
                 });
 
             modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.Category", b =>
@@ -1120,11 +1069,6 @@ namespace Coza_Ecommerce_Shop.Migrations
             modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.ProductCategory", b =>
                 {
                     b.Navigation("Products");
-                });
-
-            modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.ProductVariant", b =>
-                {
-                    b.Navigation("ProductVariantAttributes");
                 });
 #pragma warning restore 612, 618
         }
