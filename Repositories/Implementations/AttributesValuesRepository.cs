@@ -2,6 +2,7 @@
 using Coza_Ecommerce_Shop.Models.Entities;
 using Coza_Ecommerce_Shop.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace Coza_Ecommerce_Shop.Repositories.Implementations
 {
@@ -27,7 +28,12 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
 
         public async Task<IEnumerable<AttributeValue>> GetAllAsync()
         {
-            return await _context.AttributeValues.ToListAsync();
+            return await _context.AttributeValues.AsNoTracking().ToListAsync();
+        }
+
+        public async Task<IEnumerable<AttributeValue>> GetAttributeValuesByIdAttributeAsync(int id)
+        {
+            return await _context.AttributeValues.Where(x => x.AttributeId == id).ToListAsync();
         }
 
         public Task<AttributeValue?> GetByIdAsync(int? id)

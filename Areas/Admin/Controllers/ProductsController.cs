@@ -22,13 +22,15 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Microsoft.CodeAnalysis;
 using AttributeData = Coza_Ecommerce_Shop.ViewModels.Product.AttributeData;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
+using X.PagedList.Extensions;
+using Coza_Ecommerce_Shop.Models.Helper;
+using Coza_Ecommerce_Shop.Repositories.Implementations;
 
 namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 {
     [Area("Admin")]
     public class ProductsController : Controller
     {
-        private readonly AppDbContext _context;
         private readonly IMapper _mapper;
         private readonly IProductRepository _productRepository;
         private readonly IProductCategoryRepository _productCategoryRepository;
@@ -41,7 +43,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
         public ProductsController
         (
-            AppDbContext context,
+
             ILogger<ProductsController> logger,
             IMapper mapper, IProductRepository productRepository,
             IProductCategoryRepository productCategoryRepository,
@@ -53,7 +55,6 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         {
             _logger = logger;
             _mapper = mapper;
-            _context = context;
             _productRepository = productRepository;
             _productCategoryRepository = productCategoryRepository;
             _attributesRepository = attributesRepository;
@@ -64,32 +65,92 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
         [HttpPost]
         [Route("/GetValuesAttribute")]
-        public IActionResult GetValuesAttribute([FromForm] int attributeId)
+        public async Task<IActionResult> GetValuesAttribute([FromForm] int attributeId)
         {
-            var listvalue = _context.AttributeValues.Where(x => x.AttributeId == attributeId)
-                 .Select(x => new
-                 {
-                     x.Id,
-                     x.Value
-                 })
-                .ToList();
 
-            return Json(new { success = true, data = listvalue });
+            if (attributeId <= 0)
+            {
+                return BadRequest(new { success = false, message = "Invalid attribute ID." });
+            }
+
+            var listvalue = await _attributesValuesRepository.GetAttributeValuesByIdAttributeAsync(attributeId);
+
+            if (listvalue == null || !listvalue.Any())
+            {
+                return NotFound(new { success = false, message = "No values found for this attribute." });
+            }
+
+            var datalist = listvalue.Select(x => new
+            {
+                x.Id,
+                x.Value
+            })
+           .ToList();
+
+            return Ok(new { success = true, data = datalist });
 
         }
 
+        [Route("/GetVariantDetails")]
+        [HttpGet]
+        public async Task<IActionResult> GetVariantDetails(string sku)
+        {
+            
+            var variant = await _productVariantRepository.GetBySkuAsync(sku);
+
+            if (variant == null)
+            {
+                return Json(new { success = false });
+            }
+
+            var price = variant.Product.Price + (variant.AdditionalPrice == null ? 0 : variant.AdditionalPrice);
+
+            return Json(new
+            {
+                success = true,
+                data = new
+                {
+                    price = price,
+                    stock = variant.Quantity
+                }
+            });
+        }
+
+
+
 
         // GET: Admin/Products
-        public async Task<IActionResult> Index(string search)
+        public async Task<IActionResult> Index(string search, int? page = 1)
         {
+
             var listproducts = await _productRepository.GetAllAsync();
             if (!string.IsNullOrEmpty(search))
             {
-                listproducts = listproducts.Where(x => x.Title.Contains(search) || (x.ProductCode != null && x.ProductCode.Contains(search)));
+                listproducts = listproducts.Where(x => x.Title.ToLower().Contains(search.ToLower()) || (x.ProductCode != null && x.ProductCode.ToLower().Contains(search.ToLower())));
             }
 
-            listproducts = listproducts.OrderByDescending(x => x.Id);
-            return View(listproducts);
+
+            int pageSize = 5;
+            int pageNumber = page ?? 1;
+            var totalPage = listproducts.Count();
+
+            var pagedList = listproducts.OrderByDescending(x => x.Id).ToPagedList(pageNumber, pageSize);
+
+
+            var ProductsPagingViewModel = new ProductsPagingViewModel
+            {
+                Products = pagedList,
+                PagingInfo = new PagingViewModel
+                {
+                    CurrentPage = pageNumber,
+                    TotalCount = pagedList.Count,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling((double)totalPage / pageSize),
+                    SearchTerm = search,
+                }
+            };
+
+            return View(ProductsPagingViewModel);
         }
 
         // GET: Admin/Products/Details/5
@@ -170,9 +231,9 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // GET: Admin/Products/Create
         public async Task<IActionResult> Create()
         {
-            var listproductcategory = await _productCategoryRepository.GetAllAsync();
             var listAttributes = await _attributesRepository.GetAllAsync();
-            ViewData["ProductCategoryId"] = new SelectList(listproductcategory, "Id", "Title");
+            var categories = (await _productCategoryRepository.GetAllAsync()).ToList();
+            ViewData["ProductCategoryId"] = ProductCategoryHelper.BuildCategorySelectList(categories);
             ViewData["Attributes"] = new SelectList(listAttributes, "Id", "AttributeName");
             return View();
         }
@@ -181,12 +242,13 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         private async Task InitializeViewData(Product product)
         {
 
-            var listproductcategory = await _productCategoryRepository.GetAllAsync();
+
             var listattributes = await _attributesRepository.GetAllAsync();
             var selectedCategoryId = product?.ProductCategoryId ?? 0;
 
+            var categories = (await _productCategoryRepository.GetAllAsync()).ToList();
+            ViewData["ProductCategoryId"] = ProductCategoryHelper.BuildCategorySelectList(categories);
 
-            ViewData["ProductCategoryId"] = new SelectList(listproductcategory.ToList(), "Id", "Title");
             ViewData["Attributes"] = new SelectList(listattributes.ToList(), "Id", "AttributeName");
 
             ViewData["ListAttributes"] = await _attributesRepository.GetAllAsync();
@@ -235,7 +297,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                     product.IsActive = true;
                     product.CreateDate = DateTime.Now;
                     product.ModifierDate = DateTime.Now;
-                   
+
 
                     await _productRepository.AddAsync(product);
                     product.Slug = $"{FilterChar.GenerateSlug(product.Title)}-{product.Id}";
@@ -267,7 +329,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
                         }
 
-                        if(addedVariants.Count > 0)
+                        if (addedVariants.Count > 0)
                         {
                             await _productVariantRepository.AddARangesync(addedVariants);
                         }
@@ -448,12 +510,12 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                                     var attributeName = attributeDictionary.ContainsKey(item.AttributeName)
                                          ? item.AttributeName
                                          : (int?)null;
-                                   
+
                                     var attributeValue = attributeValueDictionary.ContainsKey(item.AttributeValue)
                                         ? item.AttributeValue
                                         : (int?)null;
 
-                                   
+
                                     variant.Attributes?.Add(new AttributeData
                                     {
                                         AttributeID = attributeName,
@@ -535,7 +597,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                                 productImage.ProductId = product.Id;
                                 productImage.Image = await Utilities.UploadFileAsync(file, "Products");
 
-                                if (product.Image.Equals(file.FileName))
+                                if (product.Image != null && product.Image.Equals(file.FileName))
                                 {
                                     product.Image = productImage.Image;
                                     productImage.IsDefault = true;
@@ -643,7 +705,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
             {
                 await _productRepository.RemoveAsync(product);
             }
- 
+
             return RedirectToAction(nameof(Index));
         }
 

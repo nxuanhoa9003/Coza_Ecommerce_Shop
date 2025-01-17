@@ -1,4 +1,6 @@
-﻿using Coza_Ecommerce_Shop.Models.Entities;
+﻿using Coza_Ecommerce_Shop.DTO;
+using Coza_Ecommerce_Shop.Models.Entities;
+using Coza_Ecommerce_Shop.ViewModels.Home;
 
 namespace Coza_Ecommerce_Shop.Repositories.Interfaces
 {
@@ -7,6 +9,10 @@ namespace Coza_Ecommerce_Shop.Repositories.Interfaces
         Task<Product?> GetByIdAsync(int? id);
         Task<Product?> GetDetailProductByIdAsync(int? id);
         Task<IEnumerable<Product>> GetAllAsync();
+
+        Task<IEnumerable<Product>> GetPagedProductsAsync(int page, int pageSize);
+        Task<ProductOverViewVM> GetProductByIdProductCategoryAsync(IEnumerable<ProductCategoryDTO> productCategoryDTOs, int page, int pageSize);
+
         Task AddAsync(Product productmodel);
         Task AddRangePrioductImageAsync(ICollection<ProductImage> listproductImages);
 

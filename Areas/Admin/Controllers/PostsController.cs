@@ -101,7 +101,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                     post.CreateDate = DateTime.Now;
                     post.ModifierDate = DateTime.Now;
                     post.Slug = FilterChar.GenerateSlug(post.Title);
-                    post.Image = await Utilities.UploadFileAsync(file, "posts");
+                    post.Image = await Utilities.UploadFileAsync(file, "Posts");
                     post.Category = await _categoryRepository.GetByIdAsync(post.CategoryId);
 
                     await _postRepository.AddAsync(post);

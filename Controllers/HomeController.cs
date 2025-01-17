@@ -18,7 +18,14 @@ namespace Coza_Ecommerce_Shop.Controllers
             return View();
         }
 
-        public IActionResult Privacy()
+		[Route("quick-view-product/{productId}")]
+		public async Task<IActionResult> LoadQuickProductView (int productId)
+        {
+			return await Task.FromResult(ViewComponent("QuickViewProduct", new { id = productId }));
+		}
+
+
+		public IActionResult Privacy()
         {
             return View();
         }

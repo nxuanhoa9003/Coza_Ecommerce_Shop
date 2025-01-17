@@ -21,6 +21,10 @@ namespace Coza_Ecommerce_Shop.Data
         {
             base.OnModelCreating(builder);
 
+            builder.Entity<ProductCategory>()
+                .HasIndex(p => p.Slug)
+                .IsUnique();
+
             builder.Entity<OrderDetail>()
                 .HasKey(od => new { od.OrderId, od.ProductId });
 

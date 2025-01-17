@@ -1,8 +1,11 @@
 ﻿using Coza_Ecommerce_Shop.Data;
+using Coza_Ecommerce_Shop.DTO;
 using Coza_Ecommerce_Shop.Models.Common;
 using Coza_Ecommerce_Shop.Models.Entities;
 using Coza_Ecommerce_Shop.Repositories.Interfaces;
+using Coza_Ecommerce_Shop.ViewModels.Home;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Coza_Ecommerce_Shop.Repositories.Implementations
 {
@@ -109,7 +112,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             await _context.SaveChangesAsync();
         }
 
-        
+
 
         public async Task<IEnumerable<ProductImage>> GetProductImagesByIdProduct(int? id)
         {
@@ -120,6 +123,58 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
         {
             _context.ProductImages.UpdateRange(listProductsImages);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetPagedProductsAsync(int page, int pageSize)
+        {
+            if (page <= 0) page = 1;
+            return await _context.Products
+                .Include(x => x.ProductCategory)
+                .AsNoTracking()
+                .OrderBy(p => p.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+
+        public async Task<ProductOverViewVM> GetProductByIdProductCategoryAsync(IEnumerable<ProductCategoryDTO> productCategoryDTOs, int page, int pageSize)
+        {
+
+            var products = await _context.Products
+                                .Include(x => x.ProductCategory)
+                                .AsNoTracking()
+                                .ToListAsync();
+
+            var listProduct = new List<Product>();
+            var listProductCategoryDTO = new List<ProductCategoryDTO>();
+            if (productCategoryDTOs != null && productCategoryDTOs.Any())
+            {
+                var listProductCategoryDTOs = productCategoryDTOs.ToList();
+                
+                foreach (var item in listProductCategoryDTOs)
+                {
+                    var prs = products.Where(x => x.ProductCategoryId == item.Id).ToList();
+                    if (prs.Any())
+                    {
+                        listProductCategoryDTO.Add(item);
+                        listProduct.AddRange(prs);
+                    }
+                }
+            }else
+            {
+                listProduct = products.ToList();
+                listProductCategoryDTO = productCategoryDTOs?.ToList();
+            }
+
+            listProduct = products.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            return new ProductOverViewVM
+            {
+                productCategoryDTO = listProductCategoryDTO,
+                products = listProduct,
+            };
+
+
         }
     }
 }

@@ -180,7 +180,7 @@
                                         <button type="button" class="btn btn-link" onclick="addAttribute(0)"><i class='bx bx-plus-circle'></i></button>
 
                                         <div class="attributes-container" id="attributes-container_0" style="flex-grow: 1;">
-                                            <div class="d-flex align-items-center mb-2">
+                                            <div class="d-flex align-items-center mb-2 attributes">
                                                 <div class="form-group me-3">
                                                     <label class="control-label">Thuộc tính</label>
                                                     <select name="attribute-select" id="attributeSelect_[0][0]" class="form-control attribute-select" asp-items="ViewBag.Attributes" onchange="showvalue(this, 0, 0)">
@@ -194,7 +194,7 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                            <input type="hidden" id="variants[0].AttributesJson" name="variants[0].AttributesJson" />
+                                            <input type="hidden" id="Variants[0].AttributesJson" name="variants[0].AttributesJson" />
                                         </div>
 
 
@@ -231,7 +231,7 @@
 
 
 @section scripts {
-    @Html.RenderPartialAsync("_ProductScripts", (SelectList)listatt)
+    @await Html.PartialAsync("_ProductScripts", (SelectList)listatt)
 }
 
 

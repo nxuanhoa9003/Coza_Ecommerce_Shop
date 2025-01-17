@@ -1,4 +1,5 @@
-﻿@model Coza_Ecommerce_Shop.ViewModels.Product.ProductDetailViewModel;
+﻿@using System.Globalization
+@model Coza_Ecommerce_Shop.ViewModels.Product.ProductDetailViewModel;
 
 @{
     ViewData["Title"] = "Chi tiết sản phẩm";
@@ -44,6 +45,10 @@
                         <dt class="col-sm-4">Danh mục:</dt>
                         <dd class="col-sm-8 text-secondary">@ProductDetailInfo.CategoryName</dd>
 
+                        <dt class="col-sm-4">Số lượng tổng:</dt>
+                        <dd class="col-sm-8 text-secondary">@ProductDetailInfo.Quantity</dd>
+
+
                         <dt class="col-sm-4">Trạng thái:</dt>
                         <dd class="col-sm-8">
                             @if (ProductDetailInfo.IsActive)
@@ -67,8 +72,15 @@
                     </dl>
 
                     <div class="mt-4">
-                        <h3 class="text-success fw-bold mb-1">@ProductDetailInfo.PriceSale</h3>
-                        <p class="text-muted text-decoration-line-through">@ProductDetailInfo.Price</p>
+                        @if (ProductDetailInfo.PriceSale != null && ProductDetailInfo.PriceSale > 0)
+                        {
+                            <h3 class="text-success fw-bold mb-1">@(ProductDetailInfo.PriceSale?.ToString("#,0", new CultureInfo("vi-VN")) + "đ")</h3>
+                            <p class="text-muted text-decoration-line-through">@(ProductDetailInfo.Price?.ToString("#,0", new CultureInfo("vi-VN")) + "đ")</p>
+                        }else
+                        {
+                            <h3 class="text-success fw-bold mb-1">@(ProductDetailInfo.Price?.ToString("#,0", new CultureInfo("vi-VN")) + "đ")</h3>
+                        }
+
                     </div>
 
                     <div class="mt-4 d-flex">
@@ -117,7 +129,7 @@
             <h4 class="mb-0 text-dark fw-bold">Mô tả sản phẩm</h4>
         </div>
         <div class="card-body">
-            <div class="row g-3">
+            <div class="row p-3">
                 @Html.Raw(ProductDetailInfo?.Detail)
             </div>
         </div>
@@ -144,10 +156,11 @@
                         <tbody>
                             @foreach (var variant in ProductVariants)
                             {
+                                var additionalPrice = (variant.AdditionalPrice != null ? variant.AdditionalPrice?.ToString("#,0", new CultureInfo("vi-VN")) : "0") + "đ";
                                 <tr>
                                     <td>@variant.SKU</td>
                                     <td>@variant.Quantity</td>
-                                    <td>@variant.AdditionalPrice</td>
+                                    <td>@additionalPrice</td>
                                     <td>
                                         @if (variant.Attributes != null)
                                         {

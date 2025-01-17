@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 
 namespace Coza_Ecommerce_Shop.Models.Entities
 {
@@ -8,6 +9,7 @@ namespace Coza_Ecommerce_Shop.Models.Entities
     {
         public ProductCategory() { 
             this.Products = new HashSet<Product>();
+            this.CategoryChildren = new List<ProductCategory>();
         }
 
         [Key]
@@ -28,8 +30,24 @@ namespace Coza_Ecommerce_Shop.Models.Entities
         public string? SeoDescription { get; set; }
         [StringLength(250)]
         public string? SeoKeywords { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        [DisplayName("Featured")]
+        public bool IsFeatured { get; set; } = false;
 
         public ICollection<Product> Products { get; set; }
+
+
+        // Khoá ngoại đến bảng cha nếu có
+        [ForeignKey("ParentCategory")]
+        [DisplayName("Parent Category")]
+        public int? ParentCategoryId { get; set; }
+
+        // Danh mục cha (Navigation property)
+        public ProductCategory? ParentCategory { get; set; }
+
+        // Danh sách các danh mục con
+        public ICollection<ProductCategory>? CategoryChildren { get; set; }
+
 
     }
 }

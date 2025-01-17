@@ -11,7 +11,7 @@ namespace Coza_Ecommerce_Shop.Models.Entities
         public int Id { get; set; }
         public string? SKU { get; set; }
         public int ProductId { get; set; }
-        public decimal? AdditionalPrice { get; set; }
+        public decimal? AdditionalPrice { get; set; } = 0;
         public int? Quantity { get; set; } = 0;
         [Display(Name = "Trạng thái")]
         public bool IsActive { get; set; } = false;

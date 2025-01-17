@@ -14,5 +14,8 @@ namespace Coza_Ecommerce_Shop.Repositories.Interfaces
         Task UpdateRangeAsync(IEnumerable<AttributeValue> listattributevalues);
 
         Task<IEnumerable<AttributeValue>> GetListByIdsAsync(IEnumerable<int> ids);
+        Task<IEnumerable<AttributeValue>> GetAttributeValuesByIdAttributeAsync(int id);
+
+
     }
 }

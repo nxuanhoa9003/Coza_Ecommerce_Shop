@@ -20,7 +20,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
 
         public async Task<IEnumerable<Attributes>> GetAllAsync()
         {
-            return await _context.Attributes.Include(x => x.AttributeValues).ToListAsync();
+            return await _context.Attributes.Include(x => x.AttributeValues).AsNoTracking().ToListAsync();
         }
 
         public async Task<Attributes?> GetByIdAsync(int? id)

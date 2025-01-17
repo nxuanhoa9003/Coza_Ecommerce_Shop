@@ -23,12 +23,12 @@
     </div>
 
     <!-- form search -->
-    <form class="px-4 pb-2 d-flex w-25" method="get" asp-action="Index" asp-controller="ProductCategories">
+    <form class="px-4 pb-2 d-flex w-50" method="get" asp-action="Index" asp-controller="ProductCategories">
         <div class="input-group input-group-merge">
             <button type="submit" class="input-group-text" id="basic-addon-search31" aria-label="icon">
                 <i class="bx bx-search"></i>
             </button>
-            <input type="text" name="search" class="form-control" placeholder="Tìm kiếm..." aria-label="Search..." aria-describedby="basic-addon-search31">
+            <input value="@Model.PagingInfo.SearchTerm" type="text" name="search" class="form-control" placeholder="Tìm kiếm..." aria-label="Search..." aria-describedby="basic-addon-search31">
         </div>
     </form>
     <!-- // form search -->
@@ -45,7 +45,10 @@
                             @Html.DisplayNameFor(model => model.ProductCategories[0].Title)
                         </th>
                         <th>
-                            @Html.DisplayNameFor(model => model.ProductCategories[0].CreateDate)
+                            @Html.DisplayNameFor(model => model.ProductCategories[0].ParentCategoryId)
+                        </th>
+                        <th class="text-center">
+                            @Html.DisplayNameFor(model => model.ProductCategories[0].IsFeatured)
                         </th>
 
                         <th class="text-center">Action</th>
@@ -57,13 +60,18 @@
                     }
                     @foreach (var item in Model.ProductCategories)
                     {
+                        string iconStatus = item.IsFeatured ? "<i class='bx bx-check-circle text-success' ></i>" : "<i class='bx bx-x-circle text-danger'></i>";
+
                         <tr>
                             <td>@(++stt)</td>
                             <td>
                                 @Html.DisplayFor(modelItem => item.Title)
                             </td>
                             <td>
-                                @Html.DisplayFor(modelItem => item.CreateDate)
+                                @Html.DisplayFor(modelItem => item.ParentCategory.Title)
+                            </td>
+                            <td class="text-center">
+                                @Html.Raw(iconStatus)
                             </td>
 
                             <td class="text-center">

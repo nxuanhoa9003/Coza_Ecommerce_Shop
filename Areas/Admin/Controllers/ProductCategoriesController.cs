@@ -15,6 +15,9 @@ using Coza_Ecommerce_Shop.Repositories.Interfaces;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using X.PagedList.Extensions;
 using Coza_Ecommerce_Shop.ViewModels;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.Logging;
+using Coza_Ecommerce_Shop.Models.Helper;
 
 namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 {
@@ -23,12 +26,38 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
     {
         private readonly IProductCategoryRepository _productcategoryRepository;
         public INotyfService _notifyService { get; }
+        private readonly ILogger<ProductCategoriesController> _logger;
 
-        public ProductCategoriesController(IProductCategoryRepository productcategoryRepository, INotyfService notifyService)
+        public ProductCategoriesController(IProductCategoryRepository productcategoryRepository, INotyfService notifyService, ILogger<ProductCategoriesController> logger)
         {
             _productcategoryRepository = productcategoryRepository;
             _notifyService = notifyService;
+            _logger = logger;
         }
+
+        public async Task<string> HandelSlugProductCategory(string slug, ProductCategory? category = null)
+        {
+            var listproductcategoryexist = (await _productcategoryRepository.GetByFilterSlugAsNoTrackingAsync(slug)).ToList();
+
+            int count = 0;
+            string baseSlug = slug;
+
+            if (category != null)
+            {
+                listproductcategoryexist.RemoveAll(x => x.Id == category.Id);
+
+            }
+
+            while (listproductcategoryexist.Any(c => c.Slug == slug))
+            {
+                count++;
+                slug = $"{slug}-{count}";
+            }
+
+            return slug;
+
+        }
+
 
         // GET: Admin/ProductCategories
         public async Task<IActionResult> Index(string search, int? page = 1)
@@ -39,10 +68,10 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
             if (!string.IsNullOrEmpty(search))
             {
-                listproductcategories = listproductcategories.Where(x => x.Title.Contains(search) || (x.Slug != null && x.Slug.Contains(search)));
+                listproductcategories = listproductcategories.Where(x => x.Title.ToLower().Contains(search.ToLower()) || (x.ParentCategory != null && x.ParentCategory.Title.ToLower().Contains(search.ToLower())) || (x.Slug != null && x.Slug.Contains(search)));
             }
 
-            var totalProductCategory = listproductcategories.Count();
+            var totalData = listproductcategories.Count();
             var pagedList = listproductcategories.OrderByDescending(x => x.Id).ToPagedList(pageNumber, pageSize);
 
             var productCategoryViewModel = new ProductCategoryViewModel
@@ -53,7 +82,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                     CurrentPage = pageNumber,
                     TotalCount = pagedList.Count,
                     PageSize = pageSize,
-                    TotalPages = (int)Math.Ceiling((double)totalProductCategory / pageSize),
+                    TotalPages = (int)Math.Ceiling((double)totalData / pageSize),
                     SearchTerm = search,
                 }
             };
@@ -70,6 +99,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
             }
 
             var productCategory = await _productcategoryRepository.GetByIdAsync(id);
+
             if (productCategory == null)
             {
                 return NotFound();
@@ -79,8 +109,10 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/ProductCategories/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var categories = (await _productcategoryRepository.GetAllAsync()).ToList();
+            ViewBag.Categories = ProductCategoryHelper.BuildCategorySelectList(categories);
             return View();
         }
 
@@ -89,21 +121,47 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Description,SeoTitle,SeoDescription,SeoKeywords,CreateBy,CreateDate,ModifierDate,ModifiedBy")] ProductCategory productCategory, IFormFile file)
+        public async Task<IActionResult> Create([Bind("Id,Title,Description,IsFeatured,SeoTitle,SeoDescription,SeoKeywords,CreateBy,CreateDate,ModifierDate,ModifiedBy,ParentCategoryId")] ProductCategory productCategory)
         {
-
+            var categories = (await _productcategoryRepository.GetAllAsync()).ToList();
+            ViewBag.Categories = ProductCategoryHelper.BuildCategorySelectList(categories);
             try
             {
-                productCategory.CreateDate = DateTime.Now;
-                productCategory.ModifierDate = DateTime.Now;
-                productCategory.Slug = FilterChar.GenerateSlug(productCategory.Title);
-                await _productcategoryRepository.AddAsync(productCategory);
-                _notifyService.Success("Thêm tin tức thành công");
-                return RedirectToAction(nameof(Index));
+
+                if (productCategory.ParentCategoryId.HasValue)
+                {
+                    if (!int.TryParse(productCategory.ParentCategoryId.ToString(), out int parentId))
+                    {
+                        productCategory.ParentCategoryId = null;
+                    }
+                }
+
+                bool isExists = await _productcategoryRepository.IsCategoryExistsAsync(productCategory);
+
+                if (isExists)
+                {
+                    ModelState.AddModelError("", "Danh mục đã tồn tại trong cấp hiện tại.");
+                    return View(productCategory);
+                }
+
+                var slug = FilterChar.GenerateSlug(productCategory.Title);
+
+                slug = await HandelSlugProductCategory(slug);
+
+                productCategory.Slug = slug;
+                bool rs = await _productcategoryRepository.AddAsync(productCategory);
+                if (rs)
+                {
+                    _notifyService.Success("Thêm danh mục sản phẩm thành công");
+                    return RedirectToAction(nameof(Index));
+                }
+
+                _notifyService.Error("Thêm danh mục sản phẩm thất bại");
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
+                _notifyService.Error("Thêm danh mục sản phẩm thất bại");
             }
             return View(productCategory);
         }
@@ -111,6 +169,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // GET: Admin/ProductCategories/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+
             if (id == null)
             {
                 return NotFound();
@@ -121,6 +180,8 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
             {
                 return NotFound();
             }
+            var categories = (await _productcategoryRepository.GetAllExceptIdAsync(id)).ToList();
+            ViewBag.Categories = ProductCategoryHelper.BuildCategorySelectList(categories);
             return View(productCategory);
         }
 
@@ -129,18 +190,65 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,SeoTitle,SeoDescription,SeoKeywords,CreateBy,CreateDate,ModifierDate,ModifiedBy")] ProductCategory productCategory)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,IsFeatured,SeoTitle,SeoDescription,SeoKeywords,CreateBy,CreateDate,ModifierDate,ModifiedBy,ParentCategoryId")] ProductCategory productCategory)
         {
+            var categories = (await _productcategoryRepository.GetAllExceptIdAsync(id)).ToList();
+            ViewBag.Categories = ProductCategoryHelper.BuildCategorySelectList(categories);
+            
             if (id != productCategory.Id)
             {
                 return NotFound();
+            }
+
+            if (productCategory.ParentCategoryId.HasValue)
+            {
+                if (!int.TryParse(productCategory.ParentCategoryId.ToString(), out int parentId))
+                {
+
+                    productCategory.ParentCategoryId = null;
+                    ModelState.Remove(nameof(productCategory.ParentCategoryId));
+                }
+            }
+            else
+            {
+                ModelState.Remove(nameof(productCategory.ParentCategoryId));
+                productCategory.ParentCategoryId = null;
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    await _productcategoryRepository.UpdateAsync(productCategory);
+                    var productexist = await _productcategoryRepository.GetByIdAsNoTrackingAsync(id);
+                    if (productexist == null)
+                    {
+                        return NotFound();
+                    }
+
+                    bool isExists = await _productcategoryRepository.IsCategoryExistsAsync(productCategory, productexist);
+
+                    if (isExists)
+                    {
+                        ModelState.AddModelError("", "Danh mục đã tồn tại trong cấp hiện tại.");
+                        return View(productCategory);
+                    }
+
+
+                    productCategory.CreateDate = productexist.CreateDate;
+
+                    var slug = FilterChar.GenerateSlug(productCategory.Title);
+                    slug = await HandelSlugProductCategory(slug, productexist);
+
+                    productCategory.Slug = slug;
+                    bool rs = await _productcategoryRepository.UpdateAsync(productCategory);
+
+                    if (rs)
+                    {
+                        _notifyService.Success("Cập nhật danh mục sản phẩm thành công");
+                        return RedirectToAction(nameof(Index));
+                    }
+                    _notifyService.Error("Cập nhật danh mục sản phẩm thất bại");
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -154,10 +262,11 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                //return RedirectToAction(nameof(Index));
             }
             return View(productCategory);
         }
+
 
         // GET: Admin/ProductCategories/Delete/5
         public async Task<IActionResult> Delete(int? id)
@@ -184,7 +293,14 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
             var productCategory = await _productcategoryRepository.GetByIdAsync(id);
             if (productCategory != null)
             {
-                await _productcategoryRepository.RemoveAsync(productCategory);
+                var rs = await _productcategoryRepository.RemoveAsync(productCategory);
+                if(rs)
+                {
+                    _notifyService.Success("Xoá danh mục thành công");
+                }else
+                {
+                    _notifyService.Error("Xoá danh mục thất bại");
+                }
             }
             return RedirectToAction(nameof(Index));
         }

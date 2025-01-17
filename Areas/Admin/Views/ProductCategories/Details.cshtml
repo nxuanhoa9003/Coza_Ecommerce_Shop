@@ -32,11 +32,37 @@
                 @Html.DisplayFor(model => model.Title)
             </dd>
             <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Slug)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Slug)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.IsFeatured)
+            </dt>
+            <dd class="col-sm-10">
+                @if (Model.IsFeatured)
+                {
+                    <span class="badge bg-success">Nổi bật</span> <!-- Hiển thị thông báo với badge màu xanh -->
+                }
+                else
+                {
+                    <span class="badge bg-danger">Không nổi bật</span> <!-- Thêm thông báo cho trường hợp không hiển thị -->
+                }
+            </dd>
+            <dt class="col-sm-2">
                 @Html.DisplayNameFor(model => model.Description)
             </dt>
             <dd class="col-sm-10">
                 @Html.DisplayFor(model => model.Description)
             </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.ParentCategoryId)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.ParentCategory.Title)
+            </dd>
+
             <dt class="col-sm-2">
                 @Html.DisplayNameFor(model => model.SeoTitle)
             </dt>

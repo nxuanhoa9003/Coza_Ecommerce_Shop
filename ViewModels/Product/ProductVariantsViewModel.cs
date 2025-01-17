@@ -7,13 +7,14 @@ namespace Coza_Ecommerce_Shop.ViewModels.Product
         public int Id { get; set; }
         public string? SKU { get; set; }
         public int ProductId { get; set; }
-        public decimal? AdditionalPrice { get; set; }
+        public decimal? AdditionalPrice { get; set; } = 0;
         public int? Quantity { get; set; } = 0;
         [Display(Name = "Hiển thị")]
         public bool IsActive { get; set; } = false;
 
         public string? AttributesJson { get; set; }
 
+        public string? NameVariantFromAttributes { get; set; }
         public ICollection<AttributeData>? Attributes { get; set; } = new List<AttributeData>();
 
         [Display(Name = "Người tạo")]

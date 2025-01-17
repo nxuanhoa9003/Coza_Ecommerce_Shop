@@ -50,7 +50,7 @@
     <Folder Include="Areas\Admin\Models\" />
     <Folder Include="Areas\Files\Data\" />
     <Folder Include="Areas\Files\Models\" />
-    <Folder Include="Uploads\" />
+    <Folder Include="Uploads\Posts\" />
     <Folder Include="Uploads\Products\" />
   </ItemGroup>
 

@@ -577,7 +577,7 @@ namespace Coza_Ecommerce_Shop.Migrations
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("Slug")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -589,6 +589,10 @@ namespace Coza_Ecommerce_Shop.Migrations
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("ProductCategoryId");
+
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasFilter("[Slug] IS NOT NULL");
 
                     b.ToTable("Product");
                 });
@@ -610,11 +614,20 @@ namespace Coza_Ecommerce_Shop.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsFeatured")
+                        .HasColumnType("bit");
+
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("ModifierDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("ParentCategoryId")
+                        .HasColumnType("int");
 
                     b.Property<string>("SeoDescription")
                         .HasMaxLength(500)
@@ -638,6 +651,12 @@ namespace Coza_Ecommerce_Shop.Migrations
                         .HasColumnType("nvarchar(150)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ParentCategoryId");
+
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasFilter("[Slug] IS NOT NULL");
 
                     b.ToTable("ProductCategory");
                 });
@@ -967,6 +986,15 @@ namespace Coza_Ecommerce_Shop.Migrations
                     b.Navigation("ProductCategory");
                 });
 
+            modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.ProductCategory", b =>
+                {
+                    b.HasOne("Coza_Ecommerce_Shop.Models.Entities.ProductCategory", "ParentCategory")
+                        .WithMany("CategoryChildren")
+                        .HasForeignKey("ParentCategoryId");
+
+                    b.Navigation("ParentCategory");
+                });
+
             modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.ProductImage", b =>
                 {
                     b.HasOne("Coza_Ecommerce_Shop.Models.Entities.Product", "Product")
@@ -1068,6 +1096,8 @@ namespace Coza_Ecommerce_Shop.Migrations
 
             modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.ProductCategory", b =>
                 {
+                    b.Navigation("CategoryChildren");
+
                     b.Navigation("Products");
                 });
 #pragma warning restore 612, 618

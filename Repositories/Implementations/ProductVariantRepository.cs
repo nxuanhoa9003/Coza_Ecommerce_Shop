@@ -57,7 +57,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
 
         public async Task<ProductVariant?> GetBySkuAsync(string SKU)
         {
-            return await _context.ProductVariants.FirstOrDefaultAsync(x => x.SKU == SKU);
+            return await _context.ProductVariants.Include(x=> x.Product).AsNoTracking().FirstOrDefaultAsync(x => x.SKU == SKU);
         }
     }
 }

@@ -176,7 +176,7 @@
                             <!-- product images -->
                             <div class="tab-pane fade" id="navs-justified-profile" role="tabpanel">
                                 <div class="mb-3">
-                                    <label asp-for="ProductInfo.Image" class="form-label"></label>
+                                    <label for="formValidationFile" class="form-label">Ảnh sản phẩm</label>
                                     <input name="ProductInfo.files" multiple class="form-control" type="file" id="formValidationFile">
                                     <span asp-validation-for="ProductInfo.Image" class="text-danger"></span>
 
@@ -184,10 +184,10 @@
 
                                 <div class="mb-5">
                                     <div id="imagePreview" class="row">
+                                        <input asp-for="ProductInfo.Image" id="checkedImage" type="hidden" value="@(ProductDetailInfo?.Image ?? "")" />
+
                                         @if (ProductImages != null && ProductImages.Any())
                                         {
-                                            <input asp-for="ProductInfo.Image" id="checkedImage" type="hidden" value="@(ProductDetailInfo?.Image ?? "")" />
-
                                             foreach (var img in ProductImages)
                                             {
                                                 string filename = img.Image.Split("/").Last();
@@ -234,7 +234,7 @@
                                                         
                                                         foreach (var attribute in pv.Attributes)
                                                         {
-                                                            <div class="d-flex align-items-center mb-2">
+                                                            <div class="d-flex align-items-center mb-2 attributes">
                                                                 <div class="form-group me-3">
                                                                     <label class="control-label">Thuộc tính</label>
                                                                     <select name="attribute-select" id="attributeSelect_[@variantIndex][@attributeIndex]" class="form-control attribute-select" onchange="showvalue(this, @variantIndex , @attributeIndex)">
