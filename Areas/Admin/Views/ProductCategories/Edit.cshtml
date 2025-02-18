@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "Edit";
-    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin_Sub.cshtml";
 }
 
 <nav aria-label="breadcrumb">
@@ -38,6 +38,8 @@
                         <select asp-for="ParentCategoryId" class="form-control" asp-items="ViewBag.Categories">
                             <option>Chọn danh mục</option>
                         </select>
+                        <span asp-validation-for="ParentCategoryId" class="text-danger"></span>
+
                     </div>
                     <div class="mb-3">
                         <label asp-for="Description" class="control-label"></label>

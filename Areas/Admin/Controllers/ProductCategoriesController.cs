@@ -18,10 +18,14 @@ using Coza_Ecommerce_Shop.ViewModels;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using Coza_Ecommerce_Shop.Models.Helper;
+using Coza_Ecommerce_Shop.ViewModels.ProductCategory;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(AuthenticationSchemes = "AdminScheme")]
     public class ProductCategoriesController : Controller
     {
         private readonly IProductCategoryRepository _productcategoryRepository;
@@ -58,6 +62,20 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
         }
 
+        public async Task<int> GetCategoryDepth(ProductCategory category)
+        {
+            int depth = 0;
+            while (category.ParentCategoryId != null)
+            {
+                var parentCategory = await _productcategoryRepository.GetByIdAsync(category.ParentCategoryId.Value);
+                if (parentCategory == null) break;
+
+                depth++;
+                category = parentCategory;
+            }
+            return depth;
+        }
+
 
         // GET: Admin/ProductCategories
         public async Task<IActionResult> Index(string search, int? page = 1)
@@ -74,7 +92,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
             var totalData = listproductcategories.Count();
             var pagedList = listproductcategories.OrderByDescending(x => x.Id).ToPagedList(pageNumber, pageSize);
 
-            var productCategoryViewModel = new ProductCategoryViewModel
+            var productCategoryViewModel = new ProductCategoryPagingViewModel
             {
                 ProductCategories = pagedList,
                 PagingInfo = new PagingViewModel
@@ -91,7 +109,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/ProductCategories/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
             {
@@ -121,18 +139,32 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Description,IsFeatured,SeoTitle,SeoDescription,SeoKeywords,CreateBy,CreateDate,ModifierDate,ModifiedBy,ParentCategoryId")] ProductCategory productCategory)
+        public async Task<IActionResult> Create([Bind("Title,Description,IsFeatured,SeoTitle,SeoDescription,SeoKeywords,CreateBy,CreateDate,ModifierDate,ModifiedBy,ParentCategoryId")] ProductCategory productCategory)
         {
             var categories = (await _productcategoryRepository.GetAllAsync()).ToList();
             ViewBag.Categories = ProductCategoryHelper.BuildCategorySelectList(categories);
+            
             try
             {
 
                 if (productCategory.ParentCategoryId.HasValue)
                 {
-                    if (!int.TryParse(productCategory.ParentCategoryId.ToString(), out int parentId))
+                    if (!productCategory.ParentCategoryId.HasValue || productCategory.ParentCategoryId == Guid.Empty)
                     {
                         productCategory.ParentCategoryId = null;
+                    }
+
+                    var parentCategory = await _productcategoryRepository.GetByIdAsNoTrackingAsync(productCategory.ParentCategoryId);
+                    if (parentCategory == null)
+                    {
+                        ModelState.AddModelError("ParentCategoryId", "Danh mục cha không hợp lệ.");
+                        return View(productCategory);
+                    }
+                    if (await GetCategoryDepth(parentCategory) >= 1)
+                    {
+                        ModelState.AddModelError("ParentCategoryId", "Không thể cập nhật danh mục vì vượt quá 2 cấp.");
+                        return View(productCategory);
+
                     }
                 }
 
@@ -167,7 +199,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/ProductCategories/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(Guid? id)
         {
 
             if (id == null)
@@ -190,7 +222,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,IsFeatured,SeoTitle,SeoDescription,SeoKeywords,CreateBy,CreateDate,ModifierDate,ModifiedBy,ParentCategoryId")] ProductCategory productCategory)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Title,Description,IsFeatured,SeoTitle,SeoDescription,SeoKeywords,CreateBy,CreateDate,ModifierDate,ModifiedBy,ParentCategoryId")] ProductCategory productCategory)
         {
             var categories = (await _productcategoryRepository.GetAllExceptIdAsync(id)).ToList();
             ViewBag.Categories = ProductCategoryHelper.BuildCategorySelectList(categories);
@@ -202,12 +234,27 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
             if (productCategory.ParentCategoryId.HasValue)
             {
-                if (!int.TryParse(productCategory.ParentCategoryId.ToString(), out int parentId))
+                if (!productCategory.ParentCategoryId.HasValue || productCategory.ParentCategoryId == Guid.Empty)
                 {
 
                     productCategory.ParentCategoryId = null;
                     ModelState.Remove(nameof(productCategory.ParentCategoryId));
                 }
+
+                var parentCategory = await _productcategoryRepository.GetByIdAsNoTrackingAsync(productCategory.ParentCategoryId);
+                if (parentCategory == null)
+                {
+                    ModelState.AddModelError("ParentCategoryId", "Danh mục cha không hợp lệ.");
+                    return View(productCategory);
+                }
+                if (await GetCategoryDepth(parentCategory) >= 1)
+                {
+                    ModelState.AddModelError("ParentCategoryId", "Không thể cập nhật danh mục vì vượt quá 2 cấp.");
+                    return View(productCategory);
+
+                }
+
+
             }
             else
             {
@@ -269,7 +316,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
 
         // GET: Admin/ProductCategories/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
@@ -288,7 +335,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // POST: Admin/ProductCategories/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var productCategory = await _productcategoryRepository.GetByIdAsync(id);
             if (productCategory != null)

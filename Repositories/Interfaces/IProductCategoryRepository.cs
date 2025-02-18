@@ -5,9 +5,10 @@ namespace Coza_Ecommerce_Shop.Repositories.Interfaces
 {
     public interface IProductCategoryRepository
     {
-        Task<ProductCategory?> GetByIdAsync(int? id);
-        Task<ProductCategory?> GetByIdAsNoTrackingAsync(int? id);
-        Task<IEnumerable<ProductCategory>> GetByFilterSlugAsNoTrackingAsync(string slug);
+        Task<ProductCategory?> GetByIdAsync(Guid? id);
+        Task<ProductCategory?> GetByIdAsNoTrackingAsync(Guid? id);
+        Task<ProductCategory?> GetBySlugAsNoTrackingAsync(string slug);
+		Task<IEnumerable<ProductCategory>> GetByFilterSlugAsNoTrackingAsync(string slug);
         Task<IEnumerable<ProductCategory>> GetAllAsync();
         Task<IEnumerable<ProductCategory>> GetAllExceptIdAsync(Guid? id);
 
@@ -18,6 +19,5 @@ namespace Coza_Ecommerce_Shop.Repositories.Interfaces
 
         Task<bool> IsCategoryExistsAsync(ProductCategory pnew, ProductCategory? pold = null);
 
-        Task<IEnumerable<ProductCategoryDTO>> GetAllProductCategoryFeatured();
     }
 }

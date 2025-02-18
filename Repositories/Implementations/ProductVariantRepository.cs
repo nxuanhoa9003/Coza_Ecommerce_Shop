@@ -32,7 +32,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             return await _context.ProductVariants.Where(x => x.ProductId == product.Id).ToListAsync();
         }
 
-        public Task<ProductVariant?> GetByIdAsync(int? id)
+        public Task<ProductVariant?> GetByIdAsync(Guid? id)
         {
             throw new NotImplementedException();
         }

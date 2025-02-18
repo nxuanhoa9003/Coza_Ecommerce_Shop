@@ -1,0 +1,61 @@
+﻿@model Coza_Ecommerce_Shop.ViewModels.Account.VerifyAccountViewModel
+@{
+    ViewData["Title"] = "Verify Account";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<style>
+    .verify-container {
+        max-width: 400px;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .verify-container h2 {
+        color: #333;
+        font-weight: bold;
+    }
+
+    .resend-btn {
+        background: none;
+        border: none;
+        color: #007bff;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 10px;
+        text-decoration: underline;
+    }
+
+    .resend-btn:hover {
+         color: #0056b3;
+    }
+</style>
+
+<div class="container">
+    <div class="d-flex justify-content-center align-items-center vh-100">
+        <div class="verify-container">
+            <h2>Xác thực tài khoản</h2>
+            <p>Chúng tôi đã gửi mã xác thực đến email <b>@Model.Email</b>. Vui lòng kiểm tra hộp thư và nhập mã bên dưới:</p>
+
+            <form method="post" asp-controller="Account" asp-action="VerifyAccount">
+                <input type="hidden" asp-for="Email" />
+
+                <div class="mb-3">
+                    <label asp-for="Code">Mã xác thực</label>
+                    <input asp-for="Code" autocomplete="off" class="form-control text-center" required placeholder="Nhập mã xác thực">
+                </div>
+
+                <button type="submit" class="btn btn-success">Xác thực</button>
+            </form>
+
+            <form method="post" asp-controller="Account" asp-action="SendVerificationCode">
+                <input type="hidden" asp-for="Email" value="@Model.Email" />
+                <input type="hidden" asp-for="IsResend" value="@Model.IsResend" />
+                <button type="submit" class="resend-btn">Gửi lại mã xác thực</button>
+            </form>
+        </div>
+    </div>
+
+</div>

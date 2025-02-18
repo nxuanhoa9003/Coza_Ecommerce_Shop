@@ -16,5 +16,15 @@ namespace Coza_Ecommerce_Shop.Models
 
         [DataType(DataType.Date)]
         public DateTime? BirthDate { get; set; }
+        [StringLength(400)]
+        public string? AvatarUrl { get; set; }
+
+        // Thời gian reset pass cuối cùng
+        public DateTime? LastPasswordResetRequest { get; set; }
+        // số lần nhập sai token khi reset pass
+        public int FailedPasswordResetAttempts { get; set; } = 0;
+        // Thời gian khoá reset pass cuối cùng
+        public DateTime? PasswordResetLockoutEnd { get; set; }
+
     }
 }

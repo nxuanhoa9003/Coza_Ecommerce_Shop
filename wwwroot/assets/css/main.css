@@ -1,4 +1,4 @@
-/*------------------------------------------------------------------
+﻿/*------------------------------------------------------------------
 Project:  
 Version:  
 Last change:  
@@ -451,7 +451,16 @@ Input, textarea : 14px/1.6 '', Arial, sans-serif;
 .sub-menu li:hover > .sub-menu {
   visibility: visible;
   opacity: 1;
-} 
+}
+
+.sub-menu {
+    pointer-events: none;
+}
+
+.main-menu > li:hover > .sub-menu,
+.sub-menu li:hover > .sub-menu {
+    pointer-events: auto;
+}
 
 .sub-menu li:hover {
   background-color: transparent;
@@ -473,6 +482,8 @@ Input, textarea : 14px/1.6 '', Arial, sans-serif;
     left: auto;
   }
 }
+
+
 
 /*------------------------------------------------------------------
 [ Icon header ]*/

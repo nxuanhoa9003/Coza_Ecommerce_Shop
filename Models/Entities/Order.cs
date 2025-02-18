@@ -12,8 +12,7 @@ namespace Coza_Ecommerce_Shop.Models.Entities
             this.OrderDetails = new HashSet<OrderDetail>();
         }
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         [Required]
         public string Code { get; set; }
         public decimal TotalAmount { get; set; }
@@ -22,7 +21,7 @@ namespace Coza_Ecommerce_Shop.Models.Entities
         [Required]
         [StringLength(450)]
         public string UserId { get; set; }
-        public virtual AppUser User { get; set; }
+        public AppUser User { get; set; }
         public ICollection<OrderDetail> OrderDetails { get; set; }
 
     }

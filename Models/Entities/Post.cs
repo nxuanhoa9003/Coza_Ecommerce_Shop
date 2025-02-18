@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
+using Coza_Ecommerce_Shop.Extentions;
 
 namespace Coza_Ecommerce_Shop.Models.Entities
 {
@@ -8,8 +9,7 @@ namespace Coza_Ecommerce_Shop.Models.Entities
     public class Post : CommonAttributes
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
         [StringLength(150)]
@@ -22,9 +22,11 @@ namespace Coza_Ecommerce_Shop.Models.Entities
         [Display(Name = "Chi tiết")]
         public string Detail { get; set; }
         public string? Image { get; set; }
+        
         [Display(Name = "Loại danh mục")]
         [Required(ErrorMessage = "Danh mục không được để trống")]
-        public int CategoryId { get; set; }
+        [ValidateGuid(ErrorMessage = "Vui lòng chọn danh mục hợp lệ.")]
+        public Guid? CategoryId { get; set; }
 
         public string? SeoTitile { get; set; }
         public string? SeoDescription { get; set; }
@@ -32,6 +34,6 @@ namespace Coza_Ecommerce_Shop.Models.Entities
 
         [Display(Name = "Trạng thái")]
         public bool IsActive { get; set; }
-        public virtual Category? Category { get; set; }
+        public Category? Category { get; set; }
     }
 }

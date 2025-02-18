@@ -7,14 +7,13 @@ namespace Coza_Ecommerce_Shop.Models.Entities
     public class ProductImage
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
-        public int ProductId { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid ProductId { get; set; }
         public string Image { get; set; }
         public bool IsDefault { get; set; }
 
-        [ForeignKey("ProductId")]
-        public virtual Product? Product { get; set; }
+        [ForeignKey(nameof(ProductId))]
+        public Product? Product { get; set; }
 
     }
 }

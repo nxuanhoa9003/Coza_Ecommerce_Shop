@@ -1,0 +1,38 @@
+﻿@using Coza_Ecommerce_Shop.ViewModels
+@model TypeMenuViewModel
+
+@{
+    var isDesktop = Model.IsDesktop;
+    var categories = Model.Categories;
+}
+
+@if (isDesktop)
+{
+    <ul>
+        @foreach (var category in categories)
+        {
+            <li>
+                <a asp-controller="Product" asp-action="ListProduct" asp-route-slug="@category.Slug">
+                    @category.Title
+                </a>
+            </li>
+        }
+    </ul>
+}else
+{
+    <ul class="sub-menu-m">
+        @foreach (var category in categories)
+        {
+            <li>
+                <a asp-controller="Product" asp-action="ListProduct" asp-route-slug="@category.Slug">
+                    @category.Title
+                </a>
+            </li>
+        }
+        
+    </ul>
+}
+
+
+
+

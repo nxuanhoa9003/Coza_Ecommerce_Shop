@@ -1,0 +1,45 @@
+﻿@using Coza_Ecommerce_Shop.Models.Helper
+@model UrlHandle
+@{
+    string urlaction = Url.Action(Model.Action, Model.ControllerName);
+}
+<script>
+
+    $(document).ready(function () {
+        $('#SelectAll').click(function () {
+            $('.select-item').prop('checked', this.checked);
+        });
+
+        $('#btnDeleteSelected').click(function () {
+            var selectedItems = $('.select-item:checked');
+            var idsToDelete = [];
+            selectedItems.each(function () {
+                idsToDelete.push($(this).val());
+            });
+
+            if (idsToDelete?.length) {
+                if (confirm("Bạn có muốn xoá bài viết đã chọn?")) {
+                    $.ajax({
+                        url: '@urlaction',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(idsToDelete),
+                        success: function (rs) {
+                            if (rs.success) {
+                                setTimeout(function () {
+                                    location.reload();
+                                }, 500);
+                            }
+
+                        },
+                        error: function () {
+                            alert('Đã xảy ra lỗi khi xóa bài viết.');
+                        }
+                    });
+                }
+            }
+        });
+    });
+
+</script>
+

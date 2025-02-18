@@ -5,7 +5,7 @@ namespace Coza_Ecommerce_Shop.Models.Helper
 {
     public static class ProductCategoryHelper
     {
-        public static List<SelectListItem> BuildCategorySelectList(List<ProductCategory> categories, int? parentId = null, int level = 0)
+        public static List<SelectListItem> BuildCategorySelectList(List<ProductCategory> categories, Guid? parentId = null, int level = 0)
         {
             var list = new List<SelectListItem>();
 

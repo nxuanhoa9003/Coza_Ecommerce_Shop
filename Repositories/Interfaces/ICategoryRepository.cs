@@ -4,7 +4,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Interfaces
 {
     public interface ICategoryRepository
     {
-        Task<Category?> GetByIdAsync(int? id);
+        Task<Category?> GetByIdAsync(Guid? id);
         Task<IEnumerable<Category>> GetAllAsync();
         Task AddAsync(Category categorymodel);
 

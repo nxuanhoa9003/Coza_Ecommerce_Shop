@@ -15,12 +15,15 @@ using System.Drawing.Printing;
 using X.PagedList.Extensions;
 using Coza_Ecommerce_Shop.ViewModels;
 using Coza_Ecommerce_Shop.Repositories.Interfaces;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Authorization;
 
 
 
 namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(AuthenticationSchemes = "AdminScheme")]
     public class NewsController : Controller
     {
         private readonly INewRepository _newRepository;
@@ -69,7 +72,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/News/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
             {
@@ -97,9 +100,13 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Description,Detail,Image,CategoryId,SeoTitile,SeoDescription,SeoKeywords")] New news, IFormFile file)
+        public async Task<IActionResult> Create([Bind("Title,Description,Detail,Image,CategoryId,SeoTitile,SeoDescription,SeoKeywords")] New news, IFormFile file)
         {
-
+            if (file == null)
+            {
+                ModelState.AddModelError("Image", "Chưa chọn ảnh.");
+                return View(news);
+            }
             if (ModelState.IsValid)
             {
 
@@ -124,14 +131,14 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
 
             }
-
+            
             var listcategory = await _categoryRepository.GetAllAsync();
             ViewData["CategoryId"] = new SelectList(listcategory, "Id", "Title", news.CategoryId);
             return View(news);
         }
 
         // GET: Admin/News/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
             {
@@ -153,7 +160,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Slug,Description,Detail,CategoryId,SeoTitile,SeoDescription,SeoKeywords,CreateBy,CreateDate,ModifierDate,ModifiedBy,IsActive")] New news, IFormFile file)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Title,Slug,Description,Detail,CategoryId,SeoTitile,SeoDescription,SeoKeywords,CreateBy,CreateDate,ModifierDate,ModifiedBy,IsActive")] New news, IFormFile file)
         {
             if (id != news.Id)
             {
@@ -219,7 +226,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/News/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
@@ -238,7 +245,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // POST: Admin/News/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var news = await _newRepository.GetByIdAsync(id);
             if (news != null)
@@ -247,7 +254,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                 await _newRepository.RemoveAsync(news);
             }
 
-            _notifyService.Information("Xoá tin tức thành công");
+            _notifyService.Success("Xoá tin tức thành công");
 
             return RedirectToAction(nameof(Index));
         }
@@ -255,7 +262,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
         // Post: delete select
         [HttpPost]
-        public async Task<IActionResult> DeleteNewsSelect([FromBody] List<int> ids)
+        public async Task<IActionResult> DeleteNewsSelect([FromBody] List<Guid> ids)
         {
             if (!ids.IsNullOrEmpty())
             {

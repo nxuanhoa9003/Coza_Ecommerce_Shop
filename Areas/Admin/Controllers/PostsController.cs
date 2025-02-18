@@ -14,10 +14,13 @@ using X.PagedList.Extensions;
 using Coza_Ecommerce_Shop.ViewModels;
 using Microsoft.Extensions.Hosting;
 using Coza_Ecommerce_Shop.Repositories.Interfaces;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(AuthenticationSchemes = "AdminScheme")]
     public class PostsController : Controller
     {
         private readonly IPostRepository _postRepository;
@@ -63,7 +66,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/Posts/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
             {
@@ -91,8 +94,14 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Description,Detail,Image,CategoryId,SeoTitile,SeoDescription,SeoKeywords")] Post post, IFormFile file)
+        public async Task<IActionResult> Create([Bind("Title,Description,Detail,Image,CategoryId,SeoTitile,SeoDescription,SeoKeywords")] Post post, IFormFile file)
         {
+            if(file == null)
+            {
+                ModelState.AddModelError("Image", "Chưa chọn ảnh.");
+                return View(post);
+            }
+
             if (ModelState.IsValid)
             {
                 try
@@ -115,13 +124,13 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                     ModelState.AddModelError(string.Empty, ex.Message);
                 }
             }
-
+            
             ViewData["CategoryId"] = new SelectList(await _categoryRepository.GetAllAsync(), "Id", "Title", post.CategoryId);
             return View(post);
         }
 
         // GET: Admin/Posts/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
             {
@@ -142,7 +151,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Slug,Description,Detail,Image,CategoryId,SeoTitile,SeoDescription,SeoKeywords,IsActive")] Post post, IFormFile file)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Title,Slug,Description,Detail,Image,CategoryId,SeoTitile,SeoDescription,SeoKeywords,IsActive")] Post post, IFormFile file)
         {
             if (id != post.Id)
             {
@@ -166,7 +175,6 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
                     existingPost.ModifierDate = DateTime.Now;
                     existingPost.CreateDate = existingPost.CreateDate;
-
                     existingPost.Title = post.Title;
                     existingPost.Detail = post.Detail;
                     existingPost.Description = post.Description;
@@ -180,15 +188,11 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                     {
                         Utilities.DeleteImage(existingPost.Image);
                         existingPost.Image = await Utilities.UploadFileAsync(file, "posts");
-
                     }
                     else
                     {
                         existingPost.Image = existingPost.Image;
-
                     }
-
-                    existingPost.Category = await _categoryRepository.GetByIdAsync(post.CategoryId);
 
                     await _postRepository.UpdateAsync(existingPost);
 
@@ -209,7 +213,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/Posts/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
@@ -228,7 +232,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // POST: Admin/Posts/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var post = await _postRepository.GetByIdAsync(id);
             if (post != null)
@@ -243,7 +247,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
         // Post: delete select
         [HttpPost]
-        public async Task<IActionResult> DeleteNewsSelect([FromBody] List<int> ids)
+        public async Task<IActionResult> DeleteNewsSelect([FromBody] List<Guid> ids)
         {
             if (!ids.IsNullOrEmpty())
             {
@@ -258,10 +262,10 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
                 }
                 _notifyService.Success("Xoá thành công");
-                return Json(new { success = true });
+                return Ok(new { success = true });
             }
 
-            return Json(new { success = false });
+            return Ok(new { success = false });
         }
     }
 }

@@ -7,8 +7,7 @@ namespace Coza_Ecommerce_Shop.Models.Entities
     public class Contact : CommonAttributes
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [Display(Name = "Tên")]
         [Required(ErrorMessage = "{0} không được để trống")]

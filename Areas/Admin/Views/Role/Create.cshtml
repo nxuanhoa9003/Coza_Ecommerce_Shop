@@ -1,0 +1,40 @@
+﻿@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin_Sub.cshtml";
+}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Home</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a asp-controller="Role" asp-action="Index">Role</a>
+        </li>
+        <li class="breadcrumb-item active">@ViewData["Title"]</li>
+    </ol>
+</nav>
+
+<hr />
+<div class="card">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Thêm vai trò mới</h5>
+            </div>
+            <div class="card-body">
+                <form asp-controller="Role" asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="mb-3">
+                        <label class="form-label">Tên vai trò</label>
+                        <input name="roleName" class="form-control" />
+                    </div>
+                    <div class="d-flex mb-3 gap-2">
+                        <a class="btn btn-danger" asp-action="Index">Danh sách</a>
+                        <input type="submit" class="btn btn-primary" value="Thêm mới" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

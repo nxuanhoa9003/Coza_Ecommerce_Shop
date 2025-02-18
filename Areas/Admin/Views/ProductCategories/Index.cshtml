@@ -1,8 +1,8 @@
-﻿@using Coza_Ecommerce_Shop.ViewModels
-@model ProductCategoryViewModel
+﻿@using Coza_Ecommerce_Shop.ViewModels.ProductCategory
+@model ProductCategoryPagingViewModel
 @{
     ViewData["Title"] = "Product Category";
-    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin_Sub.cshtml";
 }
 
 <nav aria-label="breadcrumb">
@@ -89,4 +89,4 @@
     }
 </div>
 
-<partial name="_Paging" model="Model.PagingInfo" />
+@await Component.InvokeAsync("Paging", Model.PagingInfo)

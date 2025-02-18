@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Coza_Ecommerce_Shop.Extentions;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
@@ -9,8 +10,7 @@ namespace Coza_Ecommerce_Shop.Models.Entities
     public class New : CommonAttributes
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [Display(Name = "Tiêu đề")]
         [Required(ErrorMessage = "{0} không được để trống")]
@@ -32,7 +32,8 @@ namespace Coza_Ecommerce_Shop.Models.Entities
 
         [Display(Name = "Loại danh mục")]
         [Required(ErrorMessage ="Danh mục không được để trống")]
-        public int CategoryId { get; set; }
+        [ValidateGuid(ErrorMessage = "Vui lòng chọn danh mục hợp lệ.")]
+        public Guid? CategoryId { get; set; }
         [StringLength(250)]
         public string? SeoTitile { get; set; }
         [StringLength(500)]
@@ -42,7 +43,7 @@ namespace Coza_Ecommerce_Shop.Models.Entities
 
         [Display(Name = "Trạng thái")]
         public bool IsActive {  get; set; }
-        public virtual Category? Category { get; set; }
+        public Category? Category { get; set; }
             
 
     }

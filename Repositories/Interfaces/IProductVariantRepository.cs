@@ -4,7 +4,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Interfaces
 {
     public interface IProductVariantRepository
     {
-        Task<ProductVariant?> GetByIdAsync(int? id);
+        Task<ProductVariant?> GetByIdAsync(Guid? id);
         Task<ProductVariant?> GetBySkuAsync(string? SKU);
         
         Task<IEnumerable<ProductVariant>> GetAllAsyncByProductID(Product product);

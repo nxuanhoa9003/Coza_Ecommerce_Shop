@@ -4,7 +4,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Interfaces
 {
     public interface INewRepository
     {
-        Task<New?> GetByIdAsync(int? id);
+        Task<New?> GetByIdAsync(Guid? id);
         Task<IEnumerable<New>> GetAllAsync();
         Task AddAsync(New newmodel);
 

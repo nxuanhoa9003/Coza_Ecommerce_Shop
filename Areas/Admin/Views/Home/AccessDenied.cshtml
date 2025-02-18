@@ -1,0 +1,46 @@
+﻿@{
+    ViewData["Title"] = "AccessDenied";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin_Sub.cshtml";
+}
+<style>
+    .access-denied-container {
+        text-align: center;
+        background-color: #fff;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .error-code {
+        font-size: 120px;
+        font-weight: bold;
+        color: #dc3545; /* Màu đỏ của Bootstrap */
+    }
+
+    .error-message {
+        font-size: 32px;
+        font-weight: bold;
+        color: #343a40; /* Màu chữ tối */
+        margin-bottom: 20px;
+    }
+
+    .error-description {
+        font-size: 18px;
+        color: #6c757d; /* Màu chữ nhạt */
+        margin-bottom: 30px;
+    }
+
+    .home-button {
+        font-size: 18px;
+        padding: 10px 30px;
+    }
+</style>
+
+<div class="access-denied-container">
+    <div class="error-code">403</div>
+    <div class="error-message">Truy cập bị từ chối</div>
+    <p class="error-description">
+        Xin lỗi, bạn không có quyền truy cập vào trang này. Vui lòng liên hệ quản trị viên để được hỗ trợ.
+    </p>
+    <a asp-action="Index" asp-controller="Home" asp-area="Admin" class="btn btn-danger home-button">Quay lại trang chủ</a>
+</div>

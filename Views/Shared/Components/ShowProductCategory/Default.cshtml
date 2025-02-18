@@ -1,0 +1,49 @@
+﻿@using Coza_Ecommerce_Shop.ViewModels
+@model TypeMenuViewModel
+@{
+    var isDesktop = Model.IsDesktop;
+    var categories = Model.Categories;
+}
+@if (isDesktop)
+{
+    <div class="mega-menu">
+        @foreach (var category in categories)
+        {
+            var subTypeMenu = new TypeMenuViewModel
+             {
+                  IsDesktop = true,
+                  Categories = category.CategoryChildren.ToList()
+            };
+            <div class="mega-column">
+                <a asp-controller="Product" asp-action="ListProduct" asp-route-slug="@category.Slug">
+                    <h4>@category.Title</h4>
+                </a>
+                <partial name="_CategoryPartial" model="subTypeMenu" />
+            </div>
+        }
+    </div>
+}
+else
+{
+    <ul class="sub-menu-m">
+        @foreach (var category in categories)
+        {
+            var subTypeMenu = new TypeMenuViewModel
+                    {
+                        IsDesktop = false,
+                        Categories = category.CategoryChildren.ToList()
+                    };
+            <li>
+                <a asp-controller="Product" asp-action="ListProduct" asp-route-slug="@category.Slug">
+                    @category.Title
+                </a>
+            </li>
+
+            <partial name="_CategoryPartial" model="subTypeMenu" />
+        }
+
+    </ul>
+}
+
+
+

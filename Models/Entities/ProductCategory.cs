@@ -13,8 +13,7 @@ namespace Coza_Ecommerce_Shop.Models.Entities
         }
 
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
         [StringLength(150)]
@@ -37,15 +36,12 @@ namespace Coza_Ecommerce_Shop.Models.Entities
         public ICollection<Product> Products { get; set; }
 
 
-        // Khoá ngoại đến bảng cha nếu có
         [ForeignKey("ParentCategory")]
         [DisplayName("Parent Category")]
-        public int? ParentCategoryId { get; set; }
+        public Guid? ParentCategoryId { get; set; }
 
-        // Danh mục cha (Navigation property)
         public ProductCategory? ParentCategory { get; set; }
 
-        // Danh sách các danh mục con
         public ICollection<ProductCategory>? CategoryChildren { get; set; }
 
 

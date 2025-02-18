@@ -23,7 +23,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             return await _context.News.Include(x => x.Category).ToListAsync();
         }
 
-        public async Task<New?> GetByIdAsync(int? id)
+        public async Task<New?> GetByIdAsync(Guid? id)
         {
             return await _context.News.Include(x => x.Category).FirstOrDefaultAsync(x => x.Id == id);
         }

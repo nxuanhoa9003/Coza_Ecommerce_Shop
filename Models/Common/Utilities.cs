@@ -57,11 +57,15 @@ namespace Coza_Ecommerce_Shop.Models.Common
 
         public static void DeleteImage(string? imageUrl)
         {
-            if (string.IsNullOrEmpty(imageUrl)) return; 
-            if (System.IO.File.Exists(imageUrl))
+            if (string.IsNullOrEmpty(imageUrl)) return;
+
+            string fullPath = Path.Combine(Directory.GetCurrentDirectory(), imageUrl.TrimStart('/')).Replace('/', '\\'); ;
+
+
+            if (File.Exists(fullPath))
             {
                 // Xóa tập tin
-                System.IO.File.Delete(imageUrl);
+                File.Delete(fullPath);
             }
         }
 

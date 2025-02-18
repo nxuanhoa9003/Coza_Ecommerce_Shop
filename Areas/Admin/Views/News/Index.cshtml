@@ -1,8 +1,9 @@
-﻿@using Coza_Ecommerce_Shop.ViewModels
+﻿@using Coza_Ecommerce_Shop.Models.Helper
+@using Coza_Ecommerce_Shop.ViewModels
 @model NewsViewModel
 @{
     ViewData["Title"] = "News";
-    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin_Sub.cshtml";
 }
 
 <nav aria-label="breadcrumb">
@@ -98,46 +99,15 @@
     }
 </div>
 
-<partial name="_Paging" model="Model.PagingInfo" />
+@await Component.InvokeAsync("Paging", Model.PagingInfo)
 
-@section scripts {
-    <script>
-
-        $(document).ready(function () {
-            $('#SelectAll').click(function () {
-                $('.select-item').prop('checked', this.checked);
-            });
-            $('#btnDeleteSelected').click(function () {
-                var selectedItems = $('.select-item:checked');
-                var idsToDelete = [];
-                selectedItems.each(function () {
-                    idsToDelete.push(Number($(this).val()));
-                });
-
-                if (idsToDelete?.length) {
-                    if (confirm("Bạn có muốn xoá bản tin đã chọn?")) {
-                        $.ajax({
-                            url: '@Url.Action("DeleteNewsSelect", "News")',
-                            type: 'POST',
-                            contentType: 'application/json',
-                            data: JSON.stringify(idsToDelete),
-                            success: function (rs) {
-                                if (rs.success) {
-                                    location.reload();
-                                }
-
-                            },
-                            error: function () {
-                                alert('Đã xảy ra lỗi khi xóa bài viết.');
-                            }
-                        });
-                    }
-
-                }
-
-
-            });
-        });
-    </script>
+@{
+    var urlHandle = new UrlHandle
+            {
+                Action = "DeleteNewsSelect",
+                ControllerName = "News"
+            };
 }
+
+<partial name="_DeleteChoosePartial" model="urlHandle" />
 

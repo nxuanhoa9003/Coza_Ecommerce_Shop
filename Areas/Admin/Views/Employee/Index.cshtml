@@ -1,0 +1,97 @@
+﻿@using Coza_Ecommerce_Shop.ViewModels.Account
+@model EmployeePagingViewModel
+@{
+    ViewData["Title"] = "Employees";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin_Sub.cshtml";
+    var listEmployees = Model.listEmployees;
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Home</a>
+        </li>
+        <li class="breadcrumb-item active">@ViewData["Title"]</li>
+    </ol>
+</nav>
+
+<!-- Basic Bootstrap Table -->
+<div class="card">
+    <div class="d-flex justify-content-between align-items-center">
+        <h5 class="card-header mb-0">@ViewData["Title"]</h5>
+        <div class="d-grid gap-2 me-4">
+            <a asp-action="Create" class="btn btn-primary me-2">Create</a> <!-- Thêm margin bên phải -->
+        </div>
+    </div>
+
+   
+
+    <div class="row col-md-8">
+        <!-- form search -->
+        <form class="col-12 col-md-6 px-4 pb-2 d-flex" method="get" asp-action="Index" asp-controller="Employee">
+            <div class="input-group input-group-merge">
+                <button type="submit" class="input-group-text" id="basic-addon-search31" aria-label="icon">
+                    <i class="bx bx-search"></i>
+                </button>
+                <input value="@Model.PagingInfo.SearchTerm" type="text" name="search" class="form-control" placeholder="Tìm kiếm..." aria-label="Search..." aria-describedby="basic-addon-search31">
+            </div>
+        </form>
+
+        <!-- // form search -->
+        <form class="col-12 col-md-6 px-4 pb-2 d-flex" method="get" asp-action="Index" asp-controller="Employee">
+            <div class="input-group input-group-merge">
+                <select name="filter" asp-items="ViewBag.filters" class="form-control">
+                    <option value="All">Tất cả</option>
+                </select>
+                <button type="submit" class="input-group-text" id="basic-addon-search31" aria-label="icon">
+                    <i class="bx bx-filter"></i>
+                </button>
+            </div>
+        </form>
+
+    </div>
+
+    @if (listEmployees != null && listEmployees.Any())
+    {
+        <hr class="border border-primary border-3 opacity-75">
+        <div class="table-responsive text-nowrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>@Html.DisplayNameFor(model => listEmployees[0].UserName)</th>
+                        <th>@Html.DisplayNameFor(model => listEmployees[0].FullName)</th>
+                        <th>@Html.DisplayNameFor(model => listEmployees[0].Email)</th>
+                        <th>@Html.DisplayNameFor(model => listEmployees[0].PhoneNumber)</th>
+                        <th class="text-center">Hoạt động</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="table-border-bottom-0">
+                    @foreach (var user in listEmployees)
+                    {
+                        string iconStatus = (user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow) ? "<i class='bx bx-x-circle text-danger'></i>" : "<i class='bx bx-check-circle text-success' ></i>";
+
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => user.UserName)</td>
+                            <td class="text-uppercase"><strong>@Html.DisplayFor(modelItem => user.FullName)</strong></td>
+                            <td>@Html.DisplayFor(modelItem => user.Email)</td>
+                            <td>@Html.DisplayFor(modelItem => user.PhoneNumber)</td>
+                            <td class="text-center">@Html.Raw(iconStatus)</td>
+                            <td class="text-center">
+                                <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <a asp-action="Details" asp-route-id="@user.Id" class="btn btn-sm btn-outline-info mx-2">Detail </a>
+                                <form asp-action="Delete" asp-route-id="@user.Id" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this item?');">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!--/ Basic Bootstrap Table -->
+@await Component.InvokeAsync("Paging", Model.PagingInfo)

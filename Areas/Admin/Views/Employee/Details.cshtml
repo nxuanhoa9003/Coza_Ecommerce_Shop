@@ -1,0 +1,67 @@
+﻿@model Coza_Ecommerce_Shop.ViewModels.Account.EmployeeViewModel
+@{
+    ViewData["Title"] = "Detail";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin_Sub.cshtml";
+
+    string iconStatus = Model.IsLock.Value ? "<i class='bx bx-x-circle fs-4 text-danger'></i>" : "<i class='bx bx-check-circle fs-4 text-success' ></i>";
+
+}
+
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Home</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a asp-controller="Employee" asp-action="Index">Employee</a>
+        </li>
+        <li class="breadcrumb-item active">@ViewData["Title"]</li>
+    </ol>
+</nav>
+
+<hr />
+<div class="card mb-4">
+    <div class="card-header text-center" style="background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+        <h4>Thông tin tài khoản</h4>
+    </div>
+    <div class="card-body p-4">
+        <div class="row d-flex align-items-center">
+            <!-- Ảnh đại diện (bên trái) -->
+            <div class="col-md-4 text-center">
+                <img src="@(string.IsNullOrEmpty(Model.AvatarUrl) ? "https://placehold.co/400x400" : Url.Content(Model.AvatarUrl))"
+                     class="rounded-circle img-thumbnail" width="180" height="180" alt="Ảnh đại diện">
+            </div>
+
+            <!-- Thông tin tài khoản (bên phải) -->
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Họ tên:</strong> @Model.FullName</p>
+                        <p><strong>Tên người dùng:</strong> @Model.UserName</p>
+                        <p><strong>Email:</strong> @Model.Email</p>
+                        <p><strong>Số điện thoại:</strong> @Model.PhoneNumber</p>
+                        <p><strong>Trạng thái:</strong> <span >@Html.Raw(iconStatus)</span></p>
+
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Địa chỉ:</strong> @Model.Address</p>
+                        <p><strong>Ngày sinh:</strong> @Model.DateOfBirth.ToString("dd/MM/yyyy")</p>
+                        <p><strong>Vai trò:</strong> @Model.Role</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-footer text-center">
+        <div class="d-flex gap-2">
+            <a asp-action="Index" class="btn btn-secondary">Danh sách</a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                <i class="bi bi-pencil-square"></i> Chỉnh sửa
+            </a>
+        </div>
+        
+    </div>
+</div>
+

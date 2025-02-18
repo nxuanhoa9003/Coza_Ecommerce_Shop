@@ -20,22 +20,25 @@ using System.Globalization;
 using System.Text;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Microsoft.CodeAnalysis;
-using AttributeData = Coza_Ecommerce_Shop.ViewModels.Product.AttributeData;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using X.PagedList.Extensions;
 using Coza_Ecommerce_Shop.Models.Helper;
 using Coza_Ecommerce_Shop.Repositories.Implementations;
+using NuGet.Packaging;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.AspNetCore.Server.IISIntegration;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(AuthenticationSchemes = "AdminScheme")]
     public class ProductsController : Controller
     {
         private readonly IMapper _mapper;
         private readonly IProductRepository _productRepository;
         private readonly IProductCategoryRepository _productCategoryRepository;
-        private readonly IAttributesRepository _attributesRepository;
-        private readonly IAttributesValuesRepository _attributesValuesRepository;
+
         private readonly IProductVariantRepository _productVariantRepository;
 
         private readonly ILogger<ProductsController> _logger;
@@ -47,8 +50,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
             ILogger<ProductsController> logger,
             IMapper mapper, IProductRepository productRepository,
             IProductCategoryRepository productCategoryRepository,
-            IAttributesRepository attributesRepository,
-            IAttributesValuesRepository attributesValuesRepository,
+
             IProductVariantRepository productVariantRepository,
             INotyfService notifyService
         )
@@ -57,72 +59,25 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
             _mapper = mapper;
             _productRepository = productRepository;
             _productCategoryRepository = productCategoryRepository;
-            _attributesRepository = attributesRepository;
-            _attributesValuesRepository = attributesValuesRepository;
             _productVariantRepository = productVariantRepository;
             _notifyService = notifyService;
         }
 
-        [HttpPost]
-        [Route("/GetValuesAttribute")]
-        public async Task<IActionResult> GetValuesAttribute([FromForm] int attributeId)
+
+        private string GenerateProductSKU()
         {
-
-            if (attributeId <= 0)
-            {
-                return BadRequest(new { success = false, message = "Invalid attribute ID." });
-            }
-
-            var listvalue = await _attributesValuesRepository.GetAttributeValuesByIdAttributeAsync(attributeId);
-
-            if (listvalue == null || !listvalue.Any())
-            {
-                return NotFound(new { success = false, message = "No values found for this attribute." });
-            }
-
-            var datalist = listvalue.Select(x => new
-            {
-                x.Id,
-                x.Value
-            })
-           .ToList();
-
-            return Ok(new { success = true, data = datalist });
-
+            string guidPart = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
+            return $"PRD-{guidPart}";
         }
 
-        [Route("/GetVariantDetails")]
-        [HttpGet]
-        public async Task<IActionResult> GetVariantDetails(string sku)
+        private string GenerateSKUVariant(string productCode, int variantNumber)
         {
-            
-            var variant = await _productVariantRepository.GetBySkuAsync(sku);
-
-            if (variant == null)
-            {
-                return Json(new { success = false });
-            }
-
-            var price = variant.Product.Price + (variant.AdditionalPrice == null ? 0 : variant.AdditionalPrice);
-
-            return Json(new
-            {
-                success = true,
-                data = new
-                {
-                    price = price,
-                    stock = variant.Quantity
-                }
-            });
+            return $"{productCode}-{variantNumber:D2}";
         }
-
-
-
 
         // GET: Admin/Products
         public async Task<IActionResult> Index(string search, int? page = 1)
         {
-
             var listproducts = await _productRepository.GetAllAsync();
             if (!string.IsNullOrEmpty(search))
             {
@@ -154,7 +109,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/Products/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
             {
@@ -166,120 +121,288 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
             {
                 return NotFound();
             }
+            return View(productdetail);
+        }
 
-            var listImages = productdetail?.ProductImages?.ToList();
-            var listVariants = productdetail?.Variants?.ToList();
+        private bool ValidateCreateProductViewModel(ProductViewModel productViewModel)
+        {
 
-            var productDetailViewModel = new ProductDetailViewModel
+            if (productViewModel.Variants.Any(x => x.BasePrice == null || x.Quantity == null))
             {
-                ProductInfo = _mapper.Map<ProductDetailInfoViewModel>(productdetail),
-                Images = _mapper.Map<List<ProductImageViewModel>>(listImages),
-                Variants = _mapper.Map<List<ProductVariantsViewModel>>(listVariants)
-            };
+                ModelState.AddModelError("", "Chưa nhập đủ thông tin cho các biến thể của sản phẩm.");
+                return false;
+            }
 
-            if (productDetailViewModel.Variants != null)
+            if (productViewModel.Files == null || productViewModel.Files.Count == 0)
             {
-                var listattributes = await _attributesRepository.GetAllAsync();
-                var listattributesvalues = await _attributesValuesRepository.GetAllAsync();
+                ModelState.AddModelError("Files", "Sản phẩm có ít nhất 1 ảnh.");
+                return false;
+            }
 
-                var attributeDictionary = listattributes.ToDictionary(x => x.Id, x => x.AttributeName);
-                var attributeValueDictionary = listattributesvalues.ToDictionary(x => x.Id, x => x.Value);
+            if (productViewModel.Variants == null || !productViewModel.Variants.Any())
+            {
+                ModelState.AddModelError("", "Sản phẩm có ít nhất 1 biến thể.");
+                return false;
+            }
 
-                foreach (var variant in productDetailViewModel.Variants)
+            var duplicateVariants = productViewModel.Variants
+                .GroupBy(v => new { v.Color, v.Size }) // Nhóm theo Color và Size
+                .Where(g => g.Count() > 1)
+                 .SelectMany(g => g.Skip(1))
+                .ToList();
+
+            if (duplicateVariants.Any())
+            {
+                string strerr = "";
+                foreach (var variant in duplicateVariants)
                 {
-                    if (variant.AttributesJson != null)
+                    strerr += $"Biến thể bị trùng: Màu {variant.Color}, Size {variant.Size}";
+                }
+
+                ModelState.AddModelError("", strerr);
+                return false;
+            }
+
+            if (!ProcessProductImages(productViewModel))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool ValidateEditProductViewModel(ProductViewModel productViewModel)
+        {
+            if (productViewModel.Variants.Any(x => x.Color == null || x.Size == null || x.BasePrice == null || x.Quantity == null))
+            {
+                ModelState.AddModelError("ErrorVariant", "Chưa nhập đủ thông tin cho các biến thể của sản phẩm.");
+                return false;
+            }
+
+            var duplicateVariants = productViewModel.Variants
+               .GroupBy(v => new { v.Color, v.Size })
+               .Where(g => g.Count() > 1)
+                .SelectMany(g => g.Skip(1))
+               .ToList();
+
+            if (duplicateVariants.Any())
+            {
+                string strerr = "";
+                foreach (var variant in duplicateVariants)
+                {
+                    strerr += $"Biến thể bị trùng: Màu {variant.Color}, Size {variant.Size}";
+                }
+
+                ModelState.AddModelError("ErrorVariant", strerr);
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool ProcessProductImages(ProductViewModel productViewModel)
+        {
+            foreach (var file in productViewModel.Files)
+            {
+                if (file.Length > 8 * 1024 * 1024) // 8MB
+                {
+                    ModelState.AddModelError("Files", "File không được lớn hơn 8MB.");
+                    return false;
+                }
+
+                var allowedExtensions = new[] { ".jpg", ".png", ".jpeg", ".gif" };
+                if (!allowedExtensions.Contains(Path.GetExtension(file.FileName).ToLower()))
+                {
+                    ModelState.AddModelError("Files", "Chỉ hỗ trợ định dạng JPG, PNG, JPEG, GIF.");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private void ProcessVariants(ProductViewModel productViewModel, Product product)
+        {
+            int variantNumber = 0;
+            var existingVariants = product.Variants.ToList();
+            var listsku = existingVariants.Select(x => x.SKU).ToList();
+			foreach (var item in productViewModel.Variants)
+            {
+                
+                var existingVariant = existingVariants.FirstOrDefault(v => v.Id == item.Id);
+                if (existingVariant == null)
+                {
+                    item.Id ??= Guid.NewGuid();
+                    var newsku = GenerateSKUVariant(productViewModel.ProductCode, ++variantNumber);
+					while (listsku.Contains(newsku))
+					{
+						newsku = GenerateSKUVariant(productViewModel.ProductCode, ++variantNumber);
+					}
+					item.SKU = newsku;
+					item.SKU = GenerateSKUVariant(productViewModel.ProductCode, ++variantNumber);
+                    item.ProductId = product.Id;
+                    item.BasePrice ??= 0;
+                    item.PriceSale ??= 0;
+                    item.Quantity ??= 0;
+                    item.IsActive = true;
+
+                    product.Variants.Add(new ProductVariant
                     {
-                        try
-                        {
-                            var objAttributes = JsonConvert.DeserializeObject<List<AttributeJsonToModel>>(variant.AttributesJson);
-                            if (objAttributes != null)
-                            {
-                                foreach (var item in objAttributes)
-                                {
-                                    var attributeName = attributeDictionary.ContainsKey(item.AttributeName)
-                                         ? attributeDictionary[item.AttributeName]
-                                         : null;
+                        Id = item.Id.Value,
+                        ProductId = product.Id,
+                        SKU = item.SKU,
+                        Color = item.Color,
+                        Size = item.Size,
+                        BasePrice = item.BasePrice.Value,
+                        PriceSale = item.PriceSale.Value,
+                        Quantity = item.Quantity.Value,
+                        IsActive = item.IsActive,
+                        IsDefault = item.IsDefault
+                    });
+                }
+                else
+                {
+                    // Cập nhật biến thể đã tồn tại
+                    existingVariant.SKU = existingVariant.SKU;
+                    existingVariant.Color = item.Color;
+                    existingVariant.Size = item.Size;
+                    existingVariant.BasePrice = item.BasePrice ?? 0;
+                    existingVariant.PriceSale = item.PriceSale ?? 0;
+                    existingVariant.Quantity = item.Quantity ?? 0;
+                    existingVariant.IsActive = item.IsActive;
+                    existingVariant.IsDefault = item.IsDefault;
+                }
 
-                                    var attributeValue = attributeValueDictionary.ContainsKey(item.AttributeValue)
-                                        ? attributeValueDictionary[item.AttributeValue]
-                                        : null;
+            }
+            if (product.Variants.All(x => !x.IsDefault))
+            {
+                product.Variants.First().IsDefault = true;
+            }
 
-                                    var ObjecAttributeData = new AttributeData
-                                    {
-                                        AttributeName = attributeName,
-                                        Value = attributeValue,
-                                    };
+        }
 
-                                    variant.Attributes?.Add(ObjecAttributeData);
-                                }
-                            }
-                        }
-                        catch (JsonException ex)
-                        {
+        private async Task ProcessProductImages(ProductViewModel productViewModel, Product product)
+        {
 
-                            _logger.LogError($"Lỗi parse JSON: {ex.Message}");
-                        }
-
-
+            // Xóa ảnh cũ nếu có danh sách ID ảnh cần xóa
+            if (!string.IsNullOrEmpty(productViewModel.DeletedImageIds))
+            {
+                var deletedIds = productViewModel.DeletedImageIds
+                                .Split(',')
+                                .Where(x => !string.IsNullOrWhiteSpace(x))
+                                .Select(Guid.Parse)
+                                .ToList();
+                var listproductImages = product.ProductImages.Where(x => deletedIds.Contains(x.Id)).ToList();
+                if(listproductImages.Count > 0)
+                {
+                    foreach (var item in listproductImages)
+                    {
+                        product.ProductImages.Remove(item);
                     }
+                }
+                
+            }
+
+
+
+            if (productViewModel.Files != null && productViewModel.Files.Count > 0)
+            {
+                var listProductImages = new List<ProductImage>();
+
+                foreach (var file in productViewModel.Files)
+                {
+                    if (file.Length > 0)
+                    {
+
+                        var productImage = new ProductImage
+                        {
+                            ProductId = product.Id,
+                            Image = await Utilities.UploadFileAsync(file, "Products"),
+                            IsDefault = productViewModel.Image == file.FileName
+
+                        };
+
+                        if (productViewModel.Image == file.FileName)
+                        {
+                            product.Image = productImage.Image;
+                            productViewModel.Image = productImage.Image;
+                        }
+
+
+
+                        listProductImages.Add(productImage);
+                    }
+                }
+                product.ProductImages.AddRange(listProductImages);
+            }
+
+            foreach (var image in product.ProductImages)
+            {
+                
+                if(productViewModel.Image == image.Image)
+                {
+                    image.IsDefault = true;
+                    product.Image = image.Image;
+                }
+                else
+                {
+                    image.IsDefault = false;
+
                 }
             }
 
-            return View(productDetailViewModel);
+        }
+
+
+        private void UpdateBaseInfoProduct(ProductViewModel productViewModel, Product product)
+        {
+            product.Title = productViewModel.Title;
+            product.Description = productViewModel.Description;
+            product.Detail = productViewModel.Detail;
+            product.ProductCategoryId = productViewModel.ProductCategoryId;
+            product.IsHome = productViewModel.IsHome;
+            product.IsHot = productViewModel.IsHot;
+            product.IsFeature = productViewModel.IsFeature;
+            product.IsSale = productViewModel.IsSale;
+            product.IsActive = productViewModel.IsActive;
+            product.IsDeleted = productViewModel.IsDeleted;
+            product.SeoTitile = productViewModel.SeoTitile;
+            product.SeoDescription = productViewModel.SeoDescription;
+            product.SeoKeywords = productViewModel.SeoKeywords;
+            string titleSlug = string.IsNullOrWhiteSpace(productViewModel.Title) ? "san-pham" : FilterChar.GenerateSlug(productViewModel.Title);
+            product.Slug = $"{titleSlug}-{product.Id.ToString("N")}";
+
+            product.Quantity = productViewModel.Variants.Sum(x => x.Quantity);
         }
 
         // GET: Admin/Products/Create
         public async Task<IActionResult> Create()
         {
-            var listAttributes = await _attributesRepository.GetAllAsync();
             var categories = (await _productCategoryRepository.GetAllAsync()).ToList();
             ViewData["ProductCategoryId"] = ProductCategoryHelper.BuildCategorySelectList(categories);
-            ViewData["Attributes"] = new SelectList(listAttributes, "Id", "AttributeName");
             return View();
         }
 
-
-        private async Task InitializeViewData(Product product)
+        // POST: Admin/Products/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([FromForm] ProductViewModel productViewModel)
         {
-
-
-            var listattributes = await _attributesRepository.GetAllAsync();
-            var selectedCategoryId = product?.ProductCategoryId ?? 0;
-
             var categories = (await _productCategoryRepository.GetAllAsync()).ToList();
             ViewData["ProductCategoryId"] = ProductCategoryHelper.BuildCategorySelectList(categories);
 
-            ViewData["Attributes"] = new SelectList(listattributes.ToList(), "Id", "AttributeName");
-
-            ViewData["ListAttributes"] = await _attributesRepository.GetAllAsync();
-            ViewData["ListAtrributeValues"] = await _attributesValuesRepository.GetAllAsync();
-        }
-
-
-        private string GenerateProductSKU()
-        {
-            string guidPart = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
-            return $"PRD-{guidPart}";
-        }
-
-        private string GenerateSKUVariant(string productCode, int variantNumber)
-        {
-            return $"{productCode}-{variantNumber:D2}";
-        }
+            if (!ValidateCreateProductViewModel(productViewModel))
+            {
+                return View(productViewModel);
+            }
 
 
-        // POST: Admin/Products/Create
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,ProductCode,Title,Slug,Description,Detail,Image,Files,Price,PriceSale,Quantity,IsSale,IsFeature,IsHot,ProductCategoryId,SeoTitile,SeoDescription,SeoKeywords,IsActive")] Product product, List<ProductVariant> variants)
-        {
-            await InitializeViewData(product);
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // kiểm tra mã sku tồn tại
+                    ProcessVariants(productViewModel, new Product());
+                    var product = _mapper.Map<Product>(productViewModel);
+
                     if (string.IsNullOrEmpty(product.ProductCode))
                     {
                         product.ProductCode = GenerateProductSKU();
@@ -289,86 +412,29 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                         if (await _productRepository.IsDuplicateProductCode(product))
                         {
                             ModelState.AddModelError("ProductCode", "Mã SKU của sản phẩm đã tồn tại.");
-
-                            return View(product);
+                            return View(productViewModel);
                         }
                     }
 
+                    product.Quantity = productViewModel.Variants.Sum(x => x.Quantity);
                     product.IsActive = true;
                     product.CreateDate = DateTime.Now;
                     product.ModifierDate = DateTime.Now;
+                    string titleSlug = string.IsNullOrWhiteSpace(product.Title) ? "san-pham" : FilterChar.GenerateSlug(product.Title);
+                    product.Slug = $"{titleSlug}-{product.Id.ToString("N")}";
 
-
-                    await _productRepository.AddAsync(product);
-                    product.Slug = $"{FilterChar.GenerateSlug(product.Title)}-{product.Id}";
-                    await _productRepository.UpdateAsync(product);
-
-                    if (variants != null && variants.Count > 0)
+                    if (productViewModel.Files.Any())
                     {
-                        List<ProductVariant> addedVariants = new List<ProductVariant>();
-                        int variantNumber = 0;
-                        foreach (var vr in variants)
-                        {
-                            if (!string.IsNullOrEmpty(vr.AttributesJson))
-                            {
-                                ++variantNumber;
-                                ProductVariant pv = new ProductVariant
-                                {
-                                    ProductId = product.Id,
-                                    SKU = GenerateSKUVariant(product.ProductCode, variantNumber),
-                                    Quantity = vr.Quantity,
-                                    AttributesJson = vr.AttributesJson,
-                                    AdditionalPrice = vr.AdditionalPrice,
-                                    CreateDate = DateTime.Now,
-                                    ModifierDate = DateTime.Now,
-                                    IsActive = true,
-                                };
-
-                                addedVariants.Add(pv);
-                            }
-
-                        }
-
-                        if (addedVariants.Count > 0)
-                        {
-                            await _productVariantRepository.AddARangesync(addedVariants);
-                        }
-
+                        await ProcessProductImages(productViewModel, product);
                     }
 
-
-                    if (product.Files != null && product.Files.Count > 0)
+                    var rs = await _productRepository.AddAsync(product);
+                    if (rs)
                     {
-                        var listProductImage = new List<ProductImage>();
-                        foreach (var file in product.Files)
-                        {
-                            if (file.Length > 0)
-                            {
-                                ProductImage productImage = new ProductImage();
-                                productImage.ProductId = product.Id;
-                                productImage.Image = await Utilities.UploadFileAsync(file, "Products");
-
-                                if (product.Image.Equals(file.FileName))
-                                {
-                                    product.Image = productImage.Image;
-                                    productImage.IsDefault = true;
-                                }
-                                else
-                                {
-                                    productImage.IsDefault = false;
-                                }
-
-                                listProductImage.Add(productImage);
-                            }
-                        }
-
-                        await _productRepository.AddRangePrioductImageAsync(listProductImage);
-
+                        _notifyService.Success("Thêm sản phẩm thành công");
+                        return RedirectToAction(nameof(Index));
                     }
 
-                    _notifyService.Success("Thêm sản phẩm thành công");
-
-                    return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
                 {
@@ -376,14 +442,16 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                 }
 
             }
-
+            LogModelStateErrors();
             _notifyService.Error("Thêm sản phẩm thất bại");
-            return View(product);
+            return View(productViewModel);
         }
 
         // GET: Admin/Products/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(Guid? id)
         {
+            var categories = (await _productCategoryRepository.GetAllAsync()).ToList();
+            ViewData["ProductCategoryId"] = ProductCategoryHelper.BuildCategorySelectList(categories);
 
             if (id == null)
             {
@@ -391,295 +459,80 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
             }
 
             var productdetail = await _productRepository.GetDetailProductByIdAsync(id);
-            var product = await _productRepository.GetByIdAsync(id);
 
-            if (productdetail == null || product == null)
+            if (productdetail == null)
             {
                 return NotFound();
             }
+            var ProductViewModel = _mapper.Map<ProductViewModel>(productdetail);
 
-            await InitializeViewData(product);
-
-            var listImages = productdetail?.ProductImages?.ToList();
-            var listVariants = productdetail?.Variants?.ToList();
-
-            var productDetailViewModel = new ProductDetailViewModel
-            {
-                ProductInfo = _mapper.Map<ProductDetailInfoViewModel>(productdetail),
-                Images = _mapper.Map<List<ProductImageViewModel>>(listImages),
-                Variants = _mapper.Map<List<ProductVariantsViewModel>>(listVariants)
-            };
-
-            if (productDetailViewModel.Variants != null)
-            {
-                var listattributes = await _attributesRepository.GetAllAsync();
-                var listattributesvalues = await _attributesValuesRepository.GetAllAsync();
-
-                var attributeDictionary = listattributes.ToDictionary(x => x.Id, x => x.AttributeName);
-                var attributeValueDictionary = listattributesvalues.ToDictionary(x => x.Id, x => x.Value);
-
-                foreach (var variant in productDetailViewModel.Variants)
-                {
-                    if (variant.AttributesJson != null)
-                    {
-                        try
-                        {
-                            var objAttributes = JsonConvert.DeserializeObject<List<AttributeJsonToModel>>(variant.AttributesJson);
-                            if (objAttributes != null)
-                            {
-                                foreach (var item in objAttributes)
-                                {
-                                    var attributeName = attributeDictionary.ContainsKey(item.AttributeName)
-                                         ? item.AttributeName
-                                         : (int?)null;
-
-                                    var attributeValue = attributeValueDictionary.ContainsKey(item.AttributeValue)
-                                        ? item.AttributeValue
-                                        : (int?)null;
-
-                                    var ObjecAttributeData = new AttributeData
-                                    {
-                                        AttributeID = attributeName,
-                                        AttributeIDValue = attributeValue,
-                                    };
-
-                                    variant.Attributes?.Add(ObjecAttributeData);
-                                }
-                            }
-                        }
-                        catch (JsonException ex)
-                        {
-
-                            _logger.LogError($"Lỗi parse JSON: {ex.Message}");
-                        }
-
-
-                    }
-                }
-            }
-
-            return View(productDetailViewModel);
+            return View(ProductViewModel);
         }
 
         // POST: Admin/Products/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int? id, ProductDetailViewModel productDetailViewModel)
+        public async Task<IActionResult> Edit(Guid? id, ProductViewModel productDetailViewModel)
         {
-            var productdetailOld = await _productRepository.GetDetailProductByIdAsync(id);
+            var categories = (await _productCategoryRepository.GetAllAsync()).ToList();
+            ViewData["ProductCategoryId"] = ProductCategoryHelper.BuildCategorySelectList(categories);
+            var productOld = await _productRepository.GetDetailProductByIdAsync(id);
 
-            if (productdetailOld == null)
+            if (productOld == null)
             {
                 return NotFound();
             }
-            if (id == null || id != productDetailViewModel.ProductInfo.Id || productDetailViewModel == null || productdetailOld == null)
+            if (id == null || id != productDetailViewModel.Id || productDetailViewModel == null || productOld == null)
             {
                 return NotFound();
             }
 
-            List<ProductVariantsViewModel> listvariants = new List<ProductVariantsViewModel>();
-            if (productDetailViewModel.Variants != null && productDetailViewModel.Variants.Count > 0)
+
+            productDetailViewModel.ProductCode = productOld.ProductCode;
+
+            if (!ValidateEditProductViewModel(productDetailViewModel))
             {
-                var listattributes = await _attributesRepository.GetAllAsync();
-                var listattributesvalues = await _attributesValuesRepository.GetAllAsync();
-
-                var attributeDictionary = listattributes.ToDictionary(x => x.Id, x => x.AttributeName);
-                var attributeValueDictionary = listattributesvalues.ToDictionary(x => x.Id, x => x.Value);
-
-
-                foreach (var variant in productDetailViewModel.Variants)
-                {
-                    variant.ProductId = id.Value;
-
-                    if (string.IsNullOrWhiteSpace(variant.AttributesJson) || variant.AttributesJson.Trim() == "[]")
-                    {
-
-                        _logger.LogError($"Variant ID: {variant.Id} có AttributesJson rỗng hoặc không hợp lệ.");
-                        continue;
-                    }
-
-                    if (variant.AttributesJson != null)
-                    {
-                        try
-                        {
-                            var objAttributes = JsonConvert.DeserializeObject<List<AttributeJsonToModel>>(variant.AttributesJson);
-                            if (objAttributes != null)
-                            {
-                                foreach (var item in objAttributes)
-                                {
-                                    var attributeName = attributeDictionary.ContainsKey(item.AttributeName)
-                                         ? item.AttributeName
-                                         : (int?)null;
-
-                                    var attributeValue = attributeValueDictionary.ContainsKey(item.AttributeValue)
-                                        ? item.AttributeValue
-                                        : (int?)null;
-
-
-                                    variant.Attributes?.Add(new AttributeData
-                                    {
-                                        AttributeID = attributeName,
-                                        AttributeIDValue = attributeValue,
-                                    });
-                                }
-                            }
-                        }
-                        catch (JsonException ex)
-                        {
-
-                            _logger.LogError($"Lỗi parse JSON: {ex.Message}");
-                        }
-                    }
-
-                    listvariants.Add(variant);
-                }
+                return View(productDetailViewModel);
             }
 
-            var product = _mapper.Map<Product>(productDetailViewModel.ProductInfo);
-            var listvariantsmodel = _mapper.Map<List<ProductVariant>>(listvariants);
+            var deletedIds = productDetailViewModel?.DeletedImageIds?.Split(',')
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Select(Guid.Parse).ToList();
 
-            productDetailViewModel.Images = _mapper.Map<List<ProductImageViewModel>>(productdetailOld.ProductImages);
-
-
-            string? DeletedImageIds = productDetailViewModel.ProductInfo.DeletedImageIds;
-            List<IFormFile> files = productDetailViewModel.ProductInfo.Files;
-
-            await InitializeViewData(product);
-
-            if (product.ProductCode != productdetailOld?.ProductCode)
+            if (deletedIds != null && deletedIds.Count == productOld.ProductImages.Count)
             {
-                product.ProductCode = productdetailOld?.ProductCode;
+                ModelState.AddModelError("Image", "Sản phẩm phải có ít nhất 1 ảnh.");
+                return View(productDetailViewModel);
             }
 
-            if (ModelState.IsValid)
+
+            try
             {
-                try
-                {
-                    // thông tin cơ bản
-                    product.Slug = $"{FilterChar.GenerateSlug(product.Title)}-{product.Id}";
-                    product.ModifierDate = DateTime.Now;
-                    await _productRepository.UpdateAsync(product);
+                UpdateBaseInfoProduct(productDetailViewModel, productOld);
 
-                    // ảnh
+                await ProcessProductImages(productDetailViewModel, productOld);
+               
+                ProcessVariants(productDetailViewModel, productOld);
 
-                    var currentImages = await _productRepository.GetProductImagesByIdProduct(product.Id);
-                    if (DeletedImageIds != null)
-                    {
-                        List<string> listdeleteidimages = DeletedImageIds.Trim(',').Split(',').ToList();
 
-                        List<int> listDeleteIdImagesInt = listdeleteidimages
-                        .Where(id => int.TryParse(id, out _))
-                        .Select(int.Parse)
-                        .ToList();
-
-                        if (listDeleteIdImagesInt.Count == productdetailOld?.ProductImages?.Count && product.Files.Count == 0)
-                        {
-                            ModelState.AddModelError("ProductInfo.Image", "Sản phẩm phải có ít nhất một ảnh, không thể xoá hết");
-                            return View(productDetailViewModel);
-                        }
-
-                        // xoá ảnh
-                        if (listDeleteIdImagesInt.Count > 0)
-                        {
-                            await _productRepository.RemoveRangeProductImageByIDAsync(listDeleteIdImagesInt);
-                        }
-
-                    }
-
-                    if (files != null && files.Count > 0)
-                    {
-                        var listProductImage = new List<ProductImage>();
-                        foreach (var file in files)
-                        {
-                            if (file.Length > 0)
-                            {
-                                ProductImage productImage = new ProductImage();
-                                productImage.ProductId = product.Id;
-                                productImage.Image = await Utilities.UploadFileAsync(file, "Products");
-
-                                if (product.Image != null && product.Image.Equals(file.FileName))
-                                {
-                                    product.Image = productImage.Image;
-                                    productImage.IsDefault = true;
-                                }
-                                else
-                                {
-                                    productImage.IsDefault = false;
-                                }
-
-                                listProductImage.Add(productImage);
-                            }
-                        }
-
-                        await _productRepository.AddRangePrioductImageAsync(listProductImage);
-
-                    }
-
-                    foreach (var image in currentImages)
-                    {
-                        image.IsDefault = product.Image == image.Image;
-                    }
-                    await _productRepository.UpdateRangeImagesAsync(currentImages);
-
-                    // biến thể
-                    if (listvariantsmodel.Any())
-                    {
-                        int currindex = 0;
-                        foreach (var vraint in listvariantsmodel)
-                        {
-                            ++currindex;
-                            var existingVariant = await _productVariantRepository.GetBySkuAsync(vraint.SKU);
-
-                            if (existingVariant == null)
-                            {
-                                vraint.SKU = GenerateSKUVariant(productdetailOld.ProductCode, currindex);
-                                vraint.ProductId = product.Id;
-                                vraint.IsActive = true;
-                                await _productVariantRepository.AddAsync(vraint);
-                            }
-                            else
-                            {
-                                existingVariant.Quantity = vraint.Quantity;
-                                existingVariant.AdditionalPrice = vraint.AdditionalPrice;
-                                existingVariant.AttributesJson = vraint.AttributesJson;
-                                existingVariant.IsActive = vraint.IsActive;
-                                await _productVariantRepository.UpdateAsync(existingVariant);
-                            }
-                        }
-                    }
-                    _notifyService.Success("Cập nhật sản phẩm thành công");
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!await _productRepository.ProductExists(product.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                await _productRepository.UpdateAsync(productOld);
+                _notifyService.Success("Cập nhật sản phẩm thành công");
                 return RedirectToAction(nameof(Index));
             }
-            else
+            catch (Exception ex)
             {
-                foreach (var state in ModelState)
-                {
-                    Console.WriteLine($"Key: {state.Key}");
-                    foreach (var error in state.Value.Errors)
-                    {
-                        Console.WriteLine($"Error: {error.ErrorMessage}");
-                    }
-                }
+                ModelState.AddModelError(string.Empty, ex.Message);
             }
 
+
+            _notifyService.Error("Cập nhật sản phẩm thất bại");
             return View(productDetailViewModel);
 
         }
 
         // GET: Admin/Products/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        [Authorize(Policy = "DeleteProduct")]
+        public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
@@ -696,19 +549,30 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // POST: Admin/Products/Delete/5
+        [Authorize(Policy = "DeleteProduct")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var product = await _productRepository.GetDetailProductByIdAsync(id);
             if (product != null)
             {
                 await _productRepository.RemoveAsync(product);
             }
-
             return RedirectToAction(nameof(Index));
         }
 
+        private void LogModelStateErrors()
+        {
+            foreach (var state in ModelState)
+            {
+                Console.WriteLine($"Key: {state.Key}");
+                foreach (var error in state.Value.Errors)
+                {
+                    Console.WriteLine($"Error: {error.ErrorMessage}");
+                }
+            }
+        }
 
     }
 }

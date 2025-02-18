@@ -1,10 +1,12 @@
-using AspNetCoreHero.ToastNotification;
+﻿using AspNetCoreHero.ToastNotification;
 using AspNetCoreHero.ToastNotification.Extensions;
 using Coza_Ecommerce_Shop.Data;
+using Coza_Ecommerce_Shop.Extentions;
 using Coza_Ecommerce_Shop.Mappings;
 using Coza_Ecommerce_Shop.Models;
 using Coza_Ecommerce_Shop.Repositories.Implementations;
 using Coza_Ecommerce_Shop.Repositories.Interfaces;
+using Coza_Ecommerce_Shop.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -28,24 +30,88 @@ namespace Coza_Ecommerce_Shop
                 option.UseSqlServer(strconnect);
             });
 
+
+            
             // Add services Identity
             builder.Services.AddIdentity<AppUser, IdentityRole>()
                     .AddEntityFrameworkStores<AppDbContext>()
                     .AddDefaultTokenProviders();
 
-            builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
-            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-            builder.Services.AddScoped<INewRepository, NewRepository>();
-            builder.Services.AddScoped<IPostRepository, PostRepository>();
-            builder.Services.AddScoped<IAttributesRepository, AttributesRepository>();
-            builder.Services.AddScoped<IAttributesValuesRepository, AttributesValuesRepository>();
-            builder.Services.AddScoped<IProductRepository, ProductRepository>();
-            builder.Services.AddScoped<IProductVariantRepository, ProductVariantRepository>();
+            // Truy cập IdentityOptions
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                // Thiết lập về Password
+                options.Password.RequireDigit = true; // Không bắt phải có số
+                options.Password.RequireLowercase = true; // Không bắt phải có chữ thường
+                options.Password.RequireNonAlphanumeric = true; // Không bắt ký tự đặc biệt
+                options.Password.RequireUppercase = true; // Không bắt buộc chữ in
+                options.Password.RequiredLength = 6; // Số ký tự tối thiểu của password
+                options.Password.RequiredUniqueChars = 1; // Số ký tự riêng biệt
+
+                // Cấu hình Lockout - khóa user
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5); // Khóa 5 phút
+                options.Lockout.MaxFailedAccessAttempts = 3; // Thất bại 3 lần thì khóa
+                options.Lockout.AllowedForNewUsers = true;
+
+                // Cấu hình về User.
+                options.User.AllowedUserNameCharacters = // các ký tự đặt tên user
+                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+                options.User.RequireUniqueEmail = true;  // Email là duy nhất
 
 
-            builder.Services.AddNotyf(config => { config.DurationInSeconds = 5; config.IsDismissable = true; config.Position = NotyfPosition.TopRight; });
+                // Cấu hình đăng nhập.
+                options.SignIn.RequireConfirmedEmail = true;            // Cấu hình xác thực địa chỉ email (email phải tồn tại)
+                options.SignIn.RequireConfirmedPhoneNumber = false;     // Xác thực số điện thoại
+                options.SignIn.RequireConfirmedAccount = true;
 
-            
+            });
+
+
+            builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+            {
+                options.TokenLifespan = TimeSpan.FromMinutes(1); // Token chỉ có hiệu lực trong 5 phút
+            });
+
+
+
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = "CustomerScheme"; // Scheme mặc định
+            })
+            .AddCookie("CustomerScheme", options =>
+            {
+                options.LoginPath = "/login/";
+                options.LogoutPath = "/logout/";
+                options.AccessDeniedPath = "/access-denied";
+            })
+            .AddCookie("AdminScheme", options =>
+            {
+                options.LoginPath = "/Admin/Account/Login";
+                options.LogoutPath = "/Admin/logout/";
+                options.AccessDeniedPath = "/Admin/AccessDenied";
+            });
+
+            // Add services MailSettings
+            builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+
+            // add authorizationPolicies
+            builder.Services.AddAuthorization(options =>
+            {
+                AuthorizationPolicies.AddCustomPolicies(options);
+            });
+
+            // Register Services
+            builder.Services.AddApplicationServices();
+
+            builder.Services.AddNotyf(config =>
+            {
+                config.DurationInSeconds = 5;
+                config.IsDismissable = true;
+                config.Position = NotyfPosition.TopRight;
+            });
+
+
 
             var app = builder.Build();
 

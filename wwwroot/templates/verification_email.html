@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+            font-family: Arial, sans-serif;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
+        }
+
+        .header {
+            background-color: #717fe0;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 20px;
+        }
+
+        .content {
+            padding: 15px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .code {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            color: gray;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">Xác thực tài khoản</div>
+        <div class="content">
+            <p>Xin chào {USERNAME},</p>
+            <p>Đây là mã xác thực của bạn:</p>
+            <div class='code'>{CODE}</div>
+            <p>Vui lòng nhập mã này để hoàn tất xác thực. Mã sẽ hết hạn sau 60s.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -24,7 +24,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             return await _context.Categories.ToListAsync();
         }
 
-        public async Task<Category?> GetByIdAsync(int? id)
+        public async Task<Category?> GetByIdAsync(Guid? id)
         {
             return await _context.Categories.FirstOrDefaultAsync(x => x.Id == id);
         }

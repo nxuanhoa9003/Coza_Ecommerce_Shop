@@ -11,5 +11,10 @@ namespace Coza_Ecommerce_Shop.ViewModels
 
         // other
         public string? SearchTerm { get; set; }
+        public string? SortOrder { get; set; }
+        public string? PriceRange { get; set; }
+        public string? Slug { get; set; }
+        public int? PriceMin { get; set; }
+        public int? PriceMax { get; set; }
     }
 }

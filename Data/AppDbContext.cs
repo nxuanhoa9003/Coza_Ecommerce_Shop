@@ -60,10 +60,7 @@ namespace Coza_Ecommerce_Shop.Data
         public DbSet<Subscribe> Subscribes { get; set; }
         public DbSet<SettingConfiguration> SettingConfigurations { get; set; }
         public DbSet<ProductVariant> ProductVariants { get; set; }
-        public DbSet<Attributes> Attributes { get; set; }
-        public DbSet<AttributeValue> AttributeValues { get; set; }
+        public DbSet<ClaimsCustom> Claims { get; set; }
         
-      
-
     }
 }

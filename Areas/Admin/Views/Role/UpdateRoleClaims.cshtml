@@ -1,0 +1,83 @@
+﻿@using Coza_Ecommerce_Shop.ViewModels.Role
+@model RoleClaimsCustomViewModel
+@{
+    ViewData["Title"] = "Add Claims";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin_Sub.cshtml";
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Home</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a asp-controller="Role" asp-action="Index">Role</a>
+        </li>
+        <li class="breadcrumb-item active">@ViewData["Title"]</li>
+    </ol>
+</nav>
+   
+<hr />
+<div class="card">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Claims của Role: @Model.RoleName</h5>
+            </div>
+            <div class="card-body">
+                <form asp-controller="Role" asp-action="UpdateRoleClaims" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+
+                    <input type="hidden" name="Id" value="@Model.Id" />
+                    
+                    <div class="col-md-6 px-4 py-2">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input"
+                                   id="choosee_all_claims"
+                                   
+                             />
+                            <label for="choosee_all_claims" class="form-check-label">
+                                Chọn tất cả
+                            </label>
+                        </div>
+                    </div>
+                    <div class="p-4 row">
+                        @foreach (var group in Model.ClaimGroups) // Duyệt qua từng nhóm
+                        {
+                            <div class="col-12 mt-2">
+                                <h5>@group.TypeClaim</h5> <!-- Hiển thị tên nhóm -->
+                            </div>
+
+                            @for (int i = 0; i < group.Claims.Count; i++) // Duyệt qua từng claim trong nhóm
+                            {
+                                <div class="col-md-4">
+                                    <!-- Chia làm 3 cột (có thể chỉnh số cột) -->
+                                    <div class="form-check my-2">
+                                        <input type="checkbox" class="form-check-input input_checkbox_claims"
+                                               id="claim_@i"
+                                               name="SelectedClaims"
+                                               value="@group.Claims[i].ClaimValue"
+                                        @(group.Claims[i].IsSelected ? "checked" : "") />
+                                                <label for="claim_@i" class="form-check-label">
+                                            @group.Claims[i].ClaimName
+                                        </label>
+                                    </div>
+                                </div>
+
+                                @if ((i + 1) % 3 == 0)
+                                {
+                                    <div class="w-100"></div>
+                                } <!-- Xuống dòng sau mỗi 3 items -->
+                            }
+                        }
+                    </div>
+                    
+                    <input type="submit" class="btn btn-primary" value="Cập nhật" />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+

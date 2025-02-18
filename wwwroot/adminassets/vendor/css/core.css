@@ -8268,8 +8268,9 @@ button:focus {
 .form-label,
 .col-form-label {
     font-size: 0.75rem;
-    text-transform: uppercase;
+    text-transform: inherit;
     letter-spacing: inherit;
+    white-space: nowrap
 }
 
 .form-label-lg {
@@ -8369,7 +8370,8 @@ button:focus {
 }
 
     .input-group-text i {
-        font-size: 0.9375rem;
+        /*        font-size: 0.9375rem;*/
+        font-size: 1.25rem;
     }
 
 .input-group-lg > .input-group-text i {

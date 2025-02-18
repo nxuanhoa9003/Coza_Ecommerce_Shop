@@ -23,41 +23,40 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
 
         public async Task<IEnumerable<ProductCategory>> GetAllAsync()
         {
-            return await _context.ProductCategories.Include(x => x.ParentCategory).Where(c => !c.IsDeleted).ToListAsync();
+            return await _context.ProductCategories
+                .Include(x => x.ParentCategory)
+                .Include(x => x.CategoryChildren)
+                .AsNoTracking().Where(c => !c.IsDeleted).ToListAsync();
         }
 
 
-        public async Task<IEnumerable<ProductCategory>> GetAllExceptIdAsync(int? id)
+        public async Task<IEnumerable<ProductCategory>> GetAllExceptIdAsync(Guid? id)
         {
             return await _context.ProductCategories.Where(x => x.Id != id && !x.IsDeleted).ToListAsync();
         }
 
-        public async Task<IEnumerable<ProductCategoryDTO>> GetAllProductCategoryFeatured()
+		public async Task<IEnumerable<ProductCategory>> GetByFilterSlugAsNoTrackingAsync(string slug)
         {
-            return await _context.ProductCategories.Where(x => x.IsFeatured).Select(x => new ProductCategoryDTO
-            {
-                Id = x.Id,
-                Name = x.Title
-            }).ToListAsync();
-        }
+			return await _context.ProductCategories.Where(x => x.Slug == slug).ToListAsync();
+		}
 
-        public async Task<IEnumerable<ProductCategory>> GetByFilterSlugAsNoTrackingAsync(string slug)
-        {
-            return await _context.ProductCategories.AsNoTracking().Where(x => x.Slug == slug).ToListAsync();
-        }
-
-        public async Task<ProductCategory?> GetByIdAsNoTrackingAsync(int? id)
+        public async Task<ProductCategory?> GetByIdAsNoTrackingAsync(Guid? id)
         {
             return await _context.ProductCategories.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
 
         }
 
-        public async Task<ProductCategory?> GetByIdAsync(int? id)
+        public async Task<ProductCategory?> GetByIdAsync(Guid? id)
         {
             return await _context.ProductCategories.Include(x => x.ParentCategory).FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<bool> IsCategoryExistsAsync(ProductCategory pnew, ProductCategory? pold = null)
+		public async Task<ProductCategory?> GetBySlugAsNoTrackingAsync(string slug)
+		{
+			return await _context.ProductCategories.FirstOrDefaultAsync(x => x.Slug == slug);
+		}
+
+		public async Task<bool> IsCategoryExistsAsync(ProductCategory pnew, ProductCategory? pold = null)
         {
             if (pold != null)
             {

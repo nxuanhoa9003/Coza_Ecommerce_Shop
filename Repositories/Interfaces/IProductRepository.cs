@@ -6,25 +6,31 @@ namespace Coza_Ecommerce_Shop.Repositories.Interfaces
 {
     public interface IProductRepository
     {
-        Task<Product?> GetByIdAsync(int? id);
-        Task<Product?> GetDetailProductByIdAsync(int? id);
+        Task<Product?> GetByIdAsync(Guid? id);
+        Task<Product?> GetDetailProductByIdAsync(Guid? id);
+        Task<Product?> GetDetailProductBySlugAsync(string slug);
+        Task<Product?> GetDetailProductBySKUAsync(string sku);
         Task<IEnumerable<Product>> GetAllAsync();
-
+        Task<IEnumerable<Product>> GetProductsRelated(Guid? CategoryId, string sku);
         Task<IEnumerable<Product>> GetPagedProductsAsync(int page, int pageSize);
-        Task<ProductOverViewVM> GetProductByIdProductCategoryAsync(IEnumerable<ProductCategoryDTO> productCategoryDTOs, int page, int pageSize);
+        Task<IEnumerable<Product>> GetProductByIdProductCategoryAsync(HashSet<Guid> allCategoryIds);
 
-        Task AddAsync(Product productmodel);
+        Task<bool> AddAsync(Product productmodel);
         Task AddRangePrioductImageAsync(ICollection<ProductImage> listproductImages);
 
         Task RemoveAsync(Product productmodel);
-        Task RemoveRangeAsync(IEnumerable<Product> listproducts);
-        Task UpdateAsync(Product productmodel);
-        Task <bool> IsDuplicateProductCode(Product productmodel);
-        Task <bool> ProductExists(int id);
-        Task <IEnumerable<string?>> CheckDuplicateVariantSKUs(ICollection<ProductVariant> variants);
-        Task RemoveRangeProductImageByIDAsync(IEnumerable<int> imageIds);
 
-        Task<IEnumerable<ProductImage>> GetProductImagesByIdProduct(int? id);
+        Task UpdateAsync(Product productmodel);
+        Task<bool> IsDuplicateProductCode(Product productmodel);
+
+        Task<IEnumerable<string?>> CheckDuplicateVariantSKUs(ICollection<ProductVariant> variants);
+        Task RemoveRangeProductImageByIDAsync(IEnumerable<Guid> imageIds);
+
+        Task<IEnumerable<ProductImage>> GetProductImagesByIdProduct(Guid? id);
         Task UpdateRangeImagesAsync(IEnumerable<ProductImage> listProductsImages);
+
+        Task<IEnumerable<ProductVariant>> GetAllVariantsOfProduct(Guid? id);
+
+        Task<IEnumerable<Product>> GetProductsHot();
     }
 }

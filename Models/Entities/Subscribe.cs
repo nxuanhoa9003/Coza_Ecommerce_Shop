@@ -7,15 +7,13 @@ namespace Coza_Ecommerce_Shop.Models.Entities
     public class Subscribe
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Display(Name = "Email")]
         [Required(ErrorMessage = "{0} không được để trống")]
         [EmailAddress(ErrorMessage = "Sai định dạng email")]
         [StringLength(150, ErrorMessage = "Không được vượt quá 150 ký tự")]
-        public string Email { get; set; }
-        
+        public string Email { get; set; }   
         public DateTime CreateDate { get; set; }
     }
 }

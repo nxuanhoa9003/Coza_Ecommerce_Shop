@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "Create";
-    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin_Sub.cshtml";
 }
 
 <nav aria-label="breadcrumb">
@@ -55,8 +55,9 @@
                     <div class="mb-3">
                         <label asp-for="CategoryId" class="form-label"></label>
                         <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryId">
-                            <option>Chọn danh mục</option>
+                            <option value="">Chọn danh mục</option>
                         </select>
+                        <span asp-validation-for="CategoryId" class="text-danger"></span>
                     </div>
                     <div class="mb-3">
                         <label asp-for="SeoTitile" class="form-label"></label>

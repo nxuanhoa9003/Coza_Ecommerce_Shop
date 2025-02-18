@@ -1,0 +1,52 @@
+﻿@model IEnumerable<Coza_Ecommerce_Shop.ViewModels.Role.ClaimCustomGroup>
+@{
+    ViewData["Title"] = "Claims";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin_Sub.cshtml";
+}
+
+<!-- Basic Bootstrap Table -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Home</a>
+        </li>
+        <li class="breadcrumb-item active">@ViewData["Title"]</li>
+    </ol>
+</nav>
+<!-- Basic Bootstrap Table -->
+<div class="card">
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive text-nowrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Tên quyền</th>
+                        <th>Mô tả</th>
+                        <th>Nhóm quyền</th>
+                    </tr>
+                </thead>
+                <tbody class="table-border-bottom-0">
+                    @foreach (var typeclaim in Model)
+                    {
+                        <tr>
+                            <td colspan="3"><p class="badge bg-info mb-0"><strong>@typeclaim.TypeClaim</strong></p></td>
+                            @foreach (var claim in typeclaim.Claims)
+                            {
+                            <tr>
+                                <td>@claim.Name</td>
+                                <td>@claim.Description</td>
+                                <td>@claim.TypeClaim</td>
+                            </tr>
+                            }
+                        </tr>
+
+
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+</div>

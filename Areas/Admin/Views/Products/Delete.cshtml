@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "Delete";
-    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin_Sub.cshtml";
 }
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -54,18 +54,6 @@
             <dd class="col-sm-10">
                 <img src="@(string.IsNullOrEmpty(Model.Image) ? "https://placehold.co/400x400" : Model.Image)" style="object-fit: cover; width: 300px; height: 300px;" class="img-thumbnail" />
 
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Price)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Price)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.PriceSale)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.PriceSale)
             </dd>
             <dt class="col-sm-2">
                 @Html.DisplayNameFor(model => model.Quantity)

@@ -1,13 +1,10 @@
 ﻿@using System.Globalization
-@model Coza_Ecommerce_Shop.ViewModels.Product.ProductDetailViewModel;
+@model Coza_Ecommerce_Shop.Models.Entities.Product
 
 @{
     ViewData["Title"] = "Chi tiết sản phẩm";
-    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin_Sub.cshtml";
 
-    var ProductDetailInfo = Model.ProductInfo;
-    var ProductImages = Model.Images;
-    var ProductVariants = Model.Variants;
 }
 
 <div class="pb-5">
@@ -26,7 +23,7 @@
             <!-- Ảnh sản phẩm chính -->
             <div class="col-lg-5">
                 <div class="p-4">
-                    <img src="@(string.IsNullOrEmpty(ProductDetailInfo.Image) ? "https://placehold.co/400x400" : ProductDetailInfo.Image)"
+                    <img src="@(string.IsNullOrEmpty(Model.Image) ? "https://placehold.co/400x400" : Model.Image)"
                          alt="Ảnh sản phẩm"
                          class="img-fluid rounded shadow-sm mb-3">
                 </div>
@@ -35,23 +32,23 @@
             <!-- Chi tiết sản phẩm -->
             <div class="col-lg-7">
                 <div class="card-body">
-                    <h2 class="card-title fw-bold text-dark">@ProductDetailInfo.Title</h2>
-                    <p class="text-muted small">@ProductDetailInfo.Description</p>
+                    <h2 class="card-title fw-bold text-dark">@Model.Title</h2>
+                    <p class="text-muted small">@Model.Description</p>
 
                     <dl class="row mt-4">
                         <dt class="col-sm-4">Mã sản phẩm:</dt>
-                        <dd class="col-sm-8 text-secondary">@ProductDetailInfo.ProductCode</dd>
+                        <dd class="col-sm-8 text-secondary">@Model.ProductCode</dd>
 
                         <dt class="col-sm-4">Danh mục:</dt>
-                        <dd class="col-sm-8 text-secondary">@ProductDetailInfo.CategoryName</dd>
+                        <dd class="col-sm-8 text-secondary">@Model.ProductCategory?.Title</dd>
 
                         <dt class="col-sm-4">Số lượng tổng:</dt>
-                        <dd class="col-sm-8 text-secondary">@ProductDetailInfo.Quantity</dd>
+                        <dd class="col-sm-8 text-secondary">@Model.Quantity</dd>
 
 
                         <dt class="col-sm-4">Trạng thái:</dt>
                         <dd class="col-sm-8">
-                            @if (ProductDetailInfo.IsActive)
+                            @if (Model.IsActive)
                             {
                                 <span class="badge bg-success">Đang hiển thị</span>
                             }
@@ -60,31 +57,20 @@
                                 <span class="badge bg-danger">Đã ẩn</span>
                             }
 
-                            @if(ProductDetailInfo.IsHot)
+                            @if (Model.IsHot)
                             {
                                 <span class="badge bg-danger">Hot</span>
                             }
-                            @if (ProductDetailInfo.IsFeature)
+                            @if (Model.IsFeature)
                             {
                                 <span class="badge bg-warning">Feature</span>
                             }
                         </dd>
                     </dl>
 
-                    <div class="mt-4">
-                        @if (ProductDetailInfo.PriceSale != null && ProductDetailInfo.PriceSale > 0)
-                        {
-                            <h3 class="text-success fw-bold mb-1">@(ProductDetailInfo.PriceSale?.ToString("#,0", new CultureInfo("vi-VN")) + "đ")</h3>
-                            <p class="text-muted text-decoration-line-through">@(ProductDetailInfo.Price?.ToString("#,0", new CultureInfo("vi-VN")) + "đ")</p>
-                        }else
-                        {
-                            <h3 class="text-success fw-bold mb-1">@(ProductDetailInfo.Price?.ToString("#,0", new CultureInfo("vi-VN")) + "đ")</h3>
-                        }
-
-                    </div>
-
+                    
                     <div class="mt-4 d-flex">
-                        <a asp-action="Edit" asp-route-id="@ProductDetailInfo?.Id" class="btn btn-warning me-2 px-4 rounded-pill">
+                        <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning me-2 px-4 rounded-pill">
                             <i class="fa fa-edit"></i> Edit
                         </a>
                         <a asp-action="Index" class="btn btn-outline-secondary px-4 rounded-pill">
@@ -96,86 +82,39 @@
         </div>
     </div>
 
-    <!-- Ảnh chi tiết -->
-    <div class="card shadow border-0 mb-5">
-        <div class="card-header bg-light rounded-pill">
-            <h4 class="mb-0 text-dark fw-bold">Hình ảnh sản phẩm</h4>
-        </div>
-        <div class="card-body">
-            <div class="row g-3">
-                @if (ProductImages.Any())
-                {
-                    @foreach (var img in ProductImages)
-                    {
-                        <div class="col-md-3">
-                            <img src="@img.Image"
-                                 alt="Ảnh sản phẩm"
-                                 class="img-fluid rounded shadow-sm"
-                                 style="object-fit: cover; height: 300px; width: 100%">
-                        </div>
-                    }
-                }
-                else
-                {
-                    <p class="text-muted">Chưa có hình ảnh nào được tải lên.</p>
-                }
-            </div>
-        </div>
-    </div>
-
-    <!-- chi tiết sản phẩm (detail) -->
-    <div class="card shadow border-0 mb-5">
-        <div class="card-header bg-light rounded-pill">
-            <h4 class="mb-0 text-dark fw-bold">Mô tả sản phẩm</h4>
-        </div>
-        <div class="card-body">
-            <div class="row p-3">
-                @Html.Raw(ProductDetailInfo?.Detail)
-            </div>
-        </div>
-    </div>
     <!-- Biến thể sản phẩm -->
     <div class="card shadow border-0 mb-5">
         <div class="card-header bg-light rounded-pill">
             <h4 class="mb-0 text-dark fw-bold">Biến thể sản phẩm</h4>
         </div>
         <div class="card-body">
-            @if (ProductVariants.Any())
+            @if (Model.Variants.Any())
             {
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th>SKU</th>
+                                <th>Color</th>
+                                <th>Size</th>
                                 <th>Số lượng</th>
-                                <th>Giá bổ sung</th>
-                                <th>Thuộc tính</th>
+                                <th>Giá gốc</th>
+                                <th>Giá khuyến mãi</th>
                                 <th>Trạng thái</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var variant in ProductVariants)
+                            @foreach (var variant in Model.Variants)
                             {
-                                var additionalPrice = (variant.AdditionalPrice != null ? variant.AdditionalPrice?.ToString("#,0", new CultureInfo("vi-VN")) : "0") + "đ";
+                                var BasePrice = (variant.BasePrice != null ? variant.BasePrice?.ToString("#,0", new CultureInfo("vi-VN")) : "0") + "đ";
+                                var PriceSale = (variant.PriceSale != null ? variant.PriceSale?.ToString("#,0", new CultureInfo("vi-VN")) : "0") + "đ";
                                 <tr>
                                     <td>@variant.SKU</td>
+                                    <td>@variant.Color</td>
+                                    <td>@variant.Size</td>
                                     <td>@variant.Quantity</td>
-                                    <td>@additionalPrice</td>
-                                    <td>
-                                        @if (variant.Attributes != null)
-                                        {
-                                            <ul class="list-unstyled mb-0">
-                                                @foreach (var attr in variant.Attributes)
-                                                {
-                                                    <li><strong>@attr.AttributeName:</strong> @attr.Value</li>
-                                                }
-                                            </ul>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">Không có thuộc tính</span>
-                                        }
-                                    </td>
+                                    <td>@BasePrice</td>
+                                    <td>@PriceSale</td>
                                     <td>
                                         @if (variant.IsActive)
                                         {
@@ -200,6 +139,47 @@
         </div>
     </div>
 
+
+
+    <!-- Ảnh chi tiết -->
+    <div class="card shadow border-0 mb-5">
+        <div class="card-header bg-light rounded-pill">
+            <h4 class="mb-0 text-dark fw-bold">Hình ảnh sản phẩm</h4>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                @if (Model.ProductImages.Any())
+                {
+                    @foreach (var img in Model.ProductImages)
+                    {
+                        <div class="col-md-3">
+                            <img src="@img.Image"
+                                 alt="Ảnh sản phẩm"
+                                 class="img-fluid rounded shadow-sm"
+                                 style="object-fit: cover; height: 300px; width: 100%">
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted">Chưa có hình ảnh nào được tải lên.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- chi tiết sản phẩm (detail) -->
+    <div class="card shadow border-0 mb-5">
+        <div class="card-header bg-light rounded-pill">
+            <h4 class="mb-0 text-dark fw-bold">Mô tả sản phẩm</h4>
+        </div>
+        <div class="card-body">
+            <div class="row p-3">
+                @Html.Raw(Model?.Detail)
+            </div>
+        </div>
+    </div>
+    
     <div class="card shadow border-0 mb-5">
         <div class="card-header bg-light rounded-pill">
             <h4 class="mb-0 text-dark fw-bold">SEO</h4>
@@ -209,19 +189,19 @@
                 <!-- Tiêu đề SEO -->
                 <div class="col-md-12">
                     <label class="form-label fw-bold">Tiêu đề SEO</label>
-                    <p class="form-control-plaintext text-muted">@(ProductDetailInfo.SeoTitile ?? "Chưa có tiêu đề SEO")</p>
+                    <p class="form-control-plaintext text-muted">@(Model.SeoTitile ?? "Chưa có tiêu đề SEO")</p>
                 </div>
 
                 <!-- Mô tả SEO -->
                 <div class="col-md-12">
                     <label class="form-label fw-bold">Mô tả SEO</label>
-                    <p class="form-control-plaintext text-muted">@(ProductDetailInfo.SeoDescription ?? "Chưa có mô tả SEO")</p>
+                    <p class="form-control-plaintext text-muted">@(Model.SeoDescription ?? "Chưa có mô tả SEO")</p>
                 </div>
 
                 <!-- Từ khóa SEO -->
                 <div class="col-md-12">
                     <label class="form-label fw-bold">Từ khóa SEO</label>
-                    <p class="form-control-plaintext text-muted">@(ProductDetailInfo.SeoKeywords ?? "Chưa có từ khóa SEO")</p>
+                    <p class="form-control-plaintext text-muted">@(Model.SeoKeywords ?? "Chưa có từ khóa SEO")</p>
                 </div>
 
                 <!-- Nút quay lại -->
@@ -241,28 +221,28 @@
                     <label class="form-label fw-bold">Ngày tạo</label>
                 </div>
                 <div class="col-md-8">
-                    <p class="form-control-plaintext text-muted">@(ProductDetailInfo.CreateDate.ToString("d/MM/yyyy hh:mm:ss tt"))</p>
+                    <p class="form-control-plaintext text-muted">@(Model.CreateDate.ToString("d/MM/yyyy hh:mm:ss tt"))</p>
                 </div>
 
                 <div class="col-md-4">
                     <label class="form-label fw-bold">Người tạo</label>
                 </div>
                 <div class="col-md-8">
-                    <p class="form-control-plaintext text-muted">@(ProductDetailInfo.CreateBy)</p>
+                    <p class="form-control-plaintext text-muted">@(Model.CreateBy)</p>
                 </div>
 
                 <div class="col-md-4">
                     <label class="form-label fw-bold">Ngày cập nhật</label>
                 </div>
                 <div class="col-md-8">
-                    <p class="form-control-plaintext text-muted">@(ProductDetailInfo.ModifierDate.ToString("d/MM/yyyy hh:mm:ss tt"))</p>
+                    <p class="form-control-plaintext text-muted">@(Model.ModifierDate.ToString("d/MM/yyyy hh:mm:ss tt"))</p>
                 </div>
 
                 <div class="col-md-4">
                     <label class="form-label fw-bold">Cập nhật bởi</label>
                 </div>
                 <div class="col-md-8">
-                    <p class="form-control-plaintext text-muted">@(ProductDetailInfo.ModifiedBy)</p>
+                    <p class="form-control-plaintext text-muted">@(Model.ModifiedBy)</p>
                 </div>
                 
             </div>

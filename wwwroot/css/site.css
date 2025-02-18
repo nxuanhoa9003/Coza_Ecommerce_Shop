@@ -1,22 +1,298 @@
-html {
-  font-size: 14px;
+﻿html {
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
 }
+
+
+.size-options button, .color-options button {
+    position: relative;
+    padding: 8px 16px;
+    margin: 4px;
+    border: 2px solid #a2a8d3;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.size-options button.active, .color-options button.active {
+    border-color: #5a6ac9;
+    color: #5a6ac9;
+}
+
+
+.size-options button.active::after, .color-options button.active::after {
+    content: "✔";
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: white;
+    color: #5a6ac9;
+    font-size: 12px;
+    font-weight: bold;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+    border-radius: 50%;
+    border: 2px solid #5a6ac9;
+}
+
+button.disabled {
+    background: #eee;
+    border: 2px solid #bbb;
+    color: #777;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+
+/*pagination product*/
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 20px;
+    list-style: none;
+}
+
+    .pagination li {
+        display: inline-block;
+    }
+
+    .pagination a {
+        text-decoration: none;
+        color: #666;
+        background-color: #e6e6e6;
+        padding: 10px 15px;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .pagination a:hover {
+            background-color: #717fe0;
+            color: #fff;
+        }
+
+    .pagination .active a {
+        background-color: #717fe0;
+        color: white;
+        font-weight: bold;
+    }
+
+    .pagination .disabled a {
+        color: #bbb;
+        cursor: not-allowed;
+        background-color: #e6e6e6;
+    }
+
+    .pagination .arrow {
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+@media (max-width: 600px) {
+    .pagination {
+        flex-wrap: wrap;
+    }
+
+        .pagination a {
+            padding: 8px 12px;
+        }
+}
+
+
+/* input range */
+
+.range-slider {
+    width: 100%;
+    position: relative;
+    height: 50px;
+}
+
+.slider-track {
+    height: 5px;
+    position: absolute;
+    background: #b3b3b3;
+    border-radius: 5px;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+}
+
+.range-slider input {
+    position: absolute;
+    width: 100%;
+    -webkit-appearance: none;
+    background: none;
+    pointer-events: none;
+    z-index: 2;
+    top: 15px;
+}
+
+    /* Custom thumb trên Chrome, Safari */
+    .range-slider input::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        background: #717fe0;
+        border: 2px solid white;
+        box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+        border-radius: 50%;
+        cursor: pointer;
+        pointer-events: auto;
+        position: relative;
+        transition: 0.2s;
+    }
+
+        /* Hover */
+        .range-slider input::-webkit-slider-thumb:hover {
+            background: #666;
+        }
+
+.price-values {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-weight: bold;
+    color: #666;
+}
+
+.btn-filter {
+   
+    background: #717fe0;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+    .btn-filter:hover {
+        background: #5a69d5;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .btn-filter:active {
+        background: #4c5ac4;
+        transform: translateY(1px);
+    }
+
+
+
+/* modal category hover shop*/
+/* Thiết lập menu */
+.menu-desktop {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.main-menu {
+    list-style-type: none;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+.main-menu > li {
+    position: relative;
+    padding: 20px 10px;
+    margin: 0px 10px;
+}
+.main-menu > li > a {
+     font-family: Poppins-Medium;
+     font-size: 14px;
+     color: #333;
+     text-decoration: none;
+     transition: all 0.4s;
+ }
+
+.main-menu > li:hover > a {
+    color: #6c7ae0;
+}
+
+/* Mega Menu */
+.has-mega-menu {
+    position: relative;
+}
+
+.mega-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 500px;
+    max-width: 1000px;
+    background: white;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    padding: 20px;
+    gap: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    z-index: 10;
+}
+
+.has-mega-menu:hover .mega-menu {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Cột Mega Menu */
+.mega-column {
+    min-width: 150px;
+}
+
+.mega-column h4 {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.mega-column ul {
+    list-style: none;
+    padding: 0;
+}
+
+.mega-column ul li {
+    margin-bottom: 5px;
+    padding-left: 20px;
+}
+
+.mega-column ul li a {
+    font-size: 14px;
+    color: #555;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.mega-column ul li a:hover {
+     color: #6c7ae0;
+}
+

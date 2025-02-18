@@ -8,11 +8,12 @@ namespace Coza_Ecommerce_Shop.Models.Entities
     public class Product : CommonAttributes
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
+
         [StringLength(50)]
         [DisplayName("SKU")]
         public string? ProductCode { get; set; }
+        
         [Required]
         [StringLength(250)]
         [DisplayName("Tên sản phẩm")]
@@ -26,14 +27,7 @@ namespace Coza_Ecommerce_Shop.Models.Entities
         [StringLength(250)]
         [DisplayName("Ảnh đại diện")]
         public string? Image { get; set; }
-        [DisplayName("Giá")]
-        [Required]
-        [Range(0, double.MaxValue)]
-        public decimal? Price { get; set; }
 
-        [DisplayName("Giá khuyến mãi")]
-        [Range(0, double.MaxValue)]
-        public decimal? PriceSale { get; set; }
         [DisplayName("Số lượng tổng")]
         [Required]
         [Range(0, int.MaxValue)]
@@ -47,7 +41,7 @@ namespace Coza_Ecommerce_Shop.Models.Entities
         public bool IsHot { get; set; }
         [DisplayName("Danh mục sản phẩm")]
         [Required(ErrorMessage = "Chọn danh mục sản phẩm.")]
-        public int? ProductCategoryId { get; set; }
+        public Guid? ProductCategoryId { get; set; }
         [StringLength(250)]
         public string? SeoTitile { get; set; }
         [StringLength(500)]
@@ -60,16 +54,15 @@ namespace Coza_Ecommerce_Shop.Models.Entities
 
         public bool IsDeleted { get; set; } = false;
 
-        [DisplayName("Danh mục sản phẩm")]
-        public virtual ProductCategory? ProductCategory { get; set; }
+        public string AttributeOptionIds { get; set; } = "[]";
 
-        [NotMapped]
-        public string? VariantSKU { get; set; }
+        [DisplayName("Danh mục sản phẩm")]
+        public ProductCategory? ProductCategory { get; set; }
 
         [NotMapped]
         [Required(ErrorMessage = "Chọn ít nhất một ảnh.")]
         public List<IFormFile> Files { get; set; } = new List<IFormFile>();
-        public virtual ICollection<ProductVariant>? Variants { get; set; }
-        public virtual ICollection<ProductImage>? ProductImages { get; set; }
+        public ICollection<ProductVariant> Variants { get; set; } = new HashSet<ProductVariant>();
+        public ICollection<ProductImage>? ProductImages { get; set; } = new List<ProductImage>();
     }
 }

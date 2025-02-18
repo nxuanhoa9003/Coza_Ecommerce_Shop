@@ -13,8 +13,7 @@ namespace Coza_Ecommerce_Shop.Models.Entities
             this.Products = new HashSet<Product>();
         }
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [Display(Name = "Tiêu đề")]
         [Required(ErrorMessage = "{0} không được để trống")]

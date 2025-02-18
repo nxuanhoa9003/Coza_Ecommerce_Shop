@@ -1,0 +1,114 @@
+﻿@using Coza_Ecommerce_Shop.ViewModels.Account
+@model ProfileViewModel
+@{
+
+    ViewData["Title"] = "Profile";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin_Sub.cshtml";
+    var avtlink = Model.AvatarUrl ?? "/Uploads/avt_empty.jpg";
+}
+
+
+<!-- Content -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Home</a>
+        </li>
+        <li class="breadcrumb-item active">@ViewData["Title"]</li>
+    </ol>
+</nav>
+<div class="row">
+    <div class="col-md-12">
+        <ul class="nav nav-pills flex-column flex-md-row mb-3">
+            <li class="nav-item">
+                <a class="nav-link active" href="javascript:void(0);"><i class="bx bx-user me-1"></i> Account</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-area="Admin" asp-controller="Account" asp-action="ChangePassword"><i class='bx bx-lock'></i> Password</a>
+            </li>
+
+        </ul>
+        <div class="card mb-4">
+            <h5 class="card-header">Profile Details</h5>
+            <form asp-area="Admin" asp-controller="Account" asp-action="Profile" id="formAccountSettings" method="POST" enctype='multipart/form-data'>
+
+                <!-- Account -->
+                <div class="card-body">
+                    <div class="d-flex align-items-start align-items-sm-center gap-4">
+                        <img src="@avtlink"
+                             alt="user-avatar"
+                             class="d-block rounded"
+                             height="100"
+                             width="100"
+                             id="uploadedAvatar" />
+                        <div class="button-wrapper">
+                            <label for="upload" class="btn btn-primary me-2 mb-4" tabindex="0">
+                                <span class="d-none d-sm-block">Upload new photo</span>
+                                <i class="bx bx-upload d-block d-sm-none"></i>
+                                <input type="file"
+                                       name="fileImage"
+                                       id="upload"
+                                       class="account-file-input"
+                                       hidden
+                                       accept="image/png, image/jpeg" />
+                            </label>
+                            <button type="button" class="btn btn-outline-secondary account-image-reset mb-4">
+                                <i class="bx bx-reset d-block d-sm-none"></i>
+                                <span class="d-none d-sm-block">Reset</span>
+                            </button>
+
+                            <p class="text-muted mb-0">Allowed JPG, GIF or PNG. Max size of 800K</p>
+                        </div>
+                    </div>
+                </div>
+                <hr class="my-0" />
+                <div class="card-body">
+                    <div class="row">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="mb-3 col-md-6">
+                            <label asp-for="FullName" class="form-label"></label>
+                            <input class="form-control"
+                                   asp-for="FullName"
+                                   autofocus />
+                            <span class="text-danger" asp-validation-for="FullName"></span>
+
+                        </div>
+                        <div class="mb-3 col-md-6">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input class="form-control" asp-for="Email" />
+                            <span class="text-danger" asp-validation-for="Email"></span>
+
+                        </div>
+                        <div class="mb-3 col-md-6">
+                            <label asp-for="PhoneNumber" class="form-label"></label>
+                            <input class="form-control" asp-for="PhoneNumber" />
+                            <span class="text-danger" asp-validation-for="PhoneNumber"></span>
+                        </div>
+
+                        <div class="mb-3 col-md-6">
+                            <label class="form-label" asp-for="DateOfBirth"></label>
+                            <input asp-for="DateOfBirth" class="form-control" />
+                            <span class="text-danger" asp-validation-for="DateOfBirth"></span>
+
+                        </div>
+                        <div class="mb-3 col-md-12">
+                            <label asp-for="Address" class="form-label"></label>
+                            <input class="form-control" asp-for="Address" />
+                            <span class="text-danger" asp-validation-for="Address"></span>
+
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <button type="submit" class="btn btn-primary me-2">Save changes</button>
+                        <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+                    </div>
+
+                </div>
+            </form>
+            <!-- /Account -->
+        </div>
+
+    </div>
+</div>
+
+<!-- / Content -->

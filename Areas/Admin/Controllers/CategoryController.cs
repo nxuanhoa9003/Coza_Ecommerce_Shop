@@ -10,10 +10,12 @@ using Coza_Ecommerce_Shop.Models.Entities;
 using Coza_Ecommerce_Shop.Models.Common;
 using AspNetCoreHero.ToastNotification.Abstractions;
 using Coza_Ecommerce_Shop.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(AuthenticationSchemes = "AdminScheme")]
     public class CategoryController : Controller
     {
         private readonly ICategoryRepository _categoryRepository;
@@ -32,7 +34,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/Category/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
             {
@@ -77,7 +79,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/Category/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
             {
@@ -97,7 +99,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,Position,SeoTitle,SeoDescription,SeoKeywords")] Category category)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Title,Description,Position,SeoTitle,SeoDescription,SeoKeywords")] Category category)
         {
 
             if (id != category.Id)
@@ -149,7 +151,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/Category/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
@@ -168,7 +170,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // POST: Admin/Category/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var category = await _categoryRepository.GetByIdAsync(id);
             if (category != null)
@@ -176,7 +178,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                await _categoryRepository.RemoveAsync(category);
             }
 
-            _notifyService.Information("Xoá danh mục thành công");
+            _notifyService.Success("Xoá danh mục thành công");
             return RedirectToAction(nameof(Index));
         }
 

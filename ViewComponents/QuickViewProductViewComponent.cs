@@ -14,22 +14,19 @@ namespace Coza_Ecommerce_Shop.ViewComponents
     public class QuickViewProductViewComponent : ViewComponent
     {
         private readonly IProductRepository _productRepository;
-        private readonly IAttributesRepository _attributesRepository;
-        private readonly IAttributesValuesRepository _attributesValuesRepository;
+       
         private readonly ILogger<QuickViewProductViewComponent> _logger;
         private readonly IMapper _mapper;
-        public QuickViewProductViewComponent(IProductRepository productRepository, IAttributesRepository attributesRepository,
-            IAttributesValuesRepository attributesValuesRepository, ILogger<QuickViewProductViewComponent> logger,
+        public QuickViewProductViewComponent(IProductRepository productRepository, ILogger<QuickViewProductViewComponent> logger,
            IMapper mapper)
         {
             _mapper = mapper;
             _logger = logger;
             _productRepository = productRepository;
-            _attributesRepository = attributesRepository;
-            _attributesValuesRepository = attributesValuesRepository;
+           
         }
 
-        public async Task<IViewComponentResult> InvokeAsync(int id)
+        public async Task<IViewComponentResult> InvokeAsync(Guid id)
         {
             var product = await _productRepository.GetDetailProductByIdAsync(id);
             if (product == null)
@@ -41,46 +38,7 @@ namespace Coza_Ecommerce_Shop.ViewComponents
 
             if (product.Variants != null && product.Variants.Any())
             {
-
-                varaintsvm = _mapper.Map<List<ProductVariantsViewModel>>(product.Variants);
-
-                var listattributesvalues = await _attributesValuesRepository.GetAllAsync();
-                var attributeValueDictionary = listattributesvalues.ToDictionary(x => x.Id, x => x.Value);
-                foreach (var variant in varaintsvm)
-                {
-                    if (!string.IsNullOrEmpty(variant.AttributesJson))
-                    {
-                        try
-                        {
-                            var objAttributes = JsonConvert.DeserializeObject<List<AttributeJsonToModel>>(variant.AttributesJson);
-                            if (objAttributes != null)
-                            {
-                               
-                                var listAttrbVaraint = new List<string>();
-                                foreach (var item in objAttributes)
-                                {
-
-                                    var attributeValue = attributeValueDictionary.ContainsKey(item.AttributeValue)
-                                        ? attributeValueDictionary[item.AttributeValue]
-                                        : null;
-
-                                    listAttrbVaraint.Add(attributeValue);
-                                }
-
-                                string strNameVaraint = string.Join(" - ", listAttrbVaraint);
-
-                                variant.NameVariantFromAttributes = strNameVaraint;
-                            }
-                        }
-                        catch (JsonException ex)
-                        {
-
-                            _logger.LogError($"Lỗi parse JSON: {ex.Message}");
-                        }
-
-
-                    }
-                }
+                varaintsvm = _mapper.Map<List<ProductVariantsViewModel>>(product.Variants);  
             }
 
 

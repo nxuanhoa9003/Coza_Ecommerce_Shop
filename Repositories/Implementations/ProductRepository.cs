@@ -16,10 +16,10 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
         {
             _context = context;
         }
-        public async Task AddAsync(Product productmodel)
+        public async Task<bool> AddAsync(Product productmodel)
         {
             await _context.Products.AddAsync(productmodel);
-            await _context.SaveChangesAsync();
+            return await _context.SaveChangesAsync() > 0;
         }
 
         public async Task AddRangePrioductImageAsync(ICollection<ProductImage> listproductImages)
@@ -42,46 +42,91 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
 
         public async Task<IEnumerable<Product>> GetAllAsync()
         {
-            return await _context.Products.Include(x => x.ProductCategory).Where(x => !x.IsDeleted).ToListAsync();
+            return await _context.Products.Include(x => x.ProductCategory)
+                .Where(x => !x.IsDeleted).ToListAsync();
         }
 
-        public async Task<Product?> GetByIdAsync(int? id)
+        public async Task<Product?> GetByIdAsync(Guid? id)
         {
             return await _context.Products
                 .Include(p => p.ProductCategory)
                 .Include(p => p.ProductImages)
-                .Include(p => p.Variants)
+                .Include(p => p.Variants).AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == id && !m.IsDeleted);
         }
 
-        public async Task<Product?> GetDetailProductByIdAsync(int? id)
+        public async Task<Product?> GetDetailProductByIdAsync(Guid? id)
         {
-            return await _context.Products.AsNoTracking()
+            var product =  await _context.Products.AsNoTracking()
                 .Include(p => p.ProductCategory)
                 .Include(p => p.ProductImages)
                 .Include(p => p.Variants)
                 .FirstOrDefaultAsync(m => m.Id == id && !m.IsDeleted);
+
+            if (product != null)
+            {
+                product.Variants = product.Variants.OrderBy(v => v.SKU).ToList(); // Sắp xếp Variants theo SKU
+				product.ProductImages = product.ProductImages.OrderByDescending(v => v.IsDefault).ToList();
+			}
+
+            return product;
+
         }
 
-        public async Task<bool> IsDuplicateProductCode(Product productmodel)
+
+        public async Task<Product?> GetDetailProductBySlugAsync(string slug)
+        {
+            var product = await _context.Products.AsNoTracking()
+                .Include(p => p.ProductCategory)
+                .Include(p => p.ProductImages)
+                .Include(p => p.Variants)
+                .FirstOrDefaultAsync(m => m.Slug == slug && !m.IsDeleted);
+
+            if (product != null)
+            {
+                product.Variants = product.Variants.OrderBy(v => v.SKU).ToList(); // Sắp xếp Variants theo SKU
+                product.ProductImages = product.ProductImages.OrderByDescending(v => v.IsDefault).ToList();
+			}
+
+
+			return product;
+
+        }
+
+
+		public async Task<Product?> GetDetailProductBySKUAsync(string sku)
+		{
+			var product = await _context.Products.AsNoTracking()
+				.Include(p => p.ProductCategory)
+				.Include(p => p.ProductImages)
+				.Include(p => p.Variants)
+				.FirstOrDefaultAsync(m => m.ProductCode == sku && !m.IsDeleted);
+
+			if (product != null)
+			{
+				product.Variants = product.Variants.OrderBy(v => v.SKU).ToList(); // Sắp xếp Variants theo SKU
+				product.ProductImages = product.ProductImages.OrderByDescending(v => v.IsDefault).ToList();
+			}
+			return product;
+		}
+
+
+
+		public async Task<bool> IsDuplicateProductCode(Product productmodel)
         {
             return await _context.Products.AnyAsync(p => p.ProductCode == productmodel.ProductCode);
         }
 
-        public async Task<bool> ProductExists(int id)
-        {
-            return await _context.Products.AnyAsync(e => e.Id == id && !e.IsDeleted);
-        }
+       
 
         public async Task RemoveAsync(Product productmodel)
         {
             productmodel.IsDeleted = true;
             _context.Products.Update(productmodel);
             await _context.SaveChangesAsync();
-
         }
 
-        public async Task RemoveRangeProductImageByIDAsync(IEnumerable<int> imageIds)
+        public async Task RemoveRangeProductImageByIDAsync(IEnumerable<Guid> imageIds)
         {
 
             if (imageIds != null && imageIds.Any())
@@ -101,20 +146,83 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             }
         }
 
-        public Task RemoveRangeAsync(IEnumerable<Product> listproducts)
-        {
-            throw new NotImplementedException();
-        }
-
+       
         public async Task UpdateAsync(Product productmodel)
         {
-            _context.Products.Update(productmodel);
-            await _context.SaveChangesAsync();
-        }
+            // product image
+            var newImages = productmodel.ProductImages;
+            var existingImages = _context.ProductImages.Where(x => x.ProductId == productmodel.Id).ToList();
+
+            var imagesToDelete = existingImages.Where(x => !newImages.Any(y => y.Id == x.Id)).ToList();
+
+            // Xóa ảnh khỏi hệ thống tệp trước khi xóa khỏi database
+            foreach (var image in imagesToDelete)
+            {
+                Utilities.DeleteImage(image.Image);
+                _context.ProductImages.Remove(image);
+            }
+            
+            foreach (var newImage in newImages)
+            {
+                var existingImage = existingImages.FirstOrDefault(x => x.Id == newImage.Id);
+                if (existingImage == null)
+                {
+                    _context.Add(newImage);
+                }else
+                {
+                    existingImage.IsDefault = newImage.IsDefault;
+                    _context.Entry(existingImage).State = EntityState.Modified;
+                }
+            }
+
+
+            // product variants
+            var newVariants = productmodel.Variants;
+            var existingVariants = _context.ProductVariants.Where(x => x.ProductId == productmodel.Id).ToList();
+            
+			foreach (var newVariant in newVariants)
+            {
+                var existingVariant = existingVariants.FirstOrDefault(x => x.Id == newVariant.Id);
+                if (existingVariant == null)
+                {
+                    
+                    _context.Add(newVariant);
+				}
+                else
+                {
+                    existingVariant.SKU = newVariant.SKU;
+                    existingVariant.Color = newVariant.Color;
+                    existingVariant.Size = newVariant.Size;
+                    existingVariant.BasePrice = newVariant.BasePrice;
+                    existingVariant.PriceSale = newVariant.PriceSale;
+                    existingVariant.Quantity = newVariant.Quantity;
+                    existingVariant.IsActive = newVariant.IsActive;
+                    existingVariant.IsDefault = newVariant.IsDefault;
+
+                    _context.Entry(existingVariant).State = EntityState.Modified;
+                }
+            }
+
+            _context.Entry(productmodel).State = EntityState.Modified;
+            
+
+			try
+			{
+				await _context.SaveChangesAsync();
+			}
+			catch (DbUpdateException ex)
+			{
+				var innerException = ex.InnerException?.Message;
+				Console.WriteLine($"Lỗi khi lưu dữ liệu: {innerException}");
+				throw;
+			}
+
+
+		}
 
 
 
-        public async Task<IEnumerable<ProductImage>> GetProductImagesByIdProduct(int? id)
+		public async Task<IEnumerable<ProductImage>> GetProductImagesByIdProduct(Guid? id)
         {
             return await _context.ProductImages.Where(x => x.ProductId == id).ToListAsync();
         }
@@ -137,44 +245,40 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
                 .ToListAsync();
         }
 
-        public async Task<ProductOverViewVM> GetProductByIdProductCategoryAsync(IEnumerable<ProductCategoryDTO> productCategoryDTOs, int page, int pageSize)
+        public async Task<IEnumerable<Product>> GetProductByIdProductCategoryAsync(HashSet<Guid> allCategoryIds)
         {
 
             var products = await _context.Products
                                 .Include(x => x.ProductCategory)
+                                .Include(x => x.Variants)
                                 .AsNoTracking()
-                                .ToListAsync();
-
-            var listProduct = new List<Product>();
-            var listProductCategoryDTO = new List<ProductCategoryDTO>();
-            if (productCategoryDTOs != null && productCategoryDTOs.Any())
-            {
-                var listProductCategoryDTOs = productCategoryDTOs.ToList();
-                
-                foreach (var item in listProductCategoryDTOs)
-                {
-                    var prs = products.Where(x => x.ProductCategoryId == item.Id).ToList();
-                    if (prs.Any())
-                    {
-                        listProductCategoryDTO.Add(item);
-                        listProduct.AddRange(prs);
-                    }
-                }
-            }else
-            {
-                listProduct = products.ToList();
-                listProductCategoryDTO = productCategoryDTOs?.ToList();
-            }
-
-            listProduct = products.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-
-            return new ProductOverViewVM
-            {
-                productCategoryDTO = listProductCategoryDTO,
-                products = listProduct,
-            };
+                                .Where(x => allCategoryIds.Contains(x.ProductCategory.Id))
+                                .OrderByDescending(x => x.IsSale)
+                                .ThenByDescending(x => x.IsHot)
+								.ToListAsync();
+            return products;
+		}
 
 
+        public async Task<IEnumerable<ProductVariant>> GetAllVariantsOfProduct(Guid? id)
+        {
+            return await _context.ProductVariants.AsNoTracking().Where(x => x.ProductId == id).ToListAsync();
+
+        }
+
+        public async Task<IEnumerable<Product>> GetProductsRelated(Guid? CategoryId, string sku)
+        {
+            var listproduct = await _context.Products
+                .Include(x => x.Variants)
+                .Where(x => x.ProductCategoryId == CategoryId && x.ProductCode != sku).ToListAsync();
+            return listproduct;
+        }
+
+        public async Task<IEnumerable<Product>> GetProductsHot()
+        {
+            var listproduct = await _context.Products.Include(x => x.Variants).AsNoTracking()
+                .Where(x => !x.IsDeleted).OrderByDescending(x => x.IsHot).ToListAsync();
+            return listproduct;
         }
     }
 }
