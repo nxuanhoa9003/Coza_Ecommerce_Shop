@@ -9,7 +9,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Interfaces
         Task<ProductCategory?> GetByIdAsNoTrackingAsync(int? id);
         Task<IEnumerable<ProductCategory>> GetByFilterSlugAsNoTrackingAsync(string slug);
         Task<IEnumerable<ProductCategory>> GetAllAsync();
-        Task<IEnumerable<ProductCategory>> GetAllExceptIdAsync(int ?id);
+        Task<IEnumerable<ProductCategory>> GetAllExceptIdAsync(Guid? id);
 
         Task<bool> AddAsync(ProductCategory productCategory);
 
