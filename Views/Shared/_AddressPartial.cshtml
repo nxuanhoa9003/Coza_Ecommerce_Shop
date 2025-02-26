@@ -1,0 +1,37 @@
+﻿@using Coza_Ecommerce_Shop.ViewModels.Order
+@model CheckoutCartvViewModel
+
+<div class="rs1-select2 rs2-select2 bg0 m-b-12 m-t-9">
+    <select class="form-select" name="Province" id="province">
+        <option value="">Chọn tỉnh/thành...</option>
+    </select>
+    <span asp-validation-for="Province" class="text-danger"></span>
+
+</div>
+
+<div class="rs1-select2 rs2-select2 bg0 m-b-12">
+    <select class="form-select" name="District" id="district">
+        <option value="">Chọn quận/huyện...</option>
+    </select>
+    <span asp-validation-for="District" class="text-danger"></span>
+
+</div>
+
+<div class="rs1-select2 rs2-select2 bg0 m-b-12">
+    <select class="form-select" name="Ward" id="ward">
+        <option value="">Chọn phường/xã...</option>
+    </select>
+    <span asp-validation-for="Ward" class="text-danger"></span>
+
+</div>
+
+<div class="bg0 m-b-12">
+    <input class="form-control" name="DetailAddress" value="@Model.DetailAddress" style="border: 1px solid; border-radius: 10px" type="text" placeholder="Địa chỉ cụ thể...." required />
+    <span asp-validation-for="DetailAddress" class="text-danger"></span>
+</div>
+
+<div class="bg0 m-b-12">
+    <input class="form-control" id="fullAddress" name="FullAddress" style="border: 1px solid; border-radius: 10px" type="hidden" placeholder="Địa chỉ đầy đủ..." readonly />
+</div>
+
+

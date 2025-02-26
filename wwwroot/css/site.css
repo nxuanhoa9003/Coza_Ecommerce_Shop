@@ -296,3 +296,72 @@ button.disabled {
      color: #6c7ae0;
 }
 
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0;
+}
+
+.avatar-img {
+    border-radius: 16px; 
+    object-fit: cover;
+}
+
+
+/*select address*/
+/* Reset mặc định của Select */
+.form-select {
+    width: 100%;
+    padding: 8px;
+    font-size: 13px;
+    border-radius: 10px;
+    border: 1px solid;
+/*    background: linear-gradient(135deg, #eef1ff, #ffffff);*/
+    color: #333;
+    transition: all 0.3s ease-in-out;
+    outline: none;
+    box-shadow: 2px 4px 10px rgba(113, 127, 224, 0.2);
+    appearance: none;
+    position: relative;
+    font-weight: 500;
+}
+
+/* Tùy chỉnh dropdown option */
+.form-select option {
+    padding: 12px;
+    background: #fff;
+    color: #333;
+    font-size: 14px;
+    transition: background 0.2s ease-in-out;
+}
+
+/* Khi chọn option */
+.form-select option:checked {
+    background-color: #717fe0;
+    color: #fff;
+    font-weight: bold;
+}
+
+/* Container dropdown */
+.rs1-select2 {
+    position: relative;
+    margin-bottom: 18px;
+}
+
+/* Custom icon dropdown */
+.rs1-select2::after {
+    content: "▼";
+    font-size: 14px;
+    position: absolute;
+    top: 50%;
+    right: 16px;
+    transform: translateY(-50%);
+    pointer-events: none;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Hiệu ứng icon khi focus */
+.form-select:focus + .rs1-select2::after {
+    color: #5a67d8;
+    transform: translateY(-50%) rotate(180deg);
+}

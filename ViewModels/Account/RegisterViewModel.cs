@@ -23,10 +23,15 @@ namespace Coza_Ecommerce_Shop.ViewModels.Account
 
 
         [DataType(DataType.Text)]
-        [Display(Name = "Tên tài khoản", Prompt = "Tên tài khoản")]
+        [Display(Name = "Tên đăng nhập", Prompt = "Tên đăng nhập")]
         [Required(ErrorMessage = "Phải nhập {0}")]
         [StringLength(100, ErrorMessage = "{0} phải dài từ {2} đến {1} ký tự.", MinimumLength = 3)]
         public string UserName { get; set; }
 
-    }
+		[DataType(DataType.Text)]
+		[Display(Name = "Họ và tên", Prompt = "Họ và tên")]
+		[Required(ErrorMessage = "Phải nhập {0}")]
+		[StringLength(100, ErrorMessage = "{0} phải dài từ {2} đến {1} ký tự.", MinimumLength = 3)]
+		public string FullName { get; set; }
+	}
 }

@@ -1,0 +1,123 @@
+﻿@using System.Globalization
+@using Coza_Ecommerce_Shop.Models.Helper
+@model Coza_Ecommerce_Shop.Models.Entities.Order
+@{
+    ViewData["Title"] = "Detail Order";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin_Sub.cshtml";
+}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Home</a>
+        </li>
+        <li class="breadcrumb-item active">@ViewData["Title"]</li>
+    </ol>
+</nav>
+
+<style>
+    .btn-custom {
+        background-color: #28a745;
+        color: white;
+    }
+
+     .btn-custom:hover {
+        background-color: #218838;
+     }
+
+    .product-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 5px;
+        object-fit: cover;
+    }
+</style>
+
+<div class="container mt-5">
+
+    <div class="card shadow border-0 mb-4">
+        <div class="card-header bg-light rounded-pill">
+            <h4 class="mb-0 fw-bold">Thông Tin Đơn Hàng</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-6">
+                    <p><strong>Mã Đơn Hàng:</strong> @Model.Code</p>
+                    <p><strong>Ngày Đặt Hàng:</strong> @Model.CreatedAt.ToString("HH:mm:ss dd/MM/yyyy")</p>
+                    <p><strong>Tình Trạng:</strong> <span class="@OrderStatusHelper.GetBadgeClass(Model.Status)">@Model.Status</span></p>
+                    <p><strong>Tổng Tiền:</strong> <span class="font-weight-bold text-danger">@(Model.TotalAmount.ToString("#,0", new CultureInfo("vi-VN")) + "đ")</span></p>
+                    <div class="w-75 my-3">
+                        <form id="updateOrderForm">
+                            <input type="hidden" name="orderId" value="@Model.Id" />
+                            <label for="orderStatus" class="pb-1"><strong>Cập nhật trạng thái:</strong></label>
+                            <select name="newStatus" id="orderStatus" class="form-control form-select">
+                                <option value="">Chọn trạng thái</option>
+                                @foreach (var status in ViewBag.ValidStatuses as List<SelectListItem>)
+                                {
+                                    <option value="@status.Value">@status.Text</option>
+                                }
+                            </select>
+                            <div id="updateMessage" class="mt-2"></div>
+                        </form>
+
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <p><strong>Tên Khách Hàng:</strong> @Model.FullName</p>
+                    <p><strong>Email:</strong> @Model.Email</p>
+                    <p><strong>Số Điện Thoại:</strong> @Model.Phone</p>
+                    <p><strong>Địa chỉ:</strong> @Model.Address</p>
+                </div>
+               
+            </div>
+           </div>
+    </div>
+    <div class="mt-4">
+        <div class="card shadow border-0 mb-4">
+            <div class="card-header bg-light rounded-pill">
+                <h4 class="mb-0 fw-bold">Danh Sách Sản Phẩm</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover ">
+                        <thead class="thead-light">
+                            <tr>
+                                <th></th>
+                                <th>Tên Sản Phẩm</th>
+                                <th>SL</th>
+                                <th>Giá</th>
+                                <th>Tổng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var item in Model.OrderDetails)
+                            {
+                                <tr>
+                                    <td><img src="@item.Product.Image" alt="@item.Product.Title" class="product-image"></td>
+                                    <td>
+                                        @item.Product.Title
+                                        <br>
+                                        <span class="fs-12">Color: @item.Variant.Color</span>
+                                        <br>
+                                        <span class="fs-12">Size: @item.Variant.Size</span>
+                                    </td>
+                                    <td>@item.Quantity</td>
+                                    <td>@(item.Price.ToString("#,0", new CultureInfo("vi-VN")) + "đ")</td>
+                                    <td>@(item.TotalPrice.ToString("#,0", new CultureInfo("vi-VN")) + "đ")</td>
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+                </div>
+               
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+@section scripts {
+    @await Html.PartialAsync("_OrderScripts")
+}

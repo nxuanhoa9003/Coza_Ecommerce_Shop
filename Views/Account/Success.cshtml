@@ -1,0 +1,30 @@
+﻿@{
+    ViewData["Title"] = "Notyfication";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    
+    .icon-success {
+        max-width: 80px; /* Giới hạn kích thước tối đa */
+        width: 100%; /* Co giãn theo kích thước màn hình */
+        height: auto; /* Giữ tỷ lệ khung hình */
+    }
+
+</style>
+<div class="m-t-23 p-b-100">
+    <div class="container">
+        <div class="d-flex justify-content-center align-items-center vh-100">
+            <div class="card text-center" style="max-width: 500px;">
+                <div class="card-body">
+                    <img src="https://cdn-icons-png.flaticon.com/512/845/845646.png" alt="Success" class="icon-success mb-3">
+                    <h3 class="text-success fw-bold">Email đã được gửi!</h3>
+                    <p class="text-muted">Hệ thống đã gửi một email đặt lại mật khẩu đến hộp thư của bạn.<br>Vui lòng kiểm tra hộp thư đến hoặc thư mục spam.</p>
+                    <a asp-action="Login" asp-controller="Account" class="btn btn-primary mt-3">
+                        <i class='bx bxs-chevron-left'></i> Quay lại đăng nhập
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

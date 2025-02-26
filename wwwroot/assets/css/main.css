@@ -1,78 +1,38 @@
-﻿/*------------------------------------------------------------------
-Project:  
-Version:  
-Last change:  
-Assigned to:  Le Xuan Bach
-Primary use:  Company
--------------------------------------------------------------------*/
-/*------------------------------------------------------------------
-[LAYOUT]
-
-* body
-  + Header / header
-  + Page Content / .page-content .name-page
-        + Section Layouts / section .name-section
-        ...
-  + Footer / footer
-
--------------------------------------------------------------------*/
-/*------------------------------------------------------------------
-[COLOR CODES]
-
-# Text Color      :  
-# Primary Color 01:  
-# Primary Color 02:   
-# Primary Color 03:  
-
-------------------------------------------------------------------*/
-/*------------------------------------------------------------------
-[TYPOGRAPHY]
-
-Body            : 16px/1.6 '', Arial, sans-serif;
-Title           : 18px/1.6 '', Arial, sans-serif;
-Paragrap        : 18px/1.6 '', Arial, sans-serif;
-Input, textarea : 14px/1.6 '', Arial, sans-serif;
--------------------------------------------------------------------*/
-
-
-
-/*//////////////////////////////////////////////////////////////////
-[ FONT ]*/
-
-@font-face {
-  font-family: Poppins-Regular;
-  src: url('../fonts/Poppins/Poppins-Regular.ttf'); 
+﻿@font-face {
+    font-family: Poppins-Regular;
+    src: url('../fonts/Poppins_2/Poppins-Regular.ttf');
 }
 
 @font-face {
-  font-family: Poppins-Light;
-  src: url('../fonts/Poppins/Poppins-Light.ttf'); 
+    font-family: Poppins-Light;
+    src: url('../fonts/Poppins_2/Poppins-Light.ttf');
 }
 
 @font-face {
-  font-family: Poppins-ExtraLight;
-  src: url('../fonts/Poppins/Poppins-ExtraLight.ttf'); 
+    font-family: Poppins-ExtraLight;
+    src: url('../fonts/Poppins_2/Poppins-ExtraLight.ttf');
 }
 
 @font-face {
-  font-family: Poppins-Medium;
-  src: url('../fonts/Poppins/Poppins-Medium.ttf'); 
+    font-family: Poppins-Medium;
+    src: url('../fonts/Poppins_2/Poppins-Medium.ttf');
 }
 
 @font-face {
-  font-family: Poppins-Italic;
-  src: url('../fonts/Poppins/Poppins-Italic.ttf'); 
+    font-family: Poppins-Italic;
+    src: url('../fonts/Poppins_2/Poppins-Italic.ttf');
 }
 
 @font-face {
-  font-family: Poppins-Bold;
-  src: url('../fonts/Poppins/Poppins-Bold.ttf'); 
+    font-family: Poppins-Bold;
+    src: url('../fonts/Poppins_2/Poppins-Bold.ttf');
 }
 
 @font-face {
-  font-family: Poppins-SemiBold;
-  src: url('../fonts/Poppins/Poppins-SemiBold.ttf'); 
+    font-family: Poppins-SemiBold;
+    src: url('../fonts/Poppins_2/Poppins-SemiBold.ttf');
 }
+
 
 
 /*---------------------------------------------*/
@@ -808,7 +768,15 @@ Input, textarea : 14px/1.6 '', Arial, sans-serif;
   padding: 5px 0 5px 0;
 }
 
-.sub-menu-m a:hover {
+.sub-menu-m .sub-menu-item {
+  font-family: Poppins-Regular;
+  font-size: 14px;
+  color: #666;
+  line-height: 2.5;
+}
+
+
+.sub-menu-m a:hover, .sub-menu-m .sub-menu-item:hover {
   text-decoration: none;
   color: #555555;
 }
@@ -1801,10 +1769,12 @@ button.mfp-close {
 }
 
 .btn-num-product-up,
-.btn-num-product-down {
-  width: 45px;
-  height: 100%;
-  cursor: pointer;
+.btn-num-product-down,
+.btn-num-product-increase,
+.btn-num-product-decrease {
+    width: 45px;
+    height: 100%;
+    cursor: pointer;
 }
 
 .num-product {
@@ -1932,9 +1902,14 @@ input.num-product::-webkit-inner-spin-button {
   border-bottom: 1px solid #e6e6e6;
 }
 
+
+/*.table-shopping-cart .column-0 {
+  width: 25px;
+  padding-left: 10px;
+}
 .table-shopping-cart .column-1 {
-  width: 133px;
-  padding-left: 50px;
+  width: 50px;
+  padding-left: 10px;
 }
 
 .table-shopping-cart .column-2 {
@@ -1956,6 +1931,49 @@ input.num-product::-webkit-inner-spin-button {
   width: 172px;
   padding-right: 50px;
   text-align: right;
+  font-size: 16px;
+}
+
+.table-shopping-cart .column-6 {
+  width: 100px;
+  text-align: center;
+}*/
+
+.table-shopping-cart .column-0 {
+  width: 25px;
+  padding-left: 10px;
+}
+
+.table-shopping-cart .column-1 {
+  width: 80px;
+  padding-left: 10px;
+}
+
+.table-shopping-cart .column-2 {
+  width: 150px;
+  font-size: 15px;
+}
+
+.table-shopping-cart .column-3 {
+  width: 80px;
+  font-size: 16px;
+  text-align: center;
+}
+
+.table-shopping-cart .column-4 {
+  width: 100px;
+  text-align: center;
+}
+
+.table-shopping-cart .column-5 {
+  width: 100px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.table-shopping-cart .column-6 {
+  width: 80px;
+  text-align: center;
   font-size: 16px;
 }
 
@@ -2146,6 +2164,7 @@ input.num-product::-webkit-inner-spin-button {
 .cl10 {color: #1d1d1d;}
 .cl11 {color: #f9ba48;}
 .cl12 {color: #ccc;}
+.cl13 {color: #8991e8;}
 
 /*//////////////////////////////////////////////////////////////////
 [ S-Text 0 - 15 ]*/
@@ -2660,6 +2679,7 @@ input.num-product::-webkit-inner-spin-button {
 .bg7 {background-color: #333;}
 .bg8 {background-color: #f3f3f3;}
 .bg9 {background-color: rgba(255,255,255,0.9);}
+.bg10{background-color: #8991e8}
 
 /*---------------------------------------------*/
 .bg-overlay1::before {
@@ -3158,6 +3178,11 @@ input.num-product::-webkit-inner-spin-button {
 /*---------------------------------------------*/
 .hov2:hover {
   background-color: #f2f2f2;
+}
+
+.hov4:hover {
+    color: #717fe0;
+    background-color: #e8eafb;
 }
 
 /*---------------------------------------------*/

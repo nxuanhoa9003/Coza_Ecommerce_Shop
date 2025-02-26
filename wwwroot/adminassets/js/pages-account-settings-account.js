@@ -32,20 +32,20 @@ document.addEventListener('DOMContentLoaded', function (e) {
         const selectAllCheckbox = document.getElementById("choosee_all_claims");
         const claimCheckboxes = document.querySelectorAll(".input_checkbox_claims");
 
-        selectAllCheckbox.addEventListener("change", function () {
+        selectAllCheckbox && selectAllCheckbox.addEventListener("change", function () {
             const isChecked = selectAllCheckbox.checked;
             claimCheckboxes.forEach(checkbox => {
                 checkbox.checked = isChecked;
             });
         });
 
-        claimCheckboxes.forEach(checkbox => {
+        claimCheckboxes && claimCheckboxes.forEach(checkbox => {
             checkbox.addEventListener("change", updateSelectAllCheckbox);
         });
 
         function updateSelectAllCheckbox() {
             const allChecked = Array.from(claimCheckboxes).every(checkbox => checkbox.checked);
-            selectAllCheckbox.checked = allChecked;
+            selectAllCheckbox && (selectAllCheckbox.checked = allChecked);
         }
         updateSelectAllCheckbox();
 
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
     })();
 
 
-   
+
 });
 
 

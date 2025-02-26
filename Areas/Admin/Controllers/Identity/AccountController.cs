@@ -24,33 +24,27 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
         private readonly IAccountRepository _accountRepository;
         private readonly IMailService _mailService;
         private readonly EmailTemplateService _templateService;
-
+        private readonly UserService _userService;
         public INotyfService _notifyService { get; }
-        public AccountController(ILogger<AccountController> logger, EmailTemplateService templateService, IMailService mailService, INotyfService notifyService, IAccountRepository accountRepository)
+
+        public AccountController(ILogger<AccountController> logger, IAccountRepository accountRepository, IMailService mailService, EmailTemplateService templateService, UserService userService, INotyfService notifyService)
         {
             _logger = logger;
             _accountRepository = accountRepository;
-            _notifyService = notifyService;
             _mailService = mailService;
             _templateService = templateService;
+            _userService = userService;
+            _notifyService = notifyService;
         }
-
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Login(string? returnUrl = null)
+        public async Task<IActionResult> Login(string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
-            if (User.Identity.IsAuthenticated)
+            if (await _userService.IsUserTypeAsync("Admin"))
             {
-                if (User.HasClaim("UserType", "Admin"))
-                {
-                    return RedirectToAction("", "Home", new { area = "Admin" });
-                }
-                else
-                {
-                    return RedirectToAction("", "Home");
-                }
+                return RedirectToAction("", "Home", new { area = "Admin" });
             }
 
             return View();
@@ -59,10 +53,15 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
+        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
             returnUrl ??= Url.Content("~/Admin");
             ViewData["ReturnUrl"] = returnUrl;
+
+            if (await _userService.IsUserTypeAsync("Admin"))
+            {
+                return RedirectToAction("", "Home", new { area = "Admin" });
+            }
 
             if (ModelState.IsValid)
             {
@@ -102,17 +101,11 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            if (User.Identity.IsAuthenticated)
+            if (await _userService.IsUserTypeAsync("Admin"))
             {
-                var userName = User.FindFirst(ClaimTypes.Name)?.Value;
-                var email = User.FindFirst(ClaimTypes.Email)?.Value;
-                var role = User.FindFirst(ClaimTypes.Role)?.Value;
-
-                await _accountRepository.LogoutAsync(role);
+                await _accountRepository.LogoutAsync(isAdmin: true);
             }
-
             return RedirectToAction("Login");
-
         }
 
         [HttpGet]
@@ -301,24 +294,24 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
         [HttpGet]
         public async Task<IActionResult> Profile()
         {
-            if (!User.Identity.IsAuthenticated)
+
+            if (await _userService.IsUserTypeAsync("Admin"))
             {
-                return RedirectToAction("Login");
+                var userPrincipal = await _userService.GetUserByUserTypeAsync("Admin");
+                if (userPrincipal != null)
+                {
+                    var email = userPrincipal.FindFirst(ClaimTypes.Email)?.Value;
+
+                    var userProfile = await _accountRepository.GetProfileByEmail(email);
+                    if (userProfile != null)
+                    {
+                        return View(userProfile);
+                    }
+
+                }
             }
 
-            var email = User.FindFirst(ClaimTypes.Email);
-            var user = await _accountRepository.FindByEmailAsync(email.Value.ToString());
-            var profileViewModel = new ProfileViewModel
-            {
-                Id = user.Id,
-                FullName = user.FullName,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                Address = user.Address,
-                DateOfBirth = user.BirthDate.Value,
-                AvatarUrl = user.AvatarUrl ?? null
-            };
-            return View(profileViewModel);
+            return RedirectToAction("Login");
 
         }
 
@@ -326,32 +319,30 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Profile(ProfileViewModel model)
         {
-            if (!User.Identity.IsAuthenticated)
+            if (!await _userService.IsUserTypeAsync("Admin"))
             {
-                _notifyService.Error("Đăng nhập để cập nhật tài khoản");
                 return RedirectToAction("Login");
             }
-            var email = User.FindFirst(ClaimTypes.Email);
-            var user = await _accountRepository.FindByEmailAsync(email.Value.ToString());
-            if(user == null)
+
+            var userPrincipal = await _userService.GetUserByUserTypeAsync("Admin");
+            if (userPrincipal == null)
             {
                 _notifyService.Error("Đã có lỗi xảy ra");
                 return RedirectToAction("Profile");
-            }
 
-            var emaildOld = user.Email;
+            }
+            var email = userPrincipal.FindFirst(ClaimTypes.Email)?.Value;
 
             if (ModelState.IsValid)
             {
-                var (IsSuccess, ErrorMessage, IsLogout) = await _accountRepository.UpdateProfile(emaildOld, model, true);
-            
-                if(IsSuccess)
+                var (IsSuccess, ErrorMessage, IsLogout) = await _accountRepository.UpdateProfile(email, model, true);
+
+                if (IsSuccess)
                 {
                     if (IsLogout)
                     {
                         _notifyService.Success("Đăng nhập lại để xác thực tài khoản");
-                        var role = User.FindFirst(ClaimTypes.Role)?.Value;
-                        await _accountRepository.LogoutAsync(role);
+                        await _accountRepository.LogoutAsync(isAdmin: true);
                         return RedirectToAction("Login");
 
                     }
@@ -367,7 +358,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
 
 
         [HttpGet]
-        public IActionResult ChangePassword ()
+        public IActionResult ChangePassword()
         {
             return View();
         }
@@ -376,14 +367,14 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(ProfilePasswordViewModel model)
         {
-
-            if (!User.Identity.IsAuthenticated)
+            if (!await _userService.IsUserTypeAsync("Admin"))
             {
                 _notifyService.Error("Đăng nhập để cập nhật tài khoản");
                 return RedirectToAction("Login");
             }
 
-            if(ModelState.IsValid)
+
+            if (ModelState.IsValid)
             {
                 var email = User.FindFirst(ClaimTypes.Email);
                 var user = await _accountRepository.FindByEmailAsync(email.Value.ToString());

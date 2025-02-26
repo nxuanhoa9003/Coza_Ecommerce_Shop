@@ -76,6 +76,22 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             return orderedRoles;
         }
 
+        public async Task<List<IdentityRole>> GetAllRolesAdminPageAsync()
+        {
+            var roles = await _roleManager.Roles.Where(x => x.Name.ToLower() != "customer").ToListAsync();
+
+            var orderedRoles = roles
+                .OrderBy(r => r.Name.ToLower() switch
+                {
+                    "admin" => 0,
+                    "customer" => 1,
+                    _ => 3
+                })
+                .ThenBy(r => r.Name)
+                .ToList();
+
+            return orderedRoles;
+        }
         public async Task<IdentityRole?> GetRoleByIdAsync(string id)
         {
             return await _roleManager.FindByIdAsync(id);

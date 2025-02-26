@@ -1,0 +1,161 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác Nhận Đơn Hàng</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #717fe0;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .order-info {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .order-info p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .table th, .table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            font-size: 14px;
+        }
+        
+        .table th {
+            background-color: #717fe0;
+            color: #ffffff;
+        }
+
+        .total {
+            text-align: right;
+            font-weight: bold;
+            margin-top: 15px;
+            font-size: 16px;
+        }
+
+        .footer {
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .product-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 5px;
+            object-fit: cover;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #28a745;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            Xác Nhận Đơn Hàng
+        </div>
+
+        <!-- Nội dung chính -->
+        <div class="content">
+            <p>Xin chào <strong>{CustomerName}</strong>,</p>
+            <p>Đơn hàng của bạn đã được xác nhận. Dưới đây là thông tin chi tiết:</p>
+
+            <!-- Thông tin đơn hàng -->
+            <div class="order-info">
+                <p><strong>Mã đơn hàng:</strong> #{OrderCode}</p>
+                <p><strong>Ngày đặt hàng:</strong> {OrderDate}</p>
+                <p><strong>Tình trạng:</strong> {OrderStatus}</p>
+                <p><strong>Tổng tiền:</strong> <span style="color: red;">{TotalAmount}</span></p>
+            </div>
+
+            <!-- Thông tin khách hàng -->
+            <h4>Thông Tin Khách Hàng</h4>
+            <div class="order-info">
+                <p><strong>Tên:</strong> {CustomerName}</p>
+                <p><strong>Email:</strong> {CustomerEmail}</p>
+                <p><strong>Số điện thoại:</strong> {CustomerPhone}</p>
+                <p><strong>Địa chỉ:</strong> {CustomerAddress}</p>
+            </div>
+
+            <!-- Danh sách sản phẩm -->
+            <h4>Danh Sách Sản Phẩm</h4>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Sản phẩm</th>
+                        <th>SL</th>
+                        <th>Giá</th>
+                        <th>Tổng</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {OrderItems}
+                </tbody>
+            </table>
+
+
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            &copy; 2025 Cửa hàng HShop. Mọi quyền được bảo lưu.
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,72 @@
+﻿@using Coza_Ecommerce_Shop.ViewModels.Account
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+        <a asp-controller="Home" asp-action="Index" class="stext-109 cl8 hov-cl1 trans-04">
+            Home
+            <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+        </a>
+
+        <span class="stext-109 cl4">
+            @ViewData["Title"]
+        </span>
+    </div>
+</div>
+
+
+<div class="m-t-23 p-b-140">
+    <div class="container mt-5" style="max-width: 400px;">
+        <h2 class="text-center mb-4">Đăng ký</h2>
+        <form method="post" asp-controller="Account" asp-action="Register">
+            <div class="mb-3">
+                <label asp-for="FullName" class="form-label"></label>
+                <input asp-for="FullName" class="form-control">
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="UserName" class="form-label"></label>
+                <input asp-for="UserName" class="form-control">
+                <span asp-validation-for="UserName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" type="email" class="form-control">
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" type="password" class="form-control">
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ConfirmPassword" class="form-label"></label>
+                <input asp-for="ConfirmPassword" type="password" class="form-control">
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn bg10 hov-btn3 cl0 w-100">Đăng ký</button>
+        </form>
+
+        <hr class="my-4">
+
+        <form method="get" asp-controller="Account" asp-action="RegisterWithGoogle">
+            <button type="submit" class="btn btn-danger w-100">
+                <img src="~/assets/images/icons/logo_google.jpg" alt="Google Icon" style="width: 20px; margin-right: 8px;">
+                Đăng ký với Google
+            </button>
+        </form>
+
+        <div class="text-center mt-3">
+            <span>Đã có tài khoản?</span>
+            <a asp-controller="Account" asp-action="Login" class="cl13 hov-cl1">Đăng nhập ngay</a>
+        </div>
+    </div>
+</div>

@@ -47,7 +47,8 @@ namespace Coza_Ecommerce_Shop.Migrations
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(256)")
+                        .UseCollation("SQL_Latin1_General_CP1_CS_AS");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
@@ -97,7 +98,8 @@ namespace Coza_Ecommerce_Shop.Migrations
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(256)")
+                        .UseCollation("SQL_Latin1_General_CP1_CS_AS");
 
                     b.HasKey("Id");
 
@@ -152,6 +154,58 @@ namespace Coza_Ecommerce_Shop.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Banner");
+                });
+
+            modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.Cart", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Carts");
+                });
+
+            modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.CartItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CartId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("VariantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CartId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("VariantId");
+
+                    b.ToTable("CartItems");
                 });
 
             modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.Category", b =>
@@ -351,27 +405,48 @@ namespace Coza_Ecommerce_Shop.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("CreateBy")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ModifierDate")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("TypePayment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -393,15 +468,23 @@ namespace Coza_Ecommerce_Shop.Migrations
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("VariantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("OrderId", "ProductId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("VariantId");
 
                     b.ToTable("OrderDetail");
                 });
@@ -689,6 +772,9 @@ namespace Coza_Ecommerce_Shop.Migrations
                         .IsRequired()
                         .HasColumnType("int");
 
+                    b.Property<int>("ReservedStock")
+                        .HasColumnType("int");
+
                     b.Property<string>("SKU")
                         .HasColumnType("nvarchar(450)");
 
@@ -742,6 +828,26 @@ namespace Coza_Ecommerce_Shop.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Subscribe");
+                });
+
+            modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.Transaction", b =>
+                {
+                    b.Property<string>("TransactionId")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("TransactionId");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -877,6 +983,44 @@ namespace Coza_Ecommerce_Shop.Migrations
                     b.ToTable("UserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.Cart", b =>
+                {
+                    b.HasOne("Coza_Ecommerce_Shop.Models.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.CartItem", b =>
+                {
+                    b.HasOne("Coza_Ecommerce_Shop.Models.Entities.Cart", "Cart")
+                        .WithMany("CartItems")
+                        .HasForeignKey("CartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Coza_Ecommerce_Shop.Models.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Coza_Ecommerce_Shop.Models.Entities.ProductVariant", "Variant")
+                        .WithMany()
+                        .HasForeignKey("VariantId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Cart");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Variant");
+                });
+
             modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.New", b =>
                 {
                     b.HasOne("Coza_Ecommerce_Shop.Models.Entities.Category", "Category")
@@ -904,7 +1048,7 @@ namespace Coza_Ecommerce_Shop.Migrations
                     b.HasOne("Coza_Ecommerce_Shop.Models.Entities.Order", "Order")
                         .WithMany("OrderDetails")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Coza_Ecommerce_Shop.Models.Entities.Product", "Product")
@@ -913,9 +1057,17 @@ namespace Coza_Ecommerce_Shop.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Coza_Ecommerce_Shop.Models.Entities.ProductVariant", "Variant")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("VariantId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.Navigation("Order");
 
                     b.Navigation("Product");
+
+                    b.Navigation("Variant");
                 });
 
             modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.Post", b =>
@@ -975,6 +1127,17 @@ namespace Coza_Ecommerce_Shop.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.Transaction", b =>
+                {
+                    b.HasOne("Coza_Ecommerce_Shop.Models.Entities.Order", "Order")
+                        .WithOne("Transaction")
+                        .HasForeignKey("Coza_Ecommerce_Shop.Models.Entities.Transaction", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -1026,6 +1189,11 @@ namespace Coza_Ecommerce_Shop.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.Cart", b =>
+                {
+                    b.Navigation("CartItems");
+                });
+
             modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.Category", b =>
                 {
                     b.Navigation("News");
@@ -1038,6 +1206,9 @@ namespace Coza_Ecommerce_Shop.Migrations
             modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.Order", b =>
                 {
                     b.Navigation("OrderDetails");
+
+                    b.Navigation("Transaction")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.Product", b =>
@@ -1052,6 +1223,11 @@ namespace Coza_Ecommerce_Shop.Migrations
                     b.Navigation("CategoryChildren");
 
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("Coza_Ecommerce_Shop.Models.Entities.ProductVariant", b =>
+                {
+                    b.Navigation("OrderDetails");
                 });
 #pragma warning restore 612, 618
         }

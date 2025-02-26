@@ -8,6 +8,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Interfaces
 {
     public interface IAccountRepository
     {
+        Task<bool> CheckIsLockedOutAsync(AppUser? user);
         Task<bool> CheckRoleUser(AppUser? user, string role);
         Task <AppUser?> FindByEmailAsync(string email);
         Task <AppUser?> FindByIdAsync(string Id);
@@ -16,8 +17,8 @@ namespace Coza_Ecommerce_Shop.Repositories.Interfaces
         Task<IList<Claim>> GetClaimsByUserRolesAsync(AppUser user);
 
         Task<(bool IsSuccess, string ErrorMessage, AppUser? user)> LoginAsync(LoginViewModel model, bool isAdmin = false);
-        Task LogoutAsync(string TypeCookieAccount);
-        Task<(bool IsSuccess, string ErrorMessage)> RegisterAsync(RegisterViewModel model);
+        Task LogoutAsync(bool isAdmin = false);
+        Task<(bool IsSuccess, string ErrorMessage, AppUser? user)> RegisterAsync(RegisterViewModel model);
         Task<bool> ConfirmEmailAsync(string userId, string token);
 
         Task <string> GenerateEmailVerificationTokenAsync(AppUser user);
@@ -32,6 +33,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Interfaces
 
         Task<EmployeeViewModel?> GetEmployeebyId(string id);
 
+        Task<ProfileViewModel?> GetProfileByEmail(string email);
         Task<(bool IsSuccess, string ErrorMessage, bool IsLogout)> UpdateProfile(string emailOld, ProfileViewModel model, bool IsPageAdmin = false);
         Task<(bool IsSuccess, string ErrorMessage)> ChangePassword(AppUser user, ProfilePasswordViewModel model);
 

@@ -69,41 +69,41 @@
 
         <li class='menu-item@(currentPage.Contains("/admin/category") ? " active" : "")'>
            
-            <a asp-controller="Category" asp-action="Index" class="menu-link">
+            <a asp-area="Admin" asp-controller="Category" asp-action="Index" class="menu-link">
                 <i class='menu-icon  bx bx-menu'></i>
                 <div data-i18n="Danh mục menu">Danh mục</div>
             </a>
         </li>
 
         <!-- Layouts -->
-        <li class='menu-item@(currentPage.StartsWith("/admin/productCategories")  || currentPage.Contains("/admin/products") ? " active open" : "")'>
+        <li class='menu-item@(currentPage.StartsWith("/admin/productcategories")  || currentPage.Contains("/admin/products") ? " active open" : "")'>
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-category"></i>
                 <div data-i18n="Quản lý sản phẩm">Quản lý sản phẩm</div>
             </a>
 
             <ul class="menu-sub">
-                <li class='menu-item@(currentPage.Contains("/admin/productCategories") ? " active" : "")'>
-                    <a asp-controller="ProductCategories" asp-action="Index" class="menu-link">
+                <li class='menu-item@(currentPage.Contains("/admin/productcategories") ? " active" : "")'>
+                    <a asp-area="Admin" asp-controller="ProductCategories" asp-action="Index" class="menu-link">
                         <div data-i18n="Danh mục sản phẩm">Danh mục sản phẩm</div>
                     </a>
                 </li>
                 <li class='menu-item@(currentPage.Contains("/admin/products") ? " active" : "")'>
-                    <a asp-controller="Products" asp-action="Index" class="menu-link">
+                    <a asp-area="Admin" asp-controller="Products" asp-action="Index" class="menu-link">
                         <div data-i18n="Sản phẩm">Sản phẩm</div>
                     </a>
                 </li>
             </ul>
         </li>
 
-        <li class="menu-item">
-            <a class="menu-link menu-toggle">
+        <li class='menu-item @(currentPage.StartsWith("/admin/order") ? " active open" : "")'>
+            <a href="javascript:void(0)" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-shopping-bag"></i>
                 <div data-i18n="Quản lý đơn hàng">Quản lý đơn hàng</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="pages-account-settings-account.html" class="menu-link">
+                <li class='menu-item@(currentPage.Contains("/admin/order") ? " active" : "")'>
+                    <a asp-area="Admin" asp-controller="Order" asp-action="Index" class="menu-link">
                         <div data-i18n="Đơn hàng">Đơn hàng</div>
                     </a>
                 </li>
@@ -111,14 +111,14 @@
             </ul>
         </li>
         <li class='menu-item@(currentPage.StartsWith("/admin/news") ? " active open" : "")'>
-            <a asp-controller="News" asp-action="Index" class="menu-link">
+            <a asp-area="Admin" asp-controller="News" asp-action="Index" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-news"></i>
                 <div data-i18n="Tin tức">Tin tức</div>
             </a>
         </li>
 
         <li class='menu-item@(currentPage.StartsWith("/admin/posts") ? " active open" : "")'>
-            <a asp-controller="Posts" asp-action="Index" class="menu-link">
+            <a asp-area="Admin" asp-controller="Posts" asp-action="Index" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-book-content"></i>
                 <div data-i18n="Bài viết">Bài viết</div>
             </a>

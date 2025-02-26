@@ -39,7 +39,7 @@
             <h2>Xác thực tài khoản</h2>
             <p>Chúng tôi đã gửi mã xác thực đến email <b>@Model.Email</b>. Vui lòng kiểm tra hộp thư và nhập mã bên dưới:</p>
 
-            <form method="post" asp-controller="Account" asp-action="VerifyAccount">
+            <form method="post" asp-area="Admin" asp-controller="Account" asp-action="VerifyAccount">
                 <input type="hidden" asp-for="Email" />
 
                 <div class="mb-3">
@@ -50,7 +50,7 @@
                 <button type="submit" class="btn btn-success">Xác thực</button>
             </form>
 
-            <form method="post" asp-controller="Account" asp-action="SendVerificationCode">
+            <form method="post" asp-area="Admin" asp-controller="Account" asp-action="SendVerificationCode">
                 <input type="hidden" asp-for="Email" value="@Model.Email" />
                 <input type="hidden" asp-for="IsResend" value="@Model.IsResend" />
                 <button type="submit" class="resend-btn">Gửi lại mã xác thực</button>

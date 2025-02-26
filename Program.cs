@@ -30,8 +30,6 @@ namespace Coza_Ecommerce_Shop
                 option.UseSqlServer(strconnect);
             });
 
-
-            
             // Add services Identity
             builder.Services.AddIdentity<AppUser, IdentityRole>()
                     .AddEntityFrameworkStores<AppDbContext>()
@@ -73,24 +71,36 @@ namespace Coza_Ecommerce_Shop
             });
 
 
-
-
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultScheme = "CustomerScheme"; // Scheme mặc định
+                options.DefaultSignInScheme = "CustomerScheme";
             })
             .AddCookie("CustomerScheme", options =>
             {
                 options.LoginPath = "/login/";
                 options.LogoutPath = "/logout/";
                 options.AccessDeniedPath = "/access-denied";
+                options.Cookie.Name = "CustomerAuth";
             })
             .AddCookie("AdminScheme", options =>
             {
                 options.LoginPath = "/Admin/Account/Login";
                 options.LogoutPath = "/Admin/logout/";
                 options.AccessDeniedPath = "/Admin/AccessDenied";
+                options.Cookie.Name = "AdminAuth";
+            })
+            .AddGoogle("GoogleScheme",options =>
+            {
+                IConfigurationSection googleAuthNSection = builder.Configuration.GetSection("Authentication:Google");
+                options.ClientId = googleAuthNSection["ClientId"];
+                options.ClientSecret = googleAuthNSection["ClientSecret"];
+                options.CallbackPath = "/dang-nhap-tu-google";
+                options.SignInScheme = "CustomerScheme";
             });
+
+            builder.Services.AddHttpContextAccessor();
+
 
             // Add services MailSettings
             builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));

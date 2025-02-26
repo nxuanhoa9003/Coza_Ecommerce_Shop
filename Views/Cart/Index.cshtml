@@ -1,0 +1,131 @@
+﻿@using Coza_Ecommerce_Shop.ViewModels.Cart;
+@using System.Globalization
+@model ViewCartViewModel
+@{
+    var cartitems = Model.cartitems;
+}
+
+<!-- breadcrumb -->
+<div class="container">
+    <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+        <a asp-controller="Home" asp-action="Index" class="stext-109 cl8 hov-cl1 trans-04">
+            Home
+            <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+        </a>
+
+        <span class="stext-109 cl4">
+            Shoping Cart
+        </span>
+    </div>
+</div>
+
+
+<!-- Shoping Cart -->
+<form method="post" asp-controller="Order" asp-action="request-checkout" class="bg0 p-t-75 p-b-85">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-xl-12 m-lr-auto m-b-50">
+                <div class="m-r--38 m-lr-0-xl w-100">
+                    <div class="wrap-table-shopping-cart">
+                        <table class="table-shopping-cart">
+                            <tr class="table_head">
+                                
+                                <th class="column-0">
+                                    <input type="checkbox" class="form-check mb-0" id="checkAll">
+                                </th>
+                                <th class="column-1">Product</th>
+                                <th class="column-2"></th>
+                                <th class="column-3">Price</th>
+                                <th class="column-4 text-center">Quantity</th>
+                                <th class="column-5">Total</th>
+                                <th class="column-6">Actions</th>
+                            </tr>
+                            @foreach (var item in cartitems)
+                            {
+                                var price = item.price.ToString("#,0", new CultureInfo("vi-VN")) + "đ";
+                                var total = item.total.ToString("#,0", new CultureInfo("vi-VN")) + "đ";
+
+                                <tr class="table_row" data-product-sku="@item.productSku" data-variant-sku="@item.variantSku">
+
+                                    <td class="column-0">
+                                        <input type="checkbox" class="item-check form-check" name="cartitem" value="@item.CartItemId">
+                                    </td>
+                                    <td class="column-1">
+                                        <div class="how-itemcart1">
+                                            <img src="@item.productImage" alt="@item.productName">
+                                        </div>
+                                    </td>
+
+                                    <td class="column-2">
+                                        <span class="fs-15">@item.productName</span>
+                                        <br>
+                                        <span class="fs-12">Color: @item.color</span>
+                                        <br>
+                                        <span class="fs-12">Size: @item.size</span>
+
+                                    </td>
+
+                                    <td class="column-3" data-price="@item.price">@price</td>
+
+                                    <td class="column-4">
+                                        <div class="wrap-num-product flex-w" style="margin: 0 auto">
+                                            <button type="button" class="btn-num-product-decrease cl8 hov-btn3 trans-04 flex-c-m">
+                                                <i class="fs-16 zmdi zmdi-minus"></i>
+                                            </button>
+
+                                            <input class="mtext-104 cl3 txt-center num-product quantity-input" type="number" name="num-product1" value="@item.quantity" min="1">
+
+                                            <button type="button" class="btn-num-product-increase cl8 hov-btn3 trans-04 flex-c-m">
+                                                <i class="fs-16 zmdi zmdi-plus"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+
+                                    <td class="column-5 totalItem" data-total="@item.total">@total</td>
+
+                                    <td class="column-6">
+                                        <button type="button" class="btn btn-danger btn-sm remove-item" data-product-sku="@item.productSku" data-variant-sku="@item.variantSku">
+                                            <i class="zmdi zmdi-delete"></i> Remove
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+
+                    </div>
+
+                    <div class="flex-w flex-sb-m bor15 p-t-18 p-b-15 p-lr-40 p-lr-15-sm">
+                        <div class="flex-w flex-m m-r-20 m-tb-5">
+                            <input class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-r-10 m-tb-5" type="text" name="codecoupon" placeholder="Coupon Code">
+
+                            <div class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5">
+                                Apply coupon
+                            </div>
+                        </div>
+
+                        <div class="flex-w flex-t p-b-13">
+                            <div class="mr-5">
+                                <span class="stext-110 cl2">
+                                    Subtotal:
+                                </span>
+                            </div>
+
+                            <div class="size-208">
+                                <span class="mtext-110 cl2 SubCartTotal">
+                                    @(Model.totalPrice.ToString("#,0", new CultureInfo("vi-VN")) + "đ")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="flex-c-m mt-5 stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
+                        Proceed to Checkout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+
+

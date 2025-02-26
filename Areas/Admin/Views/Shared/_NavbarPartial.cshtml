@@ -1,4 +1,16 @@
 ﻿@using System.Security.Claims
+@using Coza_Ecommerce_Shop.Services
+
+@inject UserService UserService
+
+@{
+    var adminUser = await UserService.GetUserBySchemeAsync("AdminScheme");
+    var fullName = adminUser?.FindFirst("FullName")?.Value;
+    var role = adminUser?.FindFirst(ClaimTypes.Role)?.Value;
+    var avatarUrl = adminUser?.FindFirst("AvatarUrl")?.Value;
+}
+
+
 <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
      id="layout-navbar">
     <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
@@ -26,11 +38,8 @@
             <!-- User -->
             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                 
-               @if (User.Identity.IsAuthenticated)
+               @if (adminUser != null)
                 {
-                    var fullName = User.FindFirst("FullName")?.Value;
-                    var role = User.FindFirst(ClaimTypes.Role)?.Value;
-                    var avatarUrl = User.FindFirst("AvatarUrl")?.Value;
                     <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                         <div class="avatar avatar-online" >
                             <img src="@avatarUrl" alt class="w-px-40 h-auto rounded-circle w-100 h-100" style="object-fit: cover" />

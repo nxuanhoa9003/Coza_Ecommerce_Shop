@@ -1,0 +1,31 @@
+﻿@using Coza_Ecommerce_Shop.ViewModels.Account
+@model RegisterWithGoogleViewModel
+@{
+    ViewData["Title"] = "Enter Username";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="m-t-23 p-b-140">
+    <div class="container mt-5" style="max-width: 400px;">
+        <h3 class="text-center mb-4">Nhập tên người dùng</h3>
+        <form method="post" asp-controller="Account" asp-action="RegisterWithGoogle">
+            <input type="hidden" asp-for="Email" />
+            <input type="hidden" asp-for="ProviderKey" />
+            <div class="mb-3">
+                <label asp-for="Username" class="form-label"></label>
+                <input asp-for="Username" class="form-control">
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="FullName" class="form-label"></label>
+                <input asp-for="FullName" class="form-control">
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn bg10 hov-btn3 cl0 w-100">Tiếp tục</button>
+        </form>
+
+    </div>
+
+</div>
+

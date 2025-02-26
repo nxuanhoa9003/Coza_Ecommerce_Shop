@@ -1,0 +1,24 @@
+﻿<script>
+    $(document).ready(function () {
+        $('#orderStatus').change(function () {
+            var orderId = $("input[name='orderId']").val();
+            var newStatus = $(this).val();
+
+            if (newStatus) {
+                if (confirm("Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng?")) {
+                    $.ajax({
+                        url: '/admin/order/update-status-order',
+                        type: 'POST',
+                        data: { orderId: orderId, newStatus: newStatus },
+                        success: function (response) {
+                            $('#updateMessage').html('<span class="text-success">Cập nhật thành công!</span>');
+                        },
+                        error: function (xhr) {
+                            $('#updateMessage').html('<span class="text-danger">' + xhr.responseText + '</span>');
+                        }
+                    });
+                }
+            }
+        });
+    });
+</script>

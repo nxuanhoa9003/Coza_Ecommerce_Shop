@@ -36,6 +36,11 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             _context = context;
         }
 
+        public async Task<bool> CheckIsLockedOutAsync(AppUser? user)
+        {
+            if (user == null) return false;
+            return await _userManager.IsLockedOutAsync(user);
+        }
         public async Task<bool> CheckRoleUser(AppUser? user, string role)
         {
             return await _userManager.IsInRoleAsync(user, role);
@@ -58,6 +63,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             {
                 return (false, "Tài khoản không tồn tại.", null);
             }
+
             var isPasswordValid = await _userManager.CheckPasswordAsync(user, model.Password);
             if (!isPasswordValid)
             {
@@ -71,7 +77,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             // Xác định loại quyền cần kiểm tra
             string requiredPermission = isAdmin ? "AccessAdminPage" : "AccessCustomerPage";
 
-            if (!await HasPermissionAsync(roles, requiredPermission))
+            if (!await HasClaimPermissionAsync(user, requiredPermission))
             {
                 return (false, $"Bạn không có quyền truy cập vào {(isAdmin ? "trang quản trị" : "trang khách hàng")}.", null);
             }
@@ -85,9 +91,10 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             var result = await _signInManager.PasswordSignInAsync(
                 user.UserName, model.Password, model.RememberMe, lockoutOnFailure: true);
 
-
             if (result.Succeeded)
             {
+                string UserType = isAdmin ? "Admin" : "Customer";
+
                 var claims = new List<Claim>
                 {
                     new Claim("Id", user.Id),
@@ -95,7 +102,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
                     new Claim("FullName", user.FullName),
                     new Claim(ClaimTypes.Email, user.Email),
                     new Claim("AvatarUrl", user.AvatarUrl ?? "/Uploads/avt_empty.jpg"),
-                    new Claim("UserType", isAdmin ? "Admin" : "Customer")
+                    new Claim("UserType", UserType),
                 };
                 foreach (var role in roles)
                 {
@@ -108,7 +115,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
                 var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 
                 await _httpContextAccessor.HttpContext.SignInAsync(authScheme, claimsPrincipal,
-                        new AuthenticationProperties { IsPersistent = true });
+                        new AuthenticationProperties { IsPersistent = model.RememberMe });
 
                 return (true, "Đăng nhập thành công!", null);
             }
@@ -119,61 +126,76 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
         }
 
 
-        private async Task<bool> HasPermissionAsync(IEnumerable<string> roles, string requiredPermission)
+        private async Task<bool> HasClaimPermissionAsync(AppUser user, string requiredPermission)
         {
-            var roleList = await _roleManager.Roles
-                        .Where(r => roles.Contains(r.Name))
-                        .ToListAsync();
+            var claims = await _userManager.GetClaimsAsync(user);
 
-            // Kiểm tra quyền trong mỗi role
-            foreach (var role in roleList)
-            {
-                var roleClaims = await _roleManager.GetClaimsAsync(role);
-                if (roleClaims.Any(c => c.Type == "Permission" && c.Value == requiredPermission))
-                {
-                    return true; // Nếu có quyền cần thiết, trả về true
-                }
-            }
-
-            // Nếu không tìm thấy quyền trong bất kỳ role nào
-            return false;
+            return claims.Any(c => c.Type == "UserAccess" && c.Value == requiredPermission);
         }
 
 
 
-        public async Task LogoutAsync(string TypeCookieAccount)
+        public async Task LogoutAsync(bool isAdmin = false)
         {
+            string TypeCookieAccount = isAdmin ? "admin" : "customer";
+
             var httpContext = _httpContextAccessor.HttpContext;
-            var typecookie = TypeCookieAccount.ToLower().Equals("admin")
-                || TypeCookieAccount.ToLower().Equals("employee") ? "AdminScheme" : "CustomerScheme";
+            var typecookie = TypeCookieAccount.ToLower().Equals("admin") ? "AdminScheme" : "CustomerScheme";
+            var cookieName = TypeCookieAccount.ToLower().Equals("admin") ? "AdminAuth" : "CustomerAuth";
             await httpContext.SignOutAsync(typecookie);
-            httpContext.Response.Cookies.Delete($".AspNetCore.{typecookie}");
-            await _signInManager.SignOutAsync();
+            httpContext.Response.Cookies.Delete(cookieName);
         }
 
-        public async Task<(bool IsSuccess, string ErrorMessage)> RegisterAsync(RegisterViewModel model)
+        public async Task<(bool IsSuccess, string ErrorMessage, AppUser? user)> RegisterAsync(RegisterViewModel model)
         {
-            var user = new AppUser
-            {
-                UserName = model.UserName,
-                Email = model.Email
-            };
+            var existingUser = await _userManager.Users
+                .FirstOrDefaultAsync(u => u.UserName == model.UserName || u.Email == model.Email);
 
-            var result = await _userManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded)
+            if (existingUser != null)
             {
-                return (false, string.Join(", ", result.Errors.Select(e => e.Description)));
+                var errorMessage = existingUser.UserName == model.UserName
+                    ? "Tên đăng nhập đã tồn tại."
+                    : "Email đã tồn tại.";
+                return (false, errorMessage, null);
             }
 
-            // Tạo token xác nhận email
-            /*var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var confirmationLink = $"{requestUrl}/Identity/Account/ConfirmEmail?userId={user.Id}&token={Uri.EscapeDataString(token)}";
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                var user = new AppUser
+                {
+                    UserName = model.UserName,
+                    Email = model.Email,
+                    FullName = model.FullName,
+                    EmailConfirmed = false,
+                };
 
-            // Gửi email xác nhận
-            await _emailSender.SendEmailAsync(user.Email, "Xác nhận tài khoản",
-                $"Vui lòng nhấp vào liên kết để xác nhận tài khoản: <a href='{confirmationLink}'>Xác nhận Email</a>");
-            */
-            return (true, "Đăng ký tài khoản thành công!");
+                var result = await _userManager.CreateAsync(user, model.Password);
+                if (!result.Succeeded)
+                {
+                    return (false, string.Join(", ", result.Errors.Select(e => e.Description)), null);
+                }
+
+
+                var resultRole = await _userManager.AddToRoleAsync(user, "Customer");
+
+                if (!resultRole.Succeeded)
+                {
+                    await _userManager.DeleteAsync(user);
+                    await transaction.RollbackAsync();
+                }
+
+                var newClaim = new Claim("UserAccess", "AccessCustomerPage");
+                var resultClaim = await _userManager.AddClaimAsync(user, newClaim);
+
+                if (!resultClaim.Succeeded)
+                {
+                    //Xóa user ngay lập tức nếu claim lỗi
+                    await _userManager.DeleteAsync(user);
+                    await transaction.RollbackAsync();
+                }
+                await transaction.CommitAsync();
+                return (true, "Đăng ký tài khoản thành công!", user);
+            }
         }
 
 
@@ -218,6 +240,12 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
                 return (false, "Email đã tồn tại.");
             }
 
+            var role = await _roleManager.FindByIdAsync(employeeViewModel.Role);
+            if (role == null || role.Name.ToLower().Equals("customer"))
+            {
+                return (false, "Vai trò không hợp lệ, vui lòng chọn vai trò hợp lệ.");
+            }
+
             var user = new AppUser
             {
                 UserName = employeeViewModel.UserName,
@@ -235,19 +263,19 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
                 return (false, string.Join(", ", result.Errors.Select(e => e.Description)));
             }
 
-            var role = await _roleManager.FindByIdAsync(employeeViewModel.Role);
-            if (role != null)
+            var newClaim = new Claim("UserAccess", "AccessAdminPage");
+            var resultClaim = await _userManager.AddClaimAsync(user, newClaim);
+
+            if (!resultClaim.Succeeded)
             {
-                var roleResult = await _userManager.AddToRoleAsync(user, role.Name);
-                if (!roleResult.Succeeded)
-                {
-                    string errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
-                    return (false, $"Tài khoản được tạo nhưng không thể gán vai trò: {errors}");
-                }
+                return (false, $"Không thể thêm claim: {string.Join(", ", resultClaim.Errors.Select(e => e.Description))}");
             }
-            else
+
+            var roleResult = await _userManager.AddToRoleAsync(user, role.Name);
+            if (!roleResult.Succeeded)
             {
-                return (false, $"Tài khoản được tạo nhưng không thể gán vai trò đã chọn");
+                string errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+                return (false, $"Tài khoản được tạo nhưng không thể gán vai trò: {errors}");
             }
             return (true, "Tạo tài khoản nhân viên thành công!");
 
@@ -275,6 +303,26 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
 
         }
 
+        public async Task<ProfileViewModel?> GetProfileByEmail(string email)
+        {
+            if (string.IsNullOrEmpty(email)) return null;
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return null;
+
+            var profile = new ProfileViewModel()
+            {
+                Id = user.Id,
+                FullName = user.FullName,
+                Address = user.Address,
+                Email = user.Email,
+                AvatarUrl = user.AvatarUrl,
+                DateOfBirth = user.BirthDate,
+                PhoneNumber = user.PhoneNumber
+            };
+            return profile;
+        }
+
         public async Task<(bool IsSuccess, string ErrorMessage)> UpdateAccountEmployee(EmployeeViewModel employeeViewModel)
         {
             var user = await _userManager.FindByIdAsync(employeeViewModel.Id);
@@ -300,6 +348,24 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
                 return (false, "Email đã được đăng ký trong tài khoản khác.");
             }
 
+            var roleNew = await _roleManager.FindByIdAsync(employeeViewModel.Role);
+            if (roleNew == null || roleNew.Name.ToLower().Equals("customer"))
+            {
+                return (false, "Vai trò không hợp lệ, vui lòng chọn vai trò hợp lệ.");
+            }
+
+            var existingClaims = await _userManager.GetClaimsAsync(user);
+            if (!existingClaims.Any(c => c.Type == "UserAccess" && c.Value == "AccessAdminPage"))
+            {
+                var claimResult = await _userManager.AddClaimAsync(user, new Claim("UserAccess", "AccessAdminPage"));
+                if (!claimResult.Succeeded)
+                {
+                    return (false, $"Không thể thêm claim: {string.Join(", ", claimResult.Errors.Select(e => e.Description))}");
+                }
+            }
+
+
+
             user.UserName = employeeViewModel.UserName;
             if (user.Email != employeeViewModel.Email)
             {
@@ -317,6 +383,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
                 return (false, string.Join(", ", updateResult.Errors.Select(e => e.Description)));
             }
 
+
             if (!string.IsNullOrWhiteSpace(employeeViewModel.Password))
             {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -329,30 +396,23 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             }
 
             var roleOld = await _userManager.GetRolesAsync(user);
-            if (!string.IsNullOrEmpty(employeeViewModel.Role) && !roleOld.Contains(employeeViewModel.Role))
+            if (!string.IsNullOrEmpty(employeeViewModel.Role) && !roleOld.Contains(roleNew.Name))
             {
-
-                var removeRoleResult = await _userManager.RemoveFromRolesAsync(user, roleOld);
-                if (!removeRoleResult.Succeeded)
+                if (roleOld.Count > 0)
                 {
-                    string errors = string.Join(", ", removeRoleResult.Errors.Select(e => e.Description));
-                    return (false, $"Không thể xóa vai trò cũ: {errors}");
-                }
-
-                var role = await _roleManager.FindByIdAsync(employeeViewModel.Role);
-                if (role != null)
-                {
-                    var roleResult = await _userManager.AddToRoleAsync(user, role.Name);
-                    if (!roleResult.Succeeded)
+                    var removeRoleResult = await _userManager.RemoveFromRolesAsync(user, roleOld);
+                    if (!removeRoleResult.Succeeded)
                     {
-
-                        string errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
-                        return (false, $"Tài khoản được tạo nhưng không thể gán vai trò: {errors}");
+                        string errors = string.Join(", ", removeRoleResult.Errors.Select(e => e.Description));
+                        return (false, $"Không thể xóa vai trò cũ: {errors}");
                     }
                 }
-                else
+
+                var roleResult = await _userManager.AddToRoleAsync(user, roleNew.Name);
+                if (!roleResult.Succeeded)
                 {
-                    return (false, $"Tài khoản được tạo nhưng không thể gán vai trò đã chọn");
+                    string errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+                    return (false, $"Tài khoản được tạo nhưng không thể gán vai trò: {errors}");
                 }
             }
 
@@ -420,17 +480,18 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
                 return (false, "Email không tồn tại.", null);
             }
 
-            var roles = await _userManager.GetRolesAsync(user);
+            var claimsAcess = await _userManager.GetClaimsAsync(user);
             if (IsAdmin)
             {
-                if (roles.Count == 0 || (!roles.Contains("Admin") && !roles.Contains("Employee")))
+                if (!claimsAcess.Any(c => c.Type == "UserAccess" && c.Value == "AccessAdminPage"))
                 {
                     return (false, "Email không thể truy cập trang Admin.", null);
                 }
             }
             else
             {
-                if (roles.Contains("Admin") || roles.Contains("Employee"))
+                //AccessCustomerPage
+                if (!claimsAcess.Any(c => c.Type == "UserAccess" && c.Value == "AccessCustomerPage"))
                 {
                     return (false, "Email không thể truy cập trang Khách hàng.", null);
                 }
@@ -524,7 +585,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             user.PhoneNumber = model.PhoneNumber;
             user.Address = model.Address;
             user.BirthDate = model.DateOfBirth;
-            
+
             if (model.fileImage != null && model.fileImage.Length > 0)
             {
                 string folder = IsPageAdmin ? "ProfileAdmin" : "ProfileCustomer";
@@ -534,8 +595,8 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
                     Utilities.DeleteImage(user.AvatarUrl);
                 }
 
-                user.AvatarUrl = await Utilities.UploadFileAsync(model.fileImage, "ProfileAdmin");
-                
+                user.AvatarUrl = await Utilities.UploadFileAsync(model.fileImage, folder);
+
             }
 
             var result = await _userManager.UpdateAsync(user);
@@ -633,6 +694,6 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
         }
 
 
-       
+
     }
 }

@@ -86,7 +86,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
         [Authorize(Policy = "CreateUser")]
         public async Task<IActionResult> Create()
         {
-            var roles = await _roleRepository.GetAllRolesAsync();
+            var roles = await _roleRepository.GetAllRolesAdminPageAsync();
             ViewBag.Roles = new SelectList(roles, "Id", "Name");
             return View();
         }
@@ -96,7 +96,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([FromForm] EmployeeViewModel employeeViewModel)
         {
-            var roles = await _roleRepository.GetAllRolesAsync();
+            var roles = await _roleRepository.GetAllRolesAdminPageAsync();
             ViewBag.Roles = new SelectList(roles, "Id", "Name", employeeViewModel.Role);
 
             if (ModelState.IsValid)
@@ -128,7 +128,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
             {
                 return NotFound();
             }
-            var roles = await _roleRepository.GetAllRolesAsync();
+            var roles = await _roleRepository.GetAllRolesAdminPageAsync();
             var IdRoleSelected = roles.FirstOrDefault(r => r.Name == user.Role)?.Id;
             user.Role = IdRoleSelected;
             ViewBag.Roles = new SelectList(roles, "Id", "Name", IdRoleSelected);
@@ -144,6 +144,18 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
             {
                 return NotFound();
             }
+
+
+            var user = await _accountRepository.GetEmployeebyId(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var roles = await _roleRepository.GetAllRolesAdminPageAsync();
+            var IdRoleSelected = roles.FirstOrDefault(r => r.Name == user.Role)?.Id;
+            user.Role = IdRoleSelected;
+            ViewBag.Roles = new SelectList(roles, "Id", "Name", IdRoleSelected);
+
 
             ModelState.Remove("Password");
             ModelState.Remove("ConfirmPassword");

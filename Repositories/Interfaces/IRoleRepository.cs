@@ -7,6 +7,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Interfaces
     public interface IRoleRepository
     {
         Task<List<IdentityRole>> GetAllRolesAsync();
+        Task<List<IdentityRole>> GetAllRolesAdminPageAsync();
         Task<IdentityRole?> GetRoleByIdAsync(string id);
         Task<(bool IsSuccess, string ErrorMessage)> CreateRoleAsync(string roleName);
         Task<(bool IsSuccess, string ErrorMessage)> UpdateRoleAsync(IdentityRole role);

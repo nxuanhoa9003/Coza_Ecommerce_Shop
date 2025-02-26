@@ -1,0 +1,118 @@
+﻿@using Coza_Ecommerce_Shop.Models.Helper
+@model IEnumerable<Coza_Ecommerce_Shop.Models.Entities.Order>
+
+
+<!-- breadcrumb -->
+<div class="container">
+    <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+        <a asp-controller="Home" asp-action="Index" class="stext-109 cl8 hov-cl1 trans-04">
+            Home
+            <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+        </a>
+
+        <span class="stext-109 cl4">
+            Order
+        </span>
+    </div>
+</div>
+
+<div class="container py-5 m-t-23 p-b-140">
+    <h3 class="text-center mb-4">Danh sách đơn hàng</h3>
+    <table class="table table-striped table-bordered text-center">
+        <thead class="table-dark">
+            <tr>
+                <th class="text-center">Mã đơn hàng</th>
+                <th class="text-center">Ngày đặt</th>
+                <th class="text-center">Tổng tiền</th>
+                <th class="text-center">Trạng thái</th>
+                <th class="text-center">Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var item in Model)
+            {
+                <tr>
+                    <td>@item.Code</td>
+                    <td>@item.CreatedAt</td>
+                    <td class="text-success fw-bold">@item.TotalAmount</td>
+                    <td><span class="@OrderStatusHelper.GetBadgeClass(item.Status)">@item.Status</span></td>
+                    <td>
+                        <a asp-controller="order" asp-action="detail" asp-route-id="@item.Id" class="btn btn-sm cl0 bg10 bor5 hov-btn3 trans-04">Xem chi tiết</a>
+                    </td>
+                </tr>
+            }
+            <tr>
+                <td>#12345</td>
+                <td>25/02/2025</td>
+                <td class="text-success fw-bold">1.500.000đ</td>
+                <td><span class="badge bg-secondary">Chờ xác nhận</span></td>
+                <td>
+                    <a href="/order/detail/12345" class="btn btn-sm cl0 bg10 bor5 hov-btn3 trans-04">Xem chi tiết</a>
+                </td>
+            </tr>
+            <tr>
+                <td>#12346</td>
+                <td>24/02/2025</td>
+                <td class="text-success fw-bold">750.000đ</td>
+                <td><span class="badge bg-info text-white">Đang chờ thanh toán</span></td>
+                <td>
+                    <a href="/order/detail/12346" class="btn btn-sm cl0 bg10 bor5 hov-btn3 trans-04">Xem chi tiết</a>
+                </td>
+            </tr>
+            <tr>
+                <td>#12347</td>
+                <td>23/02/2025</td>
+                <td class="text-success fw-bold">2.200.000đ</td>
+                <td><span class="badge bg-success">Đã thanh toán</span></td>
+                <td>
+                    <a href="/order/detail/12347" class="btn btn-sm cl0 bg10 bor5 hov-btn3 trans-04">Xem chi tiết</a>
+                </td>
+            </tr>
+            <tr>
+                <td>#12348</td>
+                <td>22/02/2025</td>
+                <td class="text-success fw-bold">1.800.000đ</td>
+                <td><span class="badge bg-primary">Đã xác nhận</span></td>
+                <td>
+                    <a href="/order/detail/12348" class="btn btn-sm cl0 bg10 bor5 hov-btn3 trans-04">Xem chi tiết</a>
+                </td>
+            </tr>
+            <tr>
+                <td>#12349</td>
+                <td>21/02/2025</td>
+                <td class="text-success fw-bold">3.000.000đ</td>
+                <td><span class="badge bg-warning text-dark">Đang giao hàng</span></td>
+                <td>
+                    <a href="/order/detail/12349" class="btn btn-sm cl0 bg10 bor5 hov-btn3 trans-04">Xem chi tiết</a>
+                </td>
+            </tr>
+            <tr>
+                <td>#12350</td>
+                <td>20/02/2025</td>
+                <td class="text-success fw-bold">2.500.000đ</td>
+                <td><span class="badge bg-dark">Đã hoàn thành</span></td>
+                <td>
+                    <a href="/order/detail/12350" class="btn btn-sm cl0 bg10 bor5 hov-btn3 trans-04">Xem chi tiết</a>
+                </td>
+            </tr>
+            <tr>
+                <td>#12351</td>
+                <td>19/02/2025</td>
+                <td class="text-success fw-bold">1.200.000đ</td>
+                <td><span class="badge bg-danger">Đã hủy</span></td>
+                <td>
+                    <a href="/order/detail/12351" class="btn btn-sm cl0 bg10 bor5 hov-btn3 trans-04">Xem chi tiết</a>
+                </td>
+            </tr>
+            <tr>
+                <td>#12352</td>
+                <td>18/02/2025</td>
+                <td class="text-success fw-bold">2.700.000đ</td>
+                <td><span class="badge bg-danger">Thanh toán thất bại</span></td>
+                <td>
+                    <a href="/order/detail/12352" class="btn btn-sm cl0 bg10 bor5 hov-btn3 trans-04">Xem chi tiết</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

@@ -32,7 +32,7 @@ namespace Coza_Ecommerce_Shop.Authorization
                         _logger.LogInformation("Truy cập được");
                         context.Succeed(requirement);
                     }
-                    _logger.LogInformation("Không có quyền truy cập");
+                    _logger.LogError("Không có quyền truy cập");
 
                 }
             }

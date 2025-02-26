@@ -19,6 +19,9 @@ namespace Coza_Ecommerce_Shop.Models.Entities
 
         [Required]
         public int? Quantity { get; set; } = 0;
+
+        public int ReservedStock { get; set; } = 0;
+
         [Display(Name = "Trạng thái")]
         public bool IsActive { get; set; } = true;
 
@@ -27,6 +30,8 @@ namespace Coza_Ecommerce_Shop.Models.Entities
 
         [ForeignKey(nameof(ProductId))]
         public Product? Product { get; set; }
+
+        public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
     }
 }
