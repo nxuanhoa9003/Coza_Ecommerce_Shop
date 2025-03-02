@@ -22,7 +22,7 @@ namespace Coza_Ecommerce_Shop.Models.Entities
 
         [Display(Name = "Nội dung")]
         public string Message { get; set; }
-        bool IsRead { get; set; } = false;
+        public bool IsRead { get; set; } = false;
 
     }
 }

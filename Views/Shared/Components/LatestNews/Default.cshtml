@@ -1,0 +1,28 @@
+﻿@using System.Globalization
+@model IEnumerable<Coza_Ecommerce_Shop.Models.Entities.New>
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="text-center">Tin tức mới nhất</h4>
+    </div>
+    <div class="card-body">
+        <div class="list-group">
+            @foreach(var item in Model)
+            {
+                <a asp-controller="News" asp-action="Details" asp-route-slug="@item.Slug" class="list-group-item list-group-item-action px-0 bor-none d-flex align-items-center">
+                    <div class="news-img-container">
+                        <img src="@item.Image" alt="news-img" class="news-img">
+                    </div>
+                    <div class="m-l-10 text-truncate">
+                        <p class="mb-1 stext-110 cl2 hov-cl1 trans-04 news-title">@item.Title</p>
+                        <small class="text-muted">
+                            @item.CreateDate.ToString("dd MMMM, yyyy", new CultureInfo("vi-VN"))
+                        </small>
+                    </div>
+                </a>
+            }
+            
+            
+        </div>
+    </div>
+</div>

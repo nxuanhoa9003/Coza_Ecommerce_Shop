@@ -42,7 +42,11 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                 query = query.Where(x => x.Code.Contains(search));
             }
 
-            var totalPosts = query.Count();
+            var totalData = query.Count();
+
+            var totalPages = totalData > 0 ? (int)Math.Ceiling((double)totalData / pageSize) : 1;
+
+            pageNumber = pageNumber > totalPages ? totalPages : pageNumber;
 
             var pagedList = query.OrderByDescending(x => x.Id).ToPagedList(pageNumber, pageSize);
             OrderPagingViewModel orderPagingView = new OrderPagingViewModel
@@ -53,7 +57,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                     CurrentPage = pageNumber,
                     TotalCount = pagedList.Count,
                     PageSize = pageSize,
-                    TotalPages = (int)Math.Ceiling((double)totalPosts / pageSize),
+                    TotalPages = totalPages,
                     SearchTerm = search,
                 }
             };

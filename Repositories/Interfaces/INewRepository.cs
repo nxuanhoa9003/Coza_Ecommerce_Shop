@@ -5,11 +5,15 @@ namespace Coza_Ecommerce_Shop.Repositories.Interfaces
     public interface INewRepository
     {
         Task<New?> GetByIdAsync(Guid? id);
+        Task<New?> GetBySlugAsync(string slug);
         Task<IEnumerable<New>> GetAllAsync();
         Task AddAsync(New newmodel);
 
         Task RemoveAsync(New newmodel);
         Task RemoveRangeAsync(IEnumerable<New> listnews);
         Task UpdateAsync(New newmodel);
+
+        Task<IEnumerable<New>> GetNewsHomeAsync();
+
     }
 }

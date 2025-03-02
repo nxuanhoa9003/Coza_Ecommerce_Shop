@@ -1,0 +1,89 @@
+﻿@model Coza_Ecommerce_Shop.ViewModels.Banner.BannerViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin_Sub.cshtml";
+}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-area="Admin" asp-controller="Home" asp-action="Index">Home</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a asp-area="Admin" asp-controller="Banner" asp-action="Index">Banner</a>
+        </li>
+        <li class="breadcrumb-item active">@ViewData["Title"]</li>
+    </ol>
+</nav>
+
+<div class="card mb-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Chỉnh sửa thông tin tin tức</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="mb-3">
+                        <label asp-for="Image" class="control-label"></label>
+                        <input name="file" class="form-control" type="file" id="formValidationFile">
+                        <img id="previewImage" src="@Model.Image" style="object-fit: cover; width: 100%; height: auto;" class="img-thumbnail mt-3" />
+                        <span asp-validation-for="Image" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Title" class="control-label"></label>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="control-label"></label>
+                        <input asp-for="Description" class="form-control" />
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Link" class="control-label"></label>
+                        <input asp-for="Link" class="form-control" />
+                        <span asp-validation-for="Link" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Type" class="form-label"></label>
+                        <input asp-for="Type" class="form-control" />
+                        <span asp-validation-for="Type" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3 d-flex align-items-center gap-4">
+                        <label asp-for="IsShow" class="control-label"></label>
+                        <div class="form-check form-switch mb-0">
+                            <input asp-for="IsShow" type="checkbox" class="form-check-input">
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-flex gap-2">
+                        <a class="btn btn-danger" asp-action="Index">Danh sách</a>
+                        <input type="submit" value="Save" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <partial name="_Summernote" model="@("#Detail")" />
+
+    @{
+        var obj = new
+        {
+            input = "formValidationFile",
+            img = "previewImage"
+        };
+        <partial name="_PreviewImagecshtml" model="obj" />
+    }
+}
+

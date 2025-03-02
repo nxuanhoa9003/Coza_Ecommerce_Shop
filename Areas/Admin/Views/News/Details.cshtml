@@ -99,7 +99,7 @@
                 @Html.DisplayNameFor(model => model.CreateDate)
             </dt>
             <dd class="col-sm-10 mt-2">
-                @Html.DisplayFor(model => model.CreateDate)
+                @Model.CreateDate.ToString("hh:mm:ss tt dd/MM/yyyy")
             </dd>
 
             <dt class="col-sm-2 mt-2">
@@ -114,7 +114,7 @@
                 @Html.DisplayNameFor(model => model.ModifierDate)
             </dt>
             <dd class="col-sm-10 mt-2">
-                @Html.DisplayFor(model => model.ModifierDate)
+                @Model.ModifierDate.ToString("hh:mm:ss tt dd/MM/yyyy")
             </dd>
 
             <dt class="col-sm-2 mt-2">

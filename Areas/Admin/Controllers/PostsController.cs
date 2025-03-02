@@ -46,7 +46,10 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                 query = query.Where(x => x.Title.Contains(search) || (x.Slug != null && x.Slug.Contains(search)));
             }
 
-            var totalPosts = query.Count();
+            var totalData = query.Count();
+
+            var totalPages = totalData > 0 ? (int)Math.Ceiling((double)totalData / pageSize) : 1;
+
             var pagedList = query.OrderByDescending(x => x.Id).ToPagedList(pageNumber, pageSize);
 
             var PostViewModel = new PostViewModel
@@ -57,7 +60,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                     CurrentPage = pageNumber,
                     TotalCount = pagedList.Count,
                     PageSize = pageSize,
-                    TotalPages = (int)Math.Ceiling((double)totalPosts / pageSize),
+                    TotalPages = totalPages,
                     SearchTerm = search,
                 }
             };
@@ -104,10 +107,13 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
+                var fullName = User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value;
+
                 try
                 {
                     post.IsActive = true;
                     post.CreateDate = DateTime.Now;
+                    post.CreateBy = fullName;
                     post.ModifierDate = DateTime.Now;
                     post.Slug = FilterChar.GenerateSlug(post.Title);
                     post.Image = await Utilities.UploadFileAsync(file, "Posts");
@@ -165,6 +171,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
+                var fullName = User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value;
                 try
                 {
                     var existingPost = await _postRepository.GetByIdAsync(id);
@@ -174,7 +181,9 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                     }
 
                     existingPost.ModifierDate = DateTime.Now;
+                    existingPost.ModifiedBy = fullName;
                     existingPost.CreateDate = existingPost.CreateDate;
+                    existingPost.CreateBy = existingPost.CreateBy;
                     existingPost.Title = post.Title;
                     existingPost.Detail = post.Detail;
                     existingPost.Description = post.Description;

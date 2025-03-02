@@ -134,6 +134,9 @@ namespace Coza_Ecommerce_Shop
             }
 
             app.UseNotyf();
+            // đăng ký middlewware setting configuration
+            app.UseMiddleware<SettingMiddleware>();
+
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

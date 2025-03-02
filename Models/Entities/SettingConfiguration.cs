@@ -11,7 +11,5 @@ namespace Coza_Ecommerce_Shop.Models.Entities
         public string SettingKey { get; set; }
         [MaxLength]
         public string SettingValue { get; set; }
-        [MaxLength]
-        public string SettingDescription { get; set; }
     }
 }

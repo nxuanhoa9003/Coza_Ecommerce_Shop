@@ -64,12 +64,15 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         public async Task<IActionResult> Create([Bind("Title,Description,Position,SeoTitle,SeoDescription,SeoKeywords")] Category category)
         {
 
+            var fullName = User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value;
+
             if (ModelState.IsValid)
             {
+
                 category.CreateDate = DateTime.Now;
                 category.ModifierDate = DateTime.Now;
                 category.Slug = FilterChar.GenerateSlug(category.Title);
-
+                category.CreateBy = fullName;
                 await _categoryRepository.AddAsync(category);
                 _notifyService.Success("Thêm danh mục thành công");
                 return RedirectToAction(nameof(Index));
@@ -111,6 +114,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
             {
                 try
                 {
+                    var fullName = User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value;
                     var existingCategory = await _categoryRepository.GetByIdAsync(id);
 
                     if (existingCategory == null)
@@ -125,7 +129,9 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                     existingCategory.SeoDescription = category.SeoDescription;
                     existingCategory.SeoKeywords = category.SeoKeywords;
                     existingCategory.CreateDate = existingCategory.CreateDate;
+                    existingCategory.CreateBy = existingCategory.CreateBy;
                     existingCategory.ModifierDate = DateTime.Now;
+                    existingCategory.ModifiedBy = fullName;
                     existingCategory.Slug = FilterChar.GenerateSlug(category.Title);
 
                     await _categoryRepository.UpdateAsync(existingCategory);

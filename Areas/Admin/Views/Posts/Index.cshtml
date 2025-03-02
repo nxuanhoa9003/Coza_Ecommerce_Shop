@@ -20,13 +20,13 @@
     <div class="d-flex justify-content-between align-items-center">
         <h5 class="card-header mb-0">@ViewData["Title"]</h5>
         <div class="d-flex gap-2">
-            <a asp-action="Create" class="btn btn-primary">Create</a> <!-- Thêm margin bên phải -->
+            <a asp-area="admin" asp-action="Create" class="btn btn-primary">Create</a> <!-- Thêm margin bên phải -->
             <button type="button" id="btnDeleteSelected" class="btn btn-danger me-4">Xoá đã chọn</button>
         </div>
     </div>
 
     <!-- form search -->
-    <form class="px-4 pb-2 d-flex w-25" method="get" asp-action="Index" asp-controller="Posts">
+    <form class="px-4 pb-2 d-flex w-25" method="get" asp-area="Admin" asp-action="Index" asp-controller="Posts">
         <div class="input-group input-group-merge">
             <button type="submit" class="input-group-text" id="basic-addon-search31" aria-label="icon">
                 <i class="bx bx-search"></i>

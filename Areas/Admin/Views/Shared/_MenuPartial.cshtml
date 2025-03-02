@@ -67,11 +67,32 @@
             </a>
         </li>
 
+        <li class='menu-item@(currentPage.Contains("/admin/banner") ? " active" : "")'>
+
+            <a asp-area="Admin" asp-controller="Banner" asp-action="Index" class="menu-link">
+                <i class='menu-icon bx bx-carousel'></i>
+                <div data-i18n="Banner">Banner</div>
+            </a>
+        </li>
+
         <li class='menu-item@(currentPage.Contains("/admin/category") ? " active" : "")'>
            
             <a asp-area="Admin" asp-controller="Category" asp-action="Index" class="menu-link">
                 <i class='menu-icon  bx bx-menu'></i>
                 <div data-i18n="Danh mục menu">Danh mục</div>
+            </a>
+        </li>
+        <li class='menu-item@(currentPage.StartsWith("/admin/news") ? " active open" : "")'>
+            <a asp-area="Admin" asp-controller="News" asp-action="Index" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-news"></i>
+                <div data-i18n="Tin tức">Tin tức</div>
+            </a>
+        </li>
+
+        <li class='menu-item@(currentPage.StartsWith("/admin/posts") ? " active open" : "")'>
+            <a asp-area="Admin" asp-controller="Posts" asp-action="Index" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-book-content"></i>
+                <div data-i18n="Bài viết">Bài viết</div>
             </a>
         </li>
 
@@ -110,19 +131,7 @@
 
             </ul>
         </li>
-        <li class='menu-item@(currentPage.StartsWith("/admin/news") ? " active open" : "")'>
-            <a asp-area="Admin" asp-controller="News" asp-action="Index" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-news"></i>
-                <div data-i18n="Tin tức">Tin tức</div>
-            </a>
-        </li>
-
-        <li class='menu-item@(currentPage.StartsWith("/admin/posts") ? " active open" : "")'>
-            <a asp-area="Admin" asp-controller="Posts" asp-action="Index" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-book-content"></i>
-                <div data-i18n="Bài viết">Bài viết</div>
-            </a>
-        </li>
+       
 
         <li class="menu-item">
             <a href="javascript:void(0);" class="menu-link">
@@ -133,12 +142,7 @@
         </li>
 
 
-        <li class="menu-item">
-            <a href="cards-basic.html" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-collection"></i>
-                <div data-i18n="Menu">Menu</div>
-            </a>
-        </li>
+       
 
         <li class='menu-item @(currentPage.StartsWith("/admin/role") || currentPage.Contains("/admin/claims") || (currentPage.Contains("/admin/employee") || currentPage.Contains("/admin/customer") ) ? " active open" : "")'>
             <a href="javascript:void(0)" class="menu-link menu-toggle">
@@ -171,7 +175,7 @@
         </li>
 
         <li class="menu-item">
-            <a href="cards-basic.html" class="menu-link">
+            <a asp-area="Admin" asp-controller="SettingConfiguration" asp-action="Update" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-wrench"></i>
                 <div data-i18n="Cấu hình hệ thống">Cấu hình hệ thống</div>
             </a>

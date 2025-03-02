@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Coza_Ecommerce_Shop.Models.Entities;
 using Coza_Ecommerce_Shop.ViewModels;
+using Coza_Ecommerce_Shop.ViewModels.Banner;
 using Coza_Ecommerce_Shop.ViewModels.Product;
 using Microsoft.CodeAnalysis.Options;
 
@@ -19,6 +20,7 @@ namespace Coza_Ecommerce_Shop.Mappings
 
             CreateMap<ProductImage, ProductImageViewModel>().ReverseMap();
             CreateMap<ProductVariant, ProductVariantsViewModel>().ReverseMap();
+            CreateMap<Banner, BannerViewModel>().ReverseMap();
 
         }
     }

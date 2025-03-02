@@ -50,10 +50,10 @@
             <dd class="col-sm-9">@Html.DisplayFor(model => model.CreateBy)</dd>
 
             <dt class="col-sm-3"><strong>@Html.DisplayNameFor(model => model.CreateDate)</strong></dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.CreateDate)</dd>
+            <dd class="col-sm-9">@Model.CreateDate.ToString("hh:mm:ss tt dd/MM/yyyy")</dd>
 
             <dt class="col-sm-3"><strong>@Html.DisplayNameFor(model => model.ModifierDate)</strong></dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.ModifierDate)</dd>
+            <dd class="col-sm-9">@Model.ModifierDate.ToString("hh:mm:ss tt dd/MM/yyyy")</dd>
 
             <dt class="col-sm-3"><strong>@Html.DisplayNameFor(model => model.ModifiedBy)</strong></dt>
             <dd class="col-sm-9">@Html.DisplayFor(model => model.ModifiedBy)</dd>

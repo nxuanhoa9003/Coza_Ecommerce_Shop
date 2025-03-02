@@ -3,6 +3,7 @@ using Coza_Ecommerce_Shop.Models.Entities;
 using Coza_Ecommerce_Shop.Repositories.Interfaces;
 using Coza_Ecommerce_Shop.ViewModels.Home;
 using Coza_Ecommerce_Shop.ViewModels.Product;
+using System.Linq;
 
 namespace Coza_Ecommerce_Shop.Services
 {
@@ -65,21 +66,24 @@ namespace Coza_Ecommerce_Shop.Services
 
                 if (filter.sort != null)
                 {
-                    if (filter.sort == "newest")
+                    listproduct = filter.sort switch
                     {
-                        listproduct = listproduct.OrderByDescending(x => x.CreateDate).ToList();
-                    }
-                    if (filter.sort == "price-asc")
-                    {
-                        listproduct = listproduct.OrderBy(x => x.Variants.FirstOrDefault(v => v.IsDefault)?.BasePrice).ToList();
-                    }
-                    if (filter.sort == "price-desc")
-                    {
-                        listproduct = listproduct.OrderByDescending(x => x.Variants.FirstOrDefault(v => v.IsDefault)?.BasePrice).ToList();
-                    }
+                        "newest" => listproduct.OrderByDescending(x => x.CreateDate).ToList(),
+                        "price-asc" => listproduct.OrderBy(x => x.Variants.FirstOrDefault(v => v.IsDefault)?.BasePrice).ToList(),
+                        "price-desc" => listproduct.OrderByDescending(x => x.Variants.FirstOrDefault(v => v.IsDefault)?.BasePrice).ToList(),
+                        _ => listproduct
+                    };
 
                 }
             }
+
+
+            int totalProducts = listproduct.ToList().Count;
+            int totalPages = totalProducts > 0 ? (int)Math.Ceiling((double)totalProducts / pageSize) : 1;
+
+            // Điều chỉnh giá trị của `page` để tránh lỗi danh sách rỗng
+            page = page > totalPages ? totalPages : page;
+            page = page < 1 ? 1 : page;
 
             var rslistproduct = listproduct.Skip((page - 1) * pageSize).Take(pageSize).ToList();
             return new ProductOverViewVM

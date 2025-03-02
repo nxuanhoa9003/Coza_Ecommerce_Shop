@@ -51,7 +51,12 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                 query = query.Where(x => x.Title.Contains(search) || (x.Slug != null && x.Slug.Contains(search)));
             }
 
-            var totalPosts = query.Count();
+            var totalData = query.Count();
+
+            var totalPages = totalData > 0 ? (int)Math.Ceiling((double)totalData / pageSize) : 1;
+
+
+            pageNumber = pageNumber > totalPages ? totalPages : pageNumber;
 
             var pagedList = query.OrderByDescending(x => x.Id).ToPagedList(pageNumber, pageSize);
 
@@ -63,7 +68,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                     CurrentPage = pageNumber,
                     TotalCount = pagedList.Count,
                     PageSize = pageSize,
-                    TotalPages = (int)Math.Ceiling((double)totalPosts / pageSize),
+                    TotalPages = totalPages,
                     SearchTerm = search,
                 }
             };
@@ -109,10 +114,12 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
             }
             if (ModelState.IsValid)
             {
+                var fullName = User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value;
 
                 try
                 {
                     news.IsActive = true;
+                    news.CreateBy = fullName;
                     news.CreateDate = DateTime.Now;
                     news.ModifierDate = DateTime.Now;
                     news.Slug = FilterChar.GenerateSlug(news.Title);
@@ -177,6 +184,8 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
                 try
                 {
+                    var fullName = User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value;
+
                     var existingNew = await _newRepository.GetByIdAsync(id);
                     if (existingNew == null)
                     {
@@ -184,7 +193,9 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                     }
 
                     existingNew.ModifierDate = DateTime.Now;
+                    existingNew.ModifiedBy = fullName;
                     existingNew.CreateDate = existingNew.CreateDate;
+                    existingNew.CreateBy = existingNew.CreateBy;
 
                     existingNew.Title = news.Title;
                     existingNew.Detail = news.Detail;

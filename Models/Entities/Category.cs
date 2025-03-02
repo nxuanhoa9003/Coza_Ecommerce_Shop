@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Authorization;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Coza_Ecommerce_Shop.Models.Entities
@@ -43,6 +44,9 @@ namespace Coza_Ecommerce_Shop.Models.Entities
         public ICollection<New> News { get; set; }
         public ICollection<Post> Posts { get; set; }
         public ICollection<Product> Products { get; set; }
+
+
+
 
     }
 }

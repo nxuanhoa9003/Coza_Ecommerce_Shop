@@ -57,7 +57,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
 
         public async Task<Product?> GetDetailProductByIdAsync(Guid? id)
         {
-            var product =  await _context.Products.AsNoTracking()
+            var product = await _context.Products.AsNoTracking()
                 .Include(p => p.ProductCategory)
                 .Include(p => p.ProductImages)
                 .Include(p => p.Variants)
@@ -66,8 +66,8 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             if (product != null)
             {
                 product.Variants = product.Variants.OrderBy(v => v.SKU).ToList(); // Sắp xếp Variants theo SKU
-				product.ProductImages = product.ProductImages.OrderByDescending(v => v.IsDefault).ToList();
-			}
+                product.ProductImages = product.ProductImages.OrderByDescending(v => v.IsDefault).ToList();
+            }
 
             return product;
 
@@ -86,38 +86,38 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             {
                 product.Variants = product.Variants.OrderBy(v => v.SKU).ToList(); // Sắp xếp Variants theo SKU
                 product.ProductImages = product.ProductImages.OrderByDescending(v => v.IsDefault).ToList();
-			}
+            }
 
 
-			return product;
+            return product;
 
         }
 
 
-		public async Task<Product?> GetDetailProductBySKUAsync(string sku)
-		{
-			var product = await _context.Products.AsNoTracking()
-				.Include(p => p.ProductCategory)
-				.Include(p => p.ProductImages)
-				.Include(p => p.Variants)
-				.FirstOrDefaultAsync(m => m.ProductCode == sku && !m.IsDeleted);
+        public async Task<Product?> GetDetailProductBySKUAsync(string sku)
+        {
+            var product = await _context.Products.AsNoTracking()
+                .Include(p => p.ProductCategory)
+                .Include(p => p.ProductImages)
+                .Include(p => p.Variants)
+                .FirstOrDefaultAsync(m => m.ProductCode == sku && !m.IsDeleted);
 
-			if (product != null)
-			{
-				product.Variants = product.Variants.OrderBy(v => v.SKU).ToList(); // Sắp xếp Variants theo SKU
-				product.ProductImages = product.ProductImages.OrderByDescending(v => v.IsDefault).ToList();
-			}
-			return product;
-		}
+            if (product != null)
+            {
+                product.Variants = product.Variants.OrderBy(v => v.SKU).ToList(); // Sắp xếp Variants theo SKU
+                product.ProductImages = product.ProductImages.OrderByDescending(v => v.IsDefault).ToList();
+            }
+            return product;
+        }
 
 
 
-		public async Task<bool> IsDuplicateProductCode(Product productmodel)
+        public async Task<bool> IsDuplicateProductCode(Product productmodel)
         {
             return await _context.Products.AnyAsync(p => p.ProductCode == productmodel.ProductCode);
         }
 
-       
+
 
         public async Task RemoveAsync(Product productmodel)
         {
@@ -146,7 +146,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             }
         }
 
-       
+
         public async Task UpdateAsync(Product productmodel)
         {
             // product image
@@ -161,14 +161,15 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
                 Utilities.DeleteImage(image.Image);
                 _context.ProductImages.Remove(image);
             }
-            
+
             foreach (var newImage in newImages)
             {
                 var existingImage = existingImages.FirstOrDefault(x => x.Id == newImage.Id);
                 if (existingImage == null)
                 {
                     _context.Add(newImage);
-                }else
+                }
+                else
                 {
                     existingImage.IsDefault = newImage.IsDefault;
                     _context.Entry(existingImage).State = EntityState.Modified;
@@ -179,15 +180,15 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             // product variants
             var newVariants = productmodel.Variants;
             var existingVariants = _context.ProductVariants.Where(x => x.ProductId == productmodel.Id).ToList();
-            
-			foreach (var newVariant in newVariants)
+
+            foreach (var newVariant in newVariants)
             {
                 var existingVariant = existingVariants.FirstOrDefault(x => x.Id == newVariant.Id);
                 if (existingVariant == null)
                 {
-                    
+
                     _context.Add(newVariant);
-				}
+                }
                 else
                 {
                     existingVariant.SKU = newVariant.SKU;
@@ -204,25 +205,25 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             }
 
             _context.Entry(productmodel).State = EntityState.Modified;
-            
-
-			try
-			{
-				await _context.SaveChangesAsync();
-			}
-			catch (DbUpdateException ex)
-			{
-				var innerException = ex.InnerException?.Message;
-				Console.WriteLine($"Lỗi khi lưu dữ liệu: {innerException}");
-				throw;
-			}
 
 
-		}
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                var innerException = ex.InnerException?.Message;
+                Console.WriteLine($"Lỗi khi lưu dữ liệu: {innerException}");
+                throw;
+            }
+
+
+        }
 
 
 
-		public async Task<IEnumerable<ProductImage>> GetProductImagesByIdProduct(Guid? id)
+        public async Task<IEnumerable<ProductImage>> GetProductImagesByIdProduct(Guid? id)
         {
             return await _context.ProductImages.Where(x => x.ProductId == id).ToListAsync();
         }
@@ -255,9 +256,9 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
                                 .Where(x => allCategoryIds.Contains(x.ProductCategory.Id))
                                 .OrderByDescending(x => x.IsSale)
                                 .ThenByDescending(x => x.IsHot)
-								.ToListAsync();
+                                .ToListAsync();
             return products;
-		}
+        }
 
 
         public async Task<IEnumerable<ProductVariant>> GetAllVariantsOfProduct(Guid? id)
@@ -280,5 +281,36 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
                 .Where(x => !x.IsDeleted).OrderByDescending(x => x.IsHot).ToListAsync();
             return listproduct;
         }
+
+        public async Task<List<string>> GetWishlistByUserid(string userid)
+        {
+            var wishlist = await _context.Wishlists.Where(x => x.UserId == userid)
+                .Select(x => x.ProductId.ToString()).ToListAsync();
+            return wishlist;
+        }
+
+        public async Task<(bool IsSuccess, string ErrorMessage)> AddToWishlist(Wishlist wishlist)
+        {
+            if (wishlist == null) return (false, "Thêm thất bại");
+            var checkexist = await _context.Wishlists.FirstOrDefaultAsync(x => x.UserId == wishlist.UserId && x.ProductId == wishlist.ProductId);
+            if (checkexist != null)
+            {
+                _context.Wishlists.Remove(checkexist);
+                await _context.SaveChangesAsync();
+                return (true, "Sản phẩm đã được xoá khỏi danh mục yêu thích");
+            }
+            await _context.Wishlists.AddAsync(wishlist);
+            var rs = await _context.SaveChangesAsync();
+            return rs > 1 ? (true, "Sản phẩm đã được thêm vào danh mục yêu thích") : (false, "Thêm thất bại");
+        }
+
+        public async Task<IEnumerable<Product>> GetProductWishlistByUserid(string userid)
+        {
+            return await _context.Wishlists
+                .Include(x => x.product)
+                .ThenInclude(x => x.Variants)
+                .Select(x => x.product).ToListAsync();
+        }
+
     }
 }

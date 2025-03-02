@@ -23,7 +23,11 @@ namespace Coza_Ecommerce_Shop.Models.Entities
 
         [Display(Name = "Url")]
         public string? Link { get; set; }
-        [Display(Name = "Kiểu")]
+        [Display(Name = "Thứ tự")]
         public int Type { get; set; }
+
+        [Display(Name = "Hiển thị")]
+        public bool IsShow { get; set; } = false;
+
     }
 }

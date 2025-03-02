@@ -1,0 +1,73 @@
+﻿@using System.Globalization
+@model ICollection<Coza_Ecommerce_Shop.Models.Entities.New>
+
+
+<style>
+    .news-description {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+
+<section class="sec-blog bg0 p-t-60 p-b-90">
+    <div class="container">
+        <div class="p-b-30">
+            <h3 class="ltext-103 cl3">
+                News
+            </h3>
+        </div>
+
+        <div class="row">
+            @foreach (var item in Model)
+            {
+                <div class="col-sm-6 col-md-4 p-b-40">
+                    <div class="blog-item">
+                        <div class="block2-pic hov-img0">
+                            <img src="@item.Image" alt="IMG-BLOG">
+                            <a asp-controller="News" asp-action="Details" asp-route-slug="@item.Slug" class="block2-btn flex-c-m stext-103 cl2 size-105 bg0 bor1 hov-btn1 p-lr-15 trans-04">
+                                Read more
+                            </a>
+                        </div>
+
+                        <div class="p-t-15">
+                            <div class="stext-107 flex-w p-b-5">
+                                <span class="m-r-3">
+                                    <span class="cl4">
+                                        By
+                                    </span>
+
+                                    <span class="cl5">
+                                        @item.CreateBy
+                                    </span>
+                                </span>
+
+                                <span>
+                                    <span class="cl4">
+                                        on
+                                    </span>
+
+                                    <span class="cl5">
+                                        @item.CreateDate.ToString("dd MMMM, yyyy", new CultureInfo("vi-VN"))
+                                    </span>
+                                </span>
+                            </div>
+
+                            <h4 class="p-b-12">
+                                <a asp-controller="News" asp-action="Details" asp-route-slug="@item.Slug" class="stext-110 cl2 hov-cl1 trans-04">
+                                    @item.Title
+                                </a>
+                            </h4>
+
+                            <p class="stext-111 cl6 news-description">
+                                @item.Description
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>

@@ -23,10 +23,10 @@ namespace Coza_Ecommerce_Shop.ViewComponents
         {
             int page = paramsFilter?.page ?? 1;
             var model = await _productCategoryService.GetProductCategoriesAsync(page, pageSize, paramsFilter);
-			model.page = page;
+			
 			model.pagingViewModel = new PagingViewModel
 			{
-				CurrentPage = page,
+				CurrentPage = model.page,
 				PageSize = pageSize,
 				TotalCount = model.totalProducts,
 				TotalPages = (int)Math.Ceiling(model.totalProducts / (double)pageSize),

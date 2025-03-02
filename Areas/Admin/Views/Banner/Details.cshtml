@@ -1,0 +1,98 @@
+﻿@model Coza_Ecommerce_Shop.Models.Entities.Banner
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin_Sub.cshtml";
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-area="Admin" asp-controller="Home" asp-action="Index">Home</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a asp-area="Admin" asp-controller="Banner" asp-action="Index">Banner</a>
+        </li>
+        <li class="breadcrumb-item active">@ViewData["Title"]</li>
+    </ol>
+</nav>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Chi tiết banner</h5>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Image)
+            </dt>
+            <dd class="col-sm-10">
+                <img src="@(string.IsNullOrEmpty(Model.Image) ? "https://placehold.co/400x400" : Model.Image)" style="object-fit: cover; width: 100%; height: auto;" class="img-thumbnail" />
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Title)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Title)
+            </dd>
+            
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Description)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Description)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Link)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.Raw(Model.Link)
+            </dd>
+
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.IsShow)
+            </dt>
+            <dd class="col-sm-10">
+                @if (Model.IsShow)
+                {
+                    <span class="badge bg-info">Đang hiển thị</span> <!-- Hiển thị thông báo với badge màu xanh -->
+                }
+                else
+                {
+                    <span class="badge bg-danger">Đã ẩn</span> <!-- Thêm thông báo cho trường hợp không hiển thị -->
+                }
+            </dd>
+
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.CreateBy)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.CreateBy)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.CreateDate)
+            </dt>
+            <dd class="col-sm-10">
+                @Model.CreateDate.ToString("hh:mm:ss tt dd/MM/yyyy")
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.ModifiedBy)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.ModifiedBy)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.ModifierDate)
+            </dt>
+            <dd class="col-sm-10">
+                @Model.ModifierDate.ToString("hh:mm:ss tt dd/MM/yyyy")
+            </dd>
+        </dl>
+
+        <div class="d-flex gap-2 mt-4">
+            <a asp-action="Index" class="btn btn-secondary">Danh sách</a>
+            <a asp-action="Edit" class="btn btn-warning" asp-route-id="@Model?.Id">Chỉnh sửa</a>
+        </div>
+    </div>
+</div>
+

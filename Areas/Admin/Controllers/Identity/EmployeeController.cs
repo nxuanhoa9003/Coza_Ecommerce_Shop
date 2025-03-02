@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using X.PagedList.Extensions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
 {
@@ -49,6 +50,12 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
 
             
             var totalData = employees.Count();
+
+            var totalPages = totalData > 0 ? (int)Math.Ceiling((double)totalData / pageSize) : 1;
+
+
+            pageNumber = pageNumber > totalPages ? 1 : pageNumber;
+
             var pagedList = employees.OrderByDescending(x => x.Id).ToPagedList(pageNumber, pageSize);
 
             var employeePagingViewModel = new EmployeePagingViewModel
@@ -59,7 +66,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
                     CurrentPage = pageNumber,
                     TotalCount = pagedList.Count,
                     PageSize = pageSize,
-                    TotalPages = (int)Math.Ceiling((double)totalData / pageSize),
+                    TotalPages = totalPages,
                     SearchTerm = search,
                 }
             };

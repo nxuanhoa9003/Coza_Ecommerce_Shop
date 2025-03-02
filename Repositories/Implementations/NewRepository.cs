@@ -28,13 +28,23 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             return await _context.News.Include(x => x.Category).FirstOrDefaultAsync(x => x.Id == id);
         }
 
+        public async Task<New?> GetBySlugAsync(string slug)
+        {
+            return await _context.News.FirstOrDefaultAsync(x => x.Slug.ToLower() == slug);
+        }
+
+        public async Task<IEnumerable<New>> GetNewsHomeAsync()
+        {
+            return await _context.News.OrderByDescending(x => x.CreateDate).Take(3).ToListAsync();
+        }
+
         public async Task RemoveAsync(New newmodel)
         {
             _context.News.Remove(newmodel);
             await _context.SaveChangesAsync();
         }
 
-        public async Task RemoveRangeAsync (IEnumerable<New> listnews)
+        public async Task RemoveRangeAsync(IEnumerable<New> listnews)
         {
             _context.News.RemoveRange(listnews);
             await _context.SaveChangesAsync();

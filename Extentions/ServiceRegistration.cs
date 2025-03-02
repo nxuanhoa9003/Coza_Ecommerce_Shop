@@ -17,6 +17,7 @@ namespace Coza_Ecommerce_Shop.Extentions
             services.AddScoped<UserManager<AppUser>, CustomUserManager>();
 
             services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
+            services.AddScoped<IBannerRepository, BannerRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<INewRepository, NewRepository>();
             services.AddScoped<IPostRepository, PostRepository>();
@@ -29,9 +30,14 @@ namespace Coza_Ecommerce_Shop.Extentions
             services.AddScoped<ITransactionRepository, TransactionRepository>();
             services.AddScoped<ICartRepository, CartRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
+
+            services.AddScoped<IContactRepository, ContactRepository>();
             
             services.AddScoped<IProductCategoryService, ProductCategoryService>();
             services.AddScoped<IProductService, ProductService>();
+
+            services.AddScoped<ISettingConfigurationRepository, SettingConfigurationRepository>();
+            services.AddScoped<ISettingService, SettingService>();
 
             // register mail service
             services.AddSingleton<IMailService, MailService>();

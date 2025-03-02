@@ -90,6 +90,12 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
             }
 
             var totalData = listproductcategories.Count();
+
+            var totalPages = totalData > 0 ? (int)Math.Ceiling((double)totalData / pageSize) : 1;
+
+
+            pageNumber = pageNumber > totalPages ? totalPages : pageNumber;
+
             var pagedList = listproductcategories.OrderByDescending(x => x.Id).ToPagedList(pageNumber, pageSize);
 
             var productCategoryViewModel = new ProductCategoryPagingViewModel
@@ -100,7 +106,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                     CurrentPage = pageNumber,
                     TotalCount = pagedList.Count,
                     PageSize = pageSize,
-                    TotalPages = (int)Math.Ceiling((double)totalData / pageSize),
+                    TotalPages = totalPages,
                     SearchTerm = search,
                 }
             };

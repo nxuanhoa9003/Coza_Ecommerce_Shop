@@ -1,0 +1,55 @@
+﻿@using System.Globalization
+@model Coza_Ecommerce_Shop.Models.Entities.Post
+@{
+    ViewData["Title"] = "Blog";
+}
+<div class="container">
+    <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+        <a asp-controller="Home" asp-action="Index" class="stext-109 cl8 hov-cl1 trans-04">
+            Home
+            <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+        </a>
+        <span class="stext-109 cl4">
+            @Model.Title
+        </span>
+
+    </div>
+</div>
+
+<div class="container py-5 m-t-20">
+    <div class="row">
+        <div class="col-md-4 order-2 order-md-2">
+            @await Component.InvokeAsync("LatestPosts", Model)
+        </div>
+        @if (Model != null)
+        {
+            <!-- Cột phải: Nội dung chi tiết bài viết -->
+            <div class="col-md-8 order-1 order-md-1">
+                <div class="card news-detail bor-none bg0">
+                    <div class="card-header bg0">
+                        <h3 class="mb-4 ltext-108">@Model.Title</h3>
+                        <span class="text-muted">
+                            @Model.CreateDate.ToString("dd MMMM, yyyy", new CultureInfo("vi-VN"))
+                        </span>
+                    </div>
+
+                    <div class="card-body">
+                        <p class="card-title">
+                            @Html.Raw(Model.Description)
+                        </p>
+
+                        <img src="@Model.Image" alt="Main News" class="card-img">
+
+                        <p class="mb-4">
+                            @Html.Raw(Model.Detail)
+                        </p>
+
+                    </div>
+                </div>
+            </div>
+        }else
+        {
+            
+        }
+    </div>
+</div>

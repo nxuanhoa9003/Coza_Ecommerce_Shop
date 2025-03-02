@@ -1,5 +1,6 @@
 ﻿using Coza_Ecommerce_Shop.DTO;
 using Coza_Ecommerce_Shop.Models.Entities;
+using Coza_Ecommerce_Shop.ViewModels.Account;
 using Coza_Ecommerce_Shop.ViewModels.Home;
 
 namespace Coza_Ecommerce_Shop.Repositories.Interfaces
@@ -32,5 +33,12 @@ namespace Coza_Ecommerce_Shop.Repositories.Interfaces
         Task<IEnumerable<ProductVariant>> GetAllVariantsOfProduct(Guid? id);
 
         Task<IEnumerable<Product>> GetProductsHot();
+
+
+        // add product to wishlist
+        Task<List<string>> GetWishlistByUserid(string userid);
+        Task<IEnumerable<Product>> GetProductWishlistByUserid(string userid);
+        Task<(bool IsSuccess, string ErrorMessage)> AddToWishlist(Wishlist wishlist);
+
     }
 }

@@ -2097,7 +2097,7 @@ input.num-product::-webkit-inner-spin-button {
   width: 30px;
 }
 
-.btn-addwish-b2 .icon-heart2 {
+/*.btn-addwish-b2 .icon-heart2 {
   opacity: 0;
 }
 
@@ -2107,14 +2107,31 @@ input.num-product::-webkit-inner-spin-button {
 
 .btn-addwish-b2:hover .icon-heart1 {
   opacity: 0;
+}*/
+
+.btn-addwish .icon-heart2 {
+    opacity: 0;
 }
 
-.js-addedwish-b2 .icon-heart2 {
-  opacity: 1;
+.btn-addwish:hover .icon-heart2 {
+    opacity: 1;
 }
 
-.js-addedwish-b2 .icon-heart1 {
-  opacity: 0;
+.btn-addwish:hover .icon-heart1 {
+    opacity: 0;
+}
+
+
+.btn-addwish.active .icon-heart2 {
+    opacity: 1;
+}
+
+.btn-addwish.active .icon-heart1 {
+    opacity: 0;
+}
+
+.btn-addwish.active.icon-addwish-detail {
+    color: #6c7ae0 !important;
 }
 
 /*---------------------------------------------*/
@@ -2708,7 +2725,12 @@ input.num-product::-webkit-inner-spin-button {
 /*==================================================================
        BORDER BORDER  BORDER  BORDER  BORDER  BORDER  BORDER  BORDER
 ==================================================================*/
-.bor0 {border-radius: 50%;}
+.bor-none {
+    border: none;
+}
+.bor0 {
+    border-radius: 50%;
+}
 
 .bor1 {
   border-radius: 23px;
@@ -2829,9 +2851,7 @@ input.num-product::-webkit-inner-spin-button {
 .plh4:-ms-input-placeholder { color: #888;}
 
 /*---------------------------------------------*/
-.js-addedwish-detail {
-  color: #6c7ae0;
-}
+
 
 /*---------------------------------------------*/
 .label1 {
@@ -3086,6 +3106,14 @@ input.num-product::-webkit-inner-spin-button {
 .hov-bg1:hover {background-color: #717fe0;}
 
 /*---------------------------------------------*/
+
+.hov-img0 {
+    position: relative;
+    border-radius: 8px;
+    width: 100%; /* Đảm bảo ảnh full card */
+    height: 350px; /* Cố định chiều cao */
+}
+
 .hov-img0 {
   display: block;
   overflow: hidden;
@@ -3093,6 +3121,8 @@ input.num-product::-webkit-inner-spin-button {
 
 .hov-img0 img{
   width: 100%;
+  height: 100%;
+  object-fit: cover;
   -webkit-transition: transform 0.9s ease;
   -o-transition: transform 0.9s ease;
   -moz-transition: transform 0.9s ease;

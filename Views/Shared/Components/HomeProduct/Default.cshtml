@@ -1,44 +1,62 @@
 ﻿@using System.Globalization
 @model ICollection<Coza_Ecommerce_Shop.Models.Entities.Product>
-<div class="row isotope-grid product-container">
-    @foreach (var product in Model)
-    {
-        var productDefault = product.Variants.FirstOrDefault(x => x.IsDefault);
-        if (productDefault == null)
-        {
-            productDefault = product.Variants.First();
-        }
-        var basePrice = (productDefault.BasePrice != null ? productDefault.BasePrice?.ToString("#,0", new CultureInfo("vi-VN")) : "0") + "đ";
-        <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item">
-            <!-- Block2 -->
-            <div class="block2">
-                <div class="block2-pic hov-img0">
-                    <img src="@product.Image" alt="IMG-PRODUCT">
-                    <a href="#" data-id="@product.Id" class="quick-order-btn block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
-                        Quick View
-                    </a>
-                </div>
 
-                <div class="block2-txt flex-w flex-t p-t-14">
-                    <div class="block2-txt-child1 flex-col-l ">
-                        <a asp-controller="Product" asp-action="ProductDetail" asp-route-slug="@product.Slug" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-                            @product.Title
-                        </a>
-
-                        <span class="stext-105 cl3">
-                            @basePrice
-                        </span>
-                    </div>
-
-                    <div class="block2-txt-child2 flex-r p-t-3">
-                        <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
-                            <img class="icon-heart1 dis-block trans-04" src="~/assets/images/icons/icon-heart-01.png" alt="ICON">
-                            <img class="icon-heart2 dis-block trans-04 ab-t-l" src="~/assets/images/icons/icon-heart-02.png" alt="ICON">
-                        </a>
-                    </div>
-                </div>
-            </div>
+<section class="bg0 p-t-23 p-b-90">
+    <div class="container">
+        <div class="p-b-30">
+            <h3 class="ltext-103 cl3">
+                Product Overview
+            </h3>
         </div>
-    }
-</div>
+
+        <div class="row isotope-grid product-container">
+            @foreach (var product in Model)
+            {
+                var productDefault = product.Variants.FirstOrDefault(x => x.IsDefault);
+                if (productDefault == null)
+                {
+                    productDefault = product.Variants.First();
+                }
+                var basePrice = (productDefault.BasePrice != null ? productDefault.BasePrice?.ToString("#,0", new CultureInfo("vi-VN")) : "0") + "đ";
+                <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item">
+                    <!-- Block2 -->
+                    <div class="block2">
+                        <div class="block2-pic hov-img0">
+                            <img src="@product.Image" alt="IMG-PRODUCT">
+                            <a href="#" data-id="@product.Id" class="quick-order-btn block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
+                                Quick View
+                            </a>
+                        </div>
+
+                        <div class="block2-txt flex-w flex-t p-t-14 product-detail">
+                            <div class="block2-txt-child1 flex-col-l">
+                                <a asp-controller="Product" asp-action="ProductDetail" asp-route-slug="@product.Slug" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 js-name-detail p-b-6">
+                                    @product.Title
+                                </a>
+
+                                <span class="stext-105 cl3">
+                                    @basePrice
+                                </span>
+                            </div>
+
+                            <div class="block2-txt-child2 flex-r p-t-3">
+                                <a href="#" data-id="@product.Id" class="btn-addwish dis-block pos-relative">
+                                    <img class="icon-heart1 dis-block trans-04" src="~/assets/images/icons/icon-heart-01.png" alt="ICON">
+                                    <img class="icon-heart2 dis-block trans-04 ab-t-l" src="~/assets/images/icons/icon-heart-02.png" alt="ICON">
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Load more product -->
+        <div class="flex-c-m flex-w w-full p-t-45">
+            <button data-page="1" id="btn-load-more" type="button" class="flex-c-m stext-101 cl5 size-102 bg2 bor1 hov-btn1 p-lr-15 trans-04">
+                Load More
+            </button>
+        </div>
+    </div>
+</section>
 

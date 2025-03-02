@@ -16,8 +16,6 @@
         });
     });
 
-
-
     $(document).on("click", ".quick-order-btn", function (e) {
         e.preventDefault();
         var productId = $(this).data("id");
@@ -26,11 +24,14 @@
             $('.js-modal1').addClass('show-modal1');
             reinitMagnificPopup();
             reinitializeSlick();
+            AddToWishlist();
+            LoadWishlist();
         });
     });
 
     $(document).on("click", ".js-hide-modal1", function () {
         $('.js-modal1').removeClass('show-modal1');
+        LoadWishlist();
     });
 
 
@@ -90,6 +91,7 @@
                 if (response) {
                     renderProducts(response);
                     $("#btn-load-more").data("page", response.nextPage);
+                   
                 }
             },
             error: function (xhr, status, error) {
@@ -102,6 +104,9 @@
     function renderProducts(data) {
         let html = "";
         let products = data.products;
+        if (products) {
+            LoadWishlist();
+        }
         products.forEach(product => {
             let productDefault = product.Variants.find(p => p.IsDefault);
             if (productDefault == null) {
@@ -118,15 +123,15 @@
                                 Quick View
                             </a>
                         </div>
-                        <div class="block2-txt flex-w flex-t p-t-14">
+                        <div class="block2-txt flex-w flex-t p-t-14 product-detail">
                             <div class="block2-txt-child1 flex-col-l">
-                                <a href="/product/product-detail/${product.Slug}" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+                                <a href="/product/product-detail/${product.Slug}" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 js-name-detail p-b-6">
                                     ${product.Title}
                                 </a>
                                 <span class="stext-105 cl3">${basePrice}</span>
                             </div>
                             <div class="block2-txt-child2 flex-r p-t-3">
-                                <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
+                                <a href="#" data-id="${product.Id}" class="btn-addwish dis-block pos-relative">
                                     <img class="icon-heart1 dis-block trans-04" src="/assets/images/icons/icon-heart-01.png" alt="ICON">
                                     <img class="icon-heart2 dis-block trans-04 ab-t-l" src="/assets/images/icons/icon-heart-02.png" alt="ICON">
                                 </a>
@@ -139,11 +144,17 @@
         var $newItems = $(html);
         $(".product-container").append($newItems);
 
+        if (products) {
+            AddToWishlist();
+        }
+
         // Cập nhật Isotope
         $(".product-container").isotope("appended", $newItems).isotope("layout");
         setTimeout(function () {
             $(".isotope-grid").isotope({ filter: "*" });
         }, 50);
+
+        
     }
 
 
@@ -308,7 +319,6 @@
         let variantSku = $("#v-sku").val();
         addToCart(productSku, variantSku, quantity, $(this));
     });
-
     function addToCart(productSku, variantSku, quantity, button) {
         $.ajax({
             url: "/cart/add-to-cart",
@@ -339,7 +349,6 @@
             }
         });
     }
-
     /*add to cart*/
 
     //update quantity cart
@@ -452,6 +461,111 @@
         });
     }
 
+
+    // add to wish list
+    function LoadWishlist() {
+        $.ajax({
+            url: "/product/load-wishlist",
+            type: "POST",
+            success: function (response) {
+                if (response && response.issuccess === true) {
+                    var normalizedWishlists = response.data.map(id => id.toLowerCase());
+                    let wishlistCount = normalizedWishlists.length;
+                    $(".icon-header-wishlish").attr("data-notify", wishlistCount);
+                    $(".btn-addwish").each(function () {
+                        var productId = $(this).data("id").toString().toLowerCase();
+                        if (normalizedWishlists.includes(productId)) {
+                            $(this).addClass("active");
+                        } else {
+                            $(this).removeClass("active");
+                        }
+                    });
+                }
+            },
+            error: function (xhr) {
+                console.error("Lỗi khi tải danh sách wishlist");
+            }
+        });
+    }
+
+    LoadWishlist();
+
+
+    function AddToWishlist() {
+        $(".btn-addwish").on('click', function (e) {
+            e.preventDefault();
+            let $this = $(this);
+            let nameProduct = $this.closest(".product-detail").find('.js-name-detail').html();
+            let productid = $this.data("id");
+            if (!productid) return;
+            $.ajax({
+                url: "/product/add-to-wishlist",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ productid: productid }),
+                success: function (response) {
+                    // Kiểm tra nếu phần tử đã được thêm vào wishlist
+                    if ($this.hasClass("active")) {
+                        // Nếu đã tym, hủy tym
+                        $this.removeClass("active");
+                        swal(nameProduct, "has been removed from wishlist!", "warning");
+                    } else {
+                        // Nếu chưa tym, thêm vào wishlist
+                        $(this).addClass("active");
+                        swal(nameProduct, "is added to wishlist!", "success");
+                    }
+                    LoadWishlist();
+                },
+                error: function (xhr) {
+                    let response = JSON.parse(xhr.responseText);
+                    if (response.isLogin && !response.isLogin) {
+                        window.location.href = "/account/login"; // Chuyển hướng đến trang đăng nhập
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+
+
+        });
+
+    }
+
+    AddToWishlist();
+    // add to wish list
+
+    // remove item wish lish
+    $(".btn-remove-item-wishlist").on('click', function (e) {
+        let $this = $(this);
+        let productid = $this.data("id");
+        if (!productid) return;
+        $.ajax({
+            url: "/product/add-to-wishlist",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ productid: productid }),
+            success: function (response) {
+                
+                // Xóa dòng sản phẩm khỏi bảng Wishlist
+                $this.closest("tr").remove();
+
+                // Cập nhật lại wishlist icon
+                LoadWishlist();
+            },
+            error: function (xhr) {
+                let response = JSON.parse(xhr.responseText);
+                if (response.isLogin && !response.isLogin) {
+                    window.location.href = "/account/login"; // Chuyển hướng đến trang đăng nhập
+                } else {
+                    alert(response.message);
+                }
+            }
+        });
+    });
+    // remove item wish lish
+
+
+
     // Gọi API khi trang tải xong
     getCartItemCount();
 
@@ -554,7 +668,7 @@
                     alert("Lỗi khi xóa sản phẩm");
                 }
             }
-       });
+        });
     }
     // Cập nhật tổng tiền sử dụng data-total
     function updateTotalModalCartPrice(price, quantity) {
@@ -581,6 +695,73 @@
     reinitMagnificPopup();
 
     reinitializeSlick();
+
+
+    // send message contact
+    function sendMessageContact() {
+
+        const notyf = new Notyf({
+            position: { x: 'right', y: 'top' }, // Đặt thông báo ở góc trên bên phải
+            duration: 3000,
+            dismissible: true
+        });
+
+
+        let emailInput = $("#email-contact");
+        let fullnameInput = $("#fullname-contact");
+        let messageInput = $("#message-contact");
+
+        // Lấy dữ liệu từ form
+        let email = emailInput.length ? emailInput.val().trim() : null;
+        let fullname = fullnameInput.length ? fullnameInput.val().trim() : null;
+        let message = messageInput.val().trim(); // Tin nhắn luôn có
+        // Nếu input tồn tại và có giá trị thì mới kiểm tra
+        if (email !== null && email === "") {
+            alert("Please enter your email address.");
+            return;
+        }
+
+        if (fullname !== null && fullname === "") {
+            alert("Please enter your full name.");
+            return;
+        }
+
+        // Kiểm tra tin nhắn bắt buộc nhập
+        if (!message) {
+            alert("Please enter your message.");
+            return;
+        }
+
+
+        // Gửi AJAX
+        $.ajax({
+            url: "/contact/send-message",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                email: email,
+                fullname: fullname,
+                message: message
+            }),
+            success: function (response) {
+                alert("Message sent successfully: " + response);
+                // Reset form sau khi gửi thành công
+                $("#email-contact").val('');
+                $("#fullname-contact").val('');
+                $("#message-contact").val('');
+                notyf.success(response);
+            },
+            error: function (xhr, status, error) {
+                notyf.error(xhr.responseText);
+            }
+        });
+    }
+    $("#btn-sendmessage-contact").on('click', function (e) {
+        e.preventDefault();
+        sendMessageContact();
+    });
+    // send message contact
+
 
 
 
