@@ -19,7 +19,7 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
         {
             await _context.AddAsync(contact);
             var rs = await _context.SaveChangesAsync();
-            return rs > 1 ? (true, "Gửi thành công") : (false, "Gửi thất bại");
+            return rs > 0 ? (true, "Gửi thành công") : (false, "Gửi thất bại");
         }
 
         public async Task<IEnumerable<Contact>> GetContacts()

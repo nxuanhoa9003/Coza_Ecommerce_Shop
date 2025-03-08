@@ -1,0 +1,142 @@
+﻿@using Coza_Ecommerce_Shop.Models.Helper
+@using Coza_Ecommerce_Shop.ViewModels
+@model ContactPagingViewModel
+@{
+    ViewData["Title"] = "Contact";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin_Sub.cshtml";
+}
+
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Home</a>
+        </li>
+        <li class="breadcrumb-item active">@ViewData["Title"]</li>
+    </ol>
+</nav>
+
+
+<div class="card">
+    <div class="d-flex justify-content-between align-items-center">
+        <h5 class="card-header mb-0">@ViewData["Title"]</h5>
+    </div>
+
+    <!-- form search -->
+    <form class="px-4 pb-2 d-flex w-25" method="get" asp-area="Admin" asp-action="Index" asp-controller="Contact">
+        <div class="input-group input-group-merge">
+            <button type="submit" class="input-group-text" id="basic-addon-search31" aria-label="icon">
+                <i class="bx bx-search"></i>
+            </button>
+            <input type="text" name="search" class="form-control" placeholder="Tìm kiếm..." aria-label="Search..." aria-describedby="basic-addon-search31">
+        </div>
+    </form>
+    <!-- // form search -->
+    @if (Model.contacts != null && Model.contacts.Any())
+    {
+        <hr class="border border-primary border-3 opacity-75">
+        <div class="table-responsive text-nowrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th class="text-center">
+                            STT
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.contacts[0].Name)
+                        </th>
+                        <th>
+                            Ngày gửi
+                        </th>
+                        <th class="text-center">
+                            Trạng thái
+                        </th>
+                        <th class="text-center">
+                            @Html.DisplayNameFor(model => model.contacts[0].Message)
+                        </th>
+
+                        <th class="text-center">
+                            Xem chi tiết
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int stt = (Model.PagingInfo.CurrentPage - 1) * Model.PagingInfo.PageSize;
+                    }
+                    @foreach (var item in Model.contacts)
+                    {
+                        string iconStatus = item.IsRead ? "<i class='bx bx-check-circle text-success' ></i>" : "<i class='bx bx-x-circle text-danger'></i>";
+
+                        <tr>
+                            <td class="text-center">@(++stt)</td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </td>
+                            
+                            <td>
+                                @item.CreateDate.ToString("hh:mm:ss tt dd/MM/yyyy")
+                            </td>
+
+                            <td class="text-center">
+                                @Html.Raw(iconStatus)
+                            </td>
+
+                            <td class="text-truncate" style="max-width: 300px;">
+                                @Html.DisplayFor(modelItem => item.Message)
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-info btn-detail-message" data-bs-toggle="modal" data-bs-target="#messageModal" type="button">Chi tiết</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@await Component.InvokeAsync("Paging", Model.PagingInfo)
+
+
+<!-- Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="messageModalLabel">Chi tiết tin nhắn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Họ tên:</strong> <span id="modalName"></span></p>
+                <p><strong>Email:</strong> <span id="modalEmail"></span></p>
+                <p><strong>Ngày gửi:</strong> <span id="modalCreateDate"></span></p>
+                <p><strong>Nội dung:</strong></p>
+                <p id="modalContent"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            $(".btn-detail-message").click(function () {
+                const messageData = {
+                    name: "Nguyễn Văn A",
+                    email: "nguyenvana@example.com",
+                    createDate: "05/03/2025 10:30 AM",
+                    content: "Đây là nội dung tin nhắn."
+                };
+                document.getElementById("modalName").innerText = messageData.name;
+                document.getElementById("modalEmail").innerText = messageData.email;
+                document.getElementById("modalCreateDate").innerText = messageData.createDate;
+                document.getElementById("modalContent").innerText = messageData.content;
+            });
+        });
+    </script>
+}
+

@@ -76,7 +76,7 @@
         </li>
 
         <li class='menu-item@(currentPage.Contains("/admin/category") ? " active" : "")'>
-           
+
             <a asp-area="Admin" asp-controller="Category" asp-action="Index" class="menu-link">
                 <i class='menu-icon  bx bx-menu'></i>
                 <div data-i18n="Danh mục menu">Danh mục</div>
@@ -131,18 +131,17 @@
 
             </ul>
         </li>
-       
 
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link">
 
-                <i class="menu-icon tf-icons bx bxs-dashboard"></i>
-                <div data-i18n="Quảng cáo">Quảng cáo</div>
+        <li class="menu-item  @(currentPage.StartsWith("/admin/contact") ? " active open" : "")">
+            <a asp-area="Admin" asp-controller="Contact" asp-action="Index" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-message"></i>
+                <div data-i18n="Tin nhắn">Tin nhắn</div>
             </a>
         </li>
 
 
-       
+
 
         <li class='menu-item @(currentPage.StartsWith("/admin/role") || currentPage.Contains("/admin/claims") || (currentPage.Contains("/admin/employee") || currentPage.Contains("/admin/customer") ) ? " active open" : "")'>
             <a href="javascript:void(0)" class="menu-link menu-toggle">

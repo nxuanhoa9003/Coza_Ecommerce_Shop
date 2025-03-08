@@ -14,13 +14,12 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
     {
         private readonly ISettingConfigurationRepository _settingConfigurationRepository;
         public INotyfService _notifyService { get; }
-        private readonly AppDbContext _context;
 
         public SettingConfigurationController(ISettingConfigurationRepository settingConfigurationRepository, INotyfService notifyService, AppDbContext context)
         {
             _settingConfigurationRepository = settingConfigurationRepository;
             _notifyService = notifyService;
-            _context = context;
+
         }
 
         [HttpGet]

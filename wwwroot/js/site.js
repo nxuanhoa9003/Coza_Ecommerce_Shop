@@ -744,7 +744,7 @@
                 message: message
             }),
             success: function (response) {
-                alert("Message sent successfully: " + response);
+                //alert("Message sent successfully: " + response);
                 // Reset form sau khi gửi thành công
                 $("#email-contact").val('');
                 $("#fullname-contact").val('');
