@@ -8,6 +8,7 @@ using X.PagedList.Extensions;
 namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Route("admin/contact")]
     [Authorize(AuthenticationSchemes = "AdminScheme")]
     public class ContactController : Controller
     {
@@ -17,7 +18,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         {
             _contactRepository = contactRepository;
         }
-
+        [HttpGet]
         public async Task<IActionResult> Index(string search, int? page = 1)
         {
             int pageSize = 10;
@@ -53,5 +54,27 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
             return View(ContactsViewModel);
         }
+
+        [HttpPost("load-detail-message")]
+        public async Task<IActionResult> LoadDetailMessage([FromBody] LoadMessageRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request?.Id))
+            {
+                return BadRequest("ID không hợp lệ");
+            }
+
+            var contact = await _contactRepository.GetContactById(request?.Id);
+            if(contact == null)
+            {
+                return NotFound("Không tìm thấy gì");
+            }
+            return Ok(new {data = contact });
+        }
+    }
+
+
+    public class LoadMessageRequest
+    {
+        public string Id { get; set; }
     }
 }

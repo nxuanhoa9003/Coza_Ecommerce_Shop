@@ -93,6 +93,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         [HttpPost("update-status-order")]
+        [Authorize(Policy = "UpdateOrder")]
         public async Task<IActionResult> UpdateOrderStatus(string orderId, string newStatus)
         {
             var order = await _orderRepository.GetOrderById(orderId);

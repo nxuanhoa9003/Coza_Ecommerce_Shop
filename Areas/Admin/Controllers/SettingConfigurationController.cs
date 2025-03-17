@@ -23,6 +23,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "UpdateSetting")]
         public async Task<IActionResult> Update()
         {
             var settings = await _settingConfigurationRepository.GetAllSettingsAsync();
@@ -31,6 +32,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "UpdateSetting")]
         public async Task<IActionResult> Update(Dictionary<string, string> settings, IFormFile Logo)
         {
 

@@ -1,0 +1,155 @@
+﻿@using Coza_Ecommerce_Shop.ViewModels.Account
+@model CustomerPagingViewModel
+
+@{
+    ViewData["Title"] = "Customers";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin_Sub.cshtml";
+    var listCustomers = Model.listCustomers;
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Home</a>
+        </li>
+        <li class="breadcrumb-item active">@ViewData["Title"]</li>
+    </ol>
+</nav>
+
+<!-- Basic Bootstrap Table -->
+<div class="card">
+    <div class="d-flex justify-content-between align-items-center">
+        <h5 class="card-header mb-0">@ViewData["Title"]</h5>
+       
+    </div>
+
+
+
+    <div class="row col-md-8">
+        <!-- form search -->
+        <form class="col-12 col-md-6 px-4 pb-2 d-flex" method="get" asp-area="Admin" asp-action="Index" asp-controller="ListCustomers">
+            <div class="input-group input-group-merge">
+                <button type="submit" class="input-group-text" id="basic-addon-search31" aria-label="icon">
+                    <i class="bx bx-search"></i>
+                </button>
+                <input value="@Model.PagingInfo.SearchTerm" type="text" name="search" class="form-control" placeholder="Tìm kiếm..." aria-label="Search..." aria-describedby="basic-addon-search31">
+            </div>
+        </form>
+
+    </div>
+
+    @if (listCustomers != null && listCustomers.Any())
+    {
+        <hr class="border border-primary border-3 opacity-75">
+        <div class="table-responsive text-nowrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>@Html.DisplayNameFor(model => listCustomers[0].UserName)</th>
+                        <th>@Html.DisplayNameFor(model => listCustomers[0].FullName)</th>
+                        <th>@Html.DisplayNameFor(model => listCustomers[0].Email)</th>
+                        <th>@Html.DisplayNameFor(model => listCustomers[0].PhoneNumber)</th>
+                        <th class="text-center">Hoạt động</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="table-border-bottom-0">
+                    @foreach (var user in listCustomers)
+                    {
+                        string iconStatus = (user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow) ? "<i class='bx bx-x-circle text-danger'></i>" : "<i class='bx bx-check-circle text-success' ></i>";
+
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => user.UserName)</td>
+                            <td class="text-uppercase"><strong>@Html.DisplayFor(modelItem => user.FullName)</strong></td>
+                            <td>@Html.DisplayFor(modelItem => user.Email)</td>
+                            <td>@Html.DisplayFor(modelItem => user.PhoneNumber)</td>
+                            <td class="text-center">@Html.Raw(iconStatus)</td>
+                            <td class="text-center">
+                                <button data-id="@user.Id" class="btn-customer-detail btn btn-sm btn-outline-info mx-2">Detail </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!--/ Basic Bootstrap Table -->
+@await Component.InvokeAsync("Paging", Model.PagingInfo)
+
+<!-- Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="messageModalLabel">Thông tin chi tiết</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Avatar -->
+                <img id="modalAvatar" src="https://via.placeholder.com/100" class="rounded-circle mb-3" alt="User Avatar" width="100" height="100">
+                <p><strong>Username:</strong> <span id="modalUserName"></span></p>
+                <p><strong>Họ tên:</strong> <span id="modalName"></span></p>
+                <p><strong>Email:</strong> <span id="modalEmail"></span></p>
+                <p><strong>Phone number:</strong> <span id="modalPhoneNumber"></span></p>
+                <p><strong>Address:</strong></p>
+                <p id="modalAddress"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $(".btn-customer-detail").click(function () {
+                let id = $(this).data("id");
+                id = id ? id.toString() : "";
+                $.ajax({
+                    url: "/admin/customer/detail-customer",
+                    method: "POST",
+                    contentType: "application/json", // Định dạng JSON
+                    data: JSON.stringify({ id: id }), // Chuyển dữ liệu thành JSON
+                    success: function (response) {
+                        if (response && response.data) {
+                            console.log("Dữ liệu nhận được:", response.data);
+                            const result =response.data;
+                            const messageData = {
+                                username: result.userName,
+                                name: result.fullName,
+                                email: result.email,
+                                phonenumber: result.phoneNumber,
+                                address: result.address,
+                                avatar: result.avatar
+                            };
+
+                            $("#modalUserName").text(messageData.username);
+                            $("#modalName").text(messageData.name);
+                            $("#modalEmail").text(messageData.email);
+                            $("#modalPhoneNumber").text(messageData.phonenumber);
+                            $("#modalAddress").text(messageData.address);
+                            $("#modalAvatar").attr("src", messageData.avatar);
+                            $("#messageModal").modal("show");
+
+                        }
+                         else {
+                            alert("Không tìm thấy dữ liệu tin nhắn!");
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Lỗi khi tải tin nhắn, vui lòng thử lại!");
+                    }
+                });
+
+
+            });
+        });
+    </script>
+}
+

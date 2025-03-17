@@ -22,6 +22,16 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             return rs > 0 ? (true, "Gửi thành công") : (false, "Gửi thất bại");
         }
 
+        public async Task<Contact?> GetContactById(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id) || !Guid.TryParse(id, out var contactId))
+            {
+                return null;
+            }
+
+            return await _context.Contacts.FirstOrDefaultAsync(x => x.Id == contactId);
+        }
+
         public async Task<IEnumerable<Contact>> GetContacts()
         {
             return await _context.Contacts.OrderByDescending(x => x.IsRead).ToListAsync();

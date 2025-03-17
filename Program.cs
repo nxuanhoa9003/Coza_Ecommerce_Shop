@@ -10,12 +10,13 @@ using Coza_Ecommerce_Shop.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using System.Threading.Tasks;
 
 namespace Coza_Ecommerce_Shop
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -90,7 +91,7 @@ namespace Coza_Ecommerce_Shop
                 options.AccessDeniedPath = "/Admin/AccessDenied";
                 options.Cookie.Name = "AdminAuth";
             })
-            .AddGoogle("GoogleScheme",options =>
+            .AddGoogle("GoogleScheme", options =>
             {
                 IConfigurationSection googleAuthNSection = builder.Configuration.GetSection("Authentication:Google");
                 options.ClientId = googleAuthNSection["ClientId"];
@@ -114,6 +115,7 @@ namespace Coza_Ecommerce_Shop
             // Register Services
             builder.Services.AddApplicationServices();
 
+
             builder.Services.AddNotyf(config =>
             {
                 config.DurationInSeconds = 5;
@@ -132,6 +134,17 @@ namespace Coza_Ecommerce_Shop
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+
+
+            // Tạo scope để gọi phương thức async
+            using (var scope = app.Services.CreateScope())
+            {
+                // Đảm bảo admin có đủ quyền khi ứng dụng khởi động
+                var serviceProvider = scope.ServiceProvider;
+                await AdminClaimSeeder.EnsureAdminHasFullClaims(serviceProvider);
+            }
+
 
             app.UseNotyf();
             // đăng ký middlewware setting configuration

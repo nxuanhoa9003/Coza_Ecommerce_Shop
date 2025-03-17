@@ -44,7 +44,9 @@ namespace Coza_Ecommerce_Shop.Repositories.Interfaces
         Task<(bool IsSuccess, string ErrorMessage)> UpdateAccountEmployee(EmployeeViewModel employeeViewModel);
         Task<(bool IsSuccess, string ErrorMessage)> DeleteAccountEmployee(string Id);
 
-
+        // customers
+        Task<IEnumerable<AppUser>> GetAllCustomersAsync(string typeUser);
+        Task<CustomerDetailViewModel?> GetDetailCustomersAsync(string Id);
 
         Task<IEnumerable<ClaimsCustom>> GetAllClaims();
     }

@@ -35,6 +35,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/Posts
+        [HttpGet]   
         public async Task<IActionResult> Index(string search, int? page = 1)
         {
             int pageSize = 2;
@@ -86,6 +87,8 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/Posts/Create
+        [HttpGet]
+        [Authorize(Policy = "CreatePost")]
         public async Task<IActionResult> Create()
         {
             ViewData["CategoryId"] = new SelectList(await _categoryRepository.GetAllAsync(), "Id", "Title");
@@ -97,6 +100,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CreatePost")]
         public async Task<IActionResult> Create([Bind("Title,Description,Detail,Image,CategoryId,SeoTitile,SeoDescription,SeoKeywords")] Post post, IFormFile file)
         {
             if(file == null)
@@ -136,6 +140,8 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/Posts/Edit/5
+        [HttpGet]
+        [Authorize(Policy = "EditPost")]
         public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
@@ -157,6 +163,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "EditPost")]
         public async Task<IActionResult> Edit(Guid id, [Bind("Id,Title,Slug,Description,Detail,Image,CategoryId,SeoTitile,SeoDescription,SeoKeywords,IsActive")] Post post, IFormFile file)
         {
             if (id != post.Id)
@@ -222,6 +229,8 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/Posts/Delete/5
+        [HttpGet]
+        [Authorize(Policy = "DeletePost")]
         public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
@@ -241,6 +250,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // POST: Admin/Posts/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "DeletePost")]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var post = await _postRepository.GetByIdAsync(id);
@@ -256,6 +266,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
         // Post: delete select
         [HttpPost]
+        [Authorize(Policy = "DeletePost")]
         public async Task<IActionResult> DeleteNewsSelect([FromBody] List<Guid> ids)
         {
             if (!ids.IsNullOrEmpty())

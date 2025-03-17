@@ -27,6 +27,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/Category
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var listcategories = await _categoryRepository.GetAllAsync();
@@ -34,6 +35,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/Category/Details/5
+        [HttpGet]
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -51,6 +53,8 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/Category/Create
+        [HttpGet]
+        [Authorize(Policy = "CreateCategory")]
         public IActionResult Create()
         {
             return View();
@@ -61,6 +65,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CreateCategory")]
         public async Task<IActionResult> Create([Bind("Title,Description,Position,SeoTitle,SeoDescription,SeoKeywords")] Category category)
         {
 
@@ -82,6 +87,9 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/Category/Edit/5
+        [HttpGet]
+        [Authorize(Policy = "EditCategory")]
+
         public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
@@ -102,6 +110,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "EditCategory")]
         public async Task<IActionResult> Edit(Guid id, [Bind("Id,Title,Description,Position,SeoTitle,SeoDescription,SeoKeywords")] Category category)
         {
 
@@ -157,6 +166,8 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/Category/Delete/5
+        [HttpGet]
+        [Authorize(Policy = "DeleteCategory")]
         public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
@@ -176,6 +187,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // POST: Admin/Category/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "DeleteCategory")]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var category = await _categoryRepository.GetByIdAsync(id);

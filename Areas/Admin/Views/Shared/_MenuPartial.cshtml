@@ -150,7 +150,7 @@
             </a>
             <ul class="menu-sub">
                 <li class='menu-item@(currentPage.Contains("/admin/customer") ? " active" : "")'>
-                    <a href="ui-accordion.html" class="menu-link">
+                    <a asp-area="Admin" asp-controller="Customer" asp-action="ListCustomers" class="menu-link">
                         <div data-i18n="Tài khoản">Khách hàng</div>
                     </a>
                 </li>

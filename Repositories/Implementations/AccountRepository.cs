@@ -1,5 +1,6 @@
 ﻿using Azure;
 using Coza_Ecommerce_Shop.Data;
+using Coza_Ecommerce_Shop.Extentions;
 using Coza_Ecommerce_Shop.Models;
 using Coza_Ecommerce_Shop.Models.Common;
 using Coza_Ecommerce_Shop.Models.Entities;
@@ -14,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System.Data;
+using System.Linq;
 using System.Net;
 using System.Security.Claims;
 
@@ -67,6 +69,14 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             var isPasswordValid = await _userManager.CheckPasswordAsync(user, model.Password);
             if (!isPasswordValid)
             {
+                // Tăng số lần thất bại đăng nhập
+                await _userManager.AccessFailedAsync(user);
+
+                // Kiểm tra xem user có bị khóa không
+                if (await _userManager.IsLockedOutAsync(user))
+                {
+                    return (false, "Tài khoản đã bị khóa do nhập sai quá nhiều lần.", null);
+                }
                 return (false, "Sai mật khẩu.", null);
             }
 
@@ -93,6 +103,26 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
 
             if (result.Succeeded)
             {
+                if (isAdmin)
+                {
+                    if (user != null && user.UserName == "admin")
+                    {
+                        var existingClaims = await _userManager.GetClaimsAsync(user);
+                        var allPermissions = Enum.GetValues(typeof(Permission)).Cast<Permission>().Select(p => p.ToString());
+
+                        var missingClaims = allPermissions.Except(existingClaims.Select(c => c.Value)).ToList();
+
+                        if (missingClaims.Any())
+                        {
+                            foreach (var claim in missingClaims)
+                            {
+                                await _userManager.AddClaimAsync(user, new Claim("Permission", claim));
+                            }
+                        }
+                    }
+                }
+
+
                 string UserType = isAdmin ? "Admin" : "Customer";
 
                 var claims = new List<Claim>
@@ -213,7 +243,6 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             IEnumerable<AppUser> users = await _userManager.Users.ToListAsync();
             if (typeUser != "All")
             {
-
                 if (typeUser == "Admin")
                 {
                     users = await _userManager.GetUsersInRoleAsync("Admin");
@@ -221,8 +250,13 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
                 else if (typeUser == "Employee")
                 {
                     users = await _userManager.GetUsersInRoleAsync("Employee");
-
                 }
+            }
+            else
+            {
+                var admins = await _userManager.GetUsersInRoleAsync("Admin");
+                var employees = await _userManager.GetUsersInRoleAsync("Employee");
+                users = admins.Concat(employees);
             }
             return users;
         }
@@ -693,7 +727,42 @@ namespace Coza_Ecommerce_Shop.Repositories.Implementations
             return roleClaims;
         }
 
+        public async Task<IEnumerable<AppUser>> GetAllCustomersAsync(string typeUser = "Customer")
+        {
+            if (string.IsNullOrWhiteSpace(typeUser))
+            {
+                return Enumerable.Empty<AppUser>(); // Trả về danh sách rỗng thay vì null
+            }
+            IEnumerable<AppUser> users = await _userManager.Users.ToListAsync();
+            users = await _userManager.GetUsersInRoleAsync(typeUser);
+            return users;
+        }
 
+        public async Task<CustomerDetailViewModel?> GetDetailCustomersAsync(string Id)
+        {
+            if (string.IsNullOrWhiteSpace(Id))
+            {
+                return null; // Trả về null
+            }
+            var users = await _userManager.GetUsersInRoleAsync("Customer");
+            var userfind = users.FirstOrDefault(x => x.Id == Id);
 
+            if (userfind == null)
+            {
+                return null;
+            }
+
+            var usrs = new CustomerDetailViewModel
+            {
+                Id = userfind.Id,
+                UserName = userfind.UserName,
+                FullName = userfind.FullName,
+                Email = userfind.Email,
+                PhoneNumber = userfind.PhoneNumber,
+                Address = userfind.Address,
+                Avatar = userfind.AvatarUrl ?? "/uploads/avt_empty.jpg"
+            };
+            return usrs;
+        }
     }
 }

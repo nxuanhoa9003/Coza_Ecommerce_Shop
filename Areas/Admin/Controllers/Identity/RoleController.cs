@@ -33,12 +33,14 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
         }
 
         [HttpGet]
+        [Authorize(Policy = "CreateRoles")]
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
+        [Authorize(Policy = "CreateRoles")]
         public async Task<IActionResult> Create([FromForm] string roleName)
         {
             if(string.IsNullOrEmpty(roleName))
@@ -62,6 +64,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
 
 
         [HttpGet]
+        [Authorize(Policy = "EditRoles")]
         public async Task<IActionResult> Edit(string id)
         {
             var role = await _roleRepository.GetRoleByIdAsync(id);
@@ -73,6 +76,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
         }
 
         [HttpPost]
+        [Authorize(Policy = "EditRoles")]
         public async Task<IActionResult> Edit([FromForm]IdentityRole role)
         {
             var rs = await _roleRepository.UpdateRoleAsync(role);
@@ -88,6 +92,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "DeleteRoles")]
         public async Task<IActionResult> Delete(string id)
         {
             if(string.IsNullOrEmpty(id))
@@ -108,7 +113,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
 
 
         [HttpGet]
-        [AllowAnonymous]
+        [Authorize(Policy = "UpdateRoleClaims")]
         public async Task<IActionResult> UpdateRoleClaims(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -154,9 +159,9 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
 
         }
 
-        [HttpPost]
-        [AllowAnonymous]
+        [HttpPost] 
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "UpdateRoleClaims")]
         public async Task<IActionResult> UpdateRoleClaims (string Id, List<string> selectedClaims)
         {
             if(string.IsNullOrEmpty(Id))
@@ -177,6 +182,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message, ex);
                 _notifyService.Error("Không thể cập nhật quyền cho vai trò");
             }
 

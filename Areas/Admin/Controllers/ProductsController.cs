@@ -76,6 +76,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/Products
+        [HttpGet]
         public async Task<IActionResult> Index(string search, int? page = 1)
         {
             var listproducts = await _productRepository.GetAllAsync();
@@ -114,6 +115,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/Products/Details/5
+        [HttpGet]
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -230,20 +232,20 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
             int variantNumber = 0;
             var existingVariants = product.Variants.ToList();
             var listsku = existingVariants.Select(x => x.SKU).ToList();
-			foreach (var item in productViewModel.Variants)
+            foreach (var item in productViewModel.Variants)
             {
-                
+
                 var existingVariant = existingVariants.FirstOrDefault(v => v.Id == item.Id);
                 if (existingVariant == null)
                 {
                     item.Id ??= Guid.NewGuid();
                     var newsku = GenerateSKUVariant(productViewModel.ProductCode, ++variantNumber);
-					while (listsku.Contains(newsku))
-					{
-						newsku = GenerateSKUVariant(productViewModel.ProductCode, ++variantNumber);
-					}
-					item.SKU = newsku;
-					item.SKU = GenerateSKUVariant(productViewModel.ProductCode, ++variantNumber);
+                    while (listsku.Contains(newsku))
+                    {
+                        newsku = GenerateSKUVariant(productViewModel.ProductCode, ++variantNumber);
+                    }
+                    item.SKU = newsku;
+                    item.SKU = GenerateSKUVariant(productViewModel.ProductCode, ++variantNumber);
                     item.ProductId = product.Id;
                     item.BasePrice ??= 0;
                     item.PriceSale ??= 0;
@@ -297,14 +299,14 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                                 .Select(Guid.Parse)
                                 .ToList();
                 var listproductImages = product.ProductImages.Where(x => deletedIds.Contains(x.Id)).ToList();
-                if(listproductImages.Count > 0)
+                if (listproductImages.Count > 0)
                 {
                     foreach (var item in listproductImages)
                     {
                         product.ProductImages.Remove(item);
                     }
                 }
-                
+
             }
 
 
@@ -342,8 +344,8 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
             foreach (var image in product.ProductImages)
             {
-                
-                if(productViewModel.Image == image.Image)
+
+                if (productViewModel.Image == image.Image)
                 {
                     image.IsDefault = true;
                     product.Image = image.Image;
@@ -380,6 +382,8 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/Products/Create
+        [HttpGet]
+        [Authorize(Policy = "CreateProduct")]
         public async Task<IActionResult> Create()
         {
             var categories = (await _productCategoryRepository.GetAllAsync()).ToList();
@@ -390,6 +394,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // POST: Admin/Products/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CreateProduct")]
         public async Task<IActionResult> Create([FromForm] ProductViewModel productViewModel)
         {
             var categories = (await _productCategoryRepository.GetAllAsync()).ToList();
@@ -453,6 +458,8 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/Products/Edit/5
+        [HttpGet]
+        [Authorize(Policy = "EditProduct")]
         public async Task<IActionResult> Edit(Guid? id)
         {
             var categories = (await _productCategoryRepository.GetAllAsync()).ToList();
@@ -477,6 +484,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // POST: Admin/Products/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "EditProduct")]
         public async Task<IActionResult> Edit(Guid? id, ProductViewModel productDetailViewModel)
         {
             var categories = (await _productCategoryRepository.GetAllAsync()).ToList();
@@ -516,7 +524,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
                 UpdateBaseInfoProduct(productDetailViewModel, productOld);
 
                 await ProcessProductImages(productDetailViewModel, productOld);
-               
+
                 ProcessVariants(productDetailViewModel, productOld);
 
 
@@ -536,6 +544,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/Products/Delete/5
+        [HttpGet]
         [Authorize(Policy = "DeleteProduct")]
         public async Task<IActionResult> Delete(Guid? id)
         {

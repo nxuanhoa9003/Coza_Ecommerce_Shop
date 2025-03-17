@@ -65,12 +65,14 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "CreateBanner")]
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
+        [Authorize(Policy = "CreateBanner")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([FromForm] BannerViewModel model)
         {
@@ -110,6 +112,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
 
         [HttpGet]
+        [Authorize(Policy = "EditBanner")]
         public async Task<IActionResult> Edit(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -124,6 +127,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "EditBanner")]
         public async Task<IActionResult> Edit(string id, [FromForm] BannerViewModel model)
         {
             if (string.IsNullOrEmpty(id) || Guid.Parse(id) != model.Id)
@@ -188,6 +192,8 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
 
         [HttpPost("Delete/{id}")]
+        [Authorize(Policy = "DeleteBanner")]
+
         public async Task<IActionResult> Delete(string id)
         {
             if (string.IsNullOrEmpty(id))

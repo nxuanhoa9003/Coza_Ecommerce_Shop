@@ -59,7 +59,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach(var orderItem in Model.OrderDetails)
+                            @foreach (var orderItem in Model.OrderDetails)
                             {
                                 <tr>
                                     <td class="align-middle text-center">
@@ -68,11 +68,14 @@
                                              alt="@orderItem.Product.Title">
                                     </td>
                                     <td class="align-middle">
-                                        <span class="fw-bold">@orderItem.Product.Title</span>
-                                        <br />
-                                        <small class="text-muted">Màu: @orderItem.Variant.Color</small>
-                                        <br />
-                                        <small class="text-muted">Size: @orderItem.Variant.Size</small>
+                                        <a class="stext-104 cl4 hov-cl1 trans-04 js-name-detail p-b-6"
+                                            asp-controller="Product" asp-action="ProductDetail" asp-route-slug="@orderItem.Product.Slug">
+                                            <span class="fw-bold">@orderItem.Product.Title</span>
+                                            <br />
+                                            <small class="text-muted">Màu: @orderItem.Variant.Color</small>
+                                            <br />
+                                            <small class="text-muted">Size: @orderItem.Variant.Size</small>
+                                        </a>
                                     </td>
                                     <td class="align-middle text-center">
                                         <span class="badge bg-secondary">@orderItem.Quantity</span>

@@ -78,6 +78,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
 
         // GET: Admin/ProductCategories
+        [HttpGet]   
         public async Task<IActionResult> Index(string search, int? page = 1)
         {
             int pageSize = 10;
@@ -115,6 +116,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/ProductCategories/Details/5
+        [HttpGet]
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -133,6 +135,8 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/ProductCategories/Create
+        [HttpGet]
+        [Authorize(Policy = "CreateProductCategories")]
         public async Task<IActionResult> Create()
         {
             var categories = (await _productcategoryRepository.GetAllAsync()).ToList();
@@ -145,6 +149,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CreateProductCategories")]
         public async Task<IActionResult> Create([Bind("Title,Description,IsFeatured,SeoTitle,SeoDescription,SeoKeywords,CreateBy,CreateDate,ModifierDate,ModifiedBy,ParentCategoryId")] ProductCategory productCategory)
         {
             var categories = (await _productcategoryRepository.GetAllAsync()).ToList();
@@ -205,6 +210,8 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         }
 
         // GET: Admin/ProductCategories/Edit/5
+        [HttpGet]
+        [Authorize(Policy = "EditProductCategories")]
         public async Task<IActionResult> Edit(Guid? id)
         {
 
@@ -228,6 +235,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "EditProductCategories")]
         public async Task<IActionResult> Edit(Guid id, [Bind("Id,Title,Description,IsFeatured,SeoTitle,SeoDescription,SeoKeywords,CreateBy,CreateDate,ModifierDate,ModifiedBy,ParentCategoryId")] ProductCategory productCategory)
         {
             var categories = (await _productcategoryRepository.GetAllExceptIdAsync(id)).ToList();
@@ -322,6 +330,8 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
 
 
         // GET: Admin/ProductCategories/Delete/5
+        [HttpGet]
+        [Authorize(Policy = "DeleteProductCategories")]
         public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
@@ -341,6 +351,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers
         // POST: Admin/ProductCategories/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "DeleteProductCategories")]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var productCategory = await _productcategoryRepository.GetByIdAsync(id);

@@ -43,6 +43,8 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
             int pageSize = 10;
             int pageNumber = page ?? 1;
             var employees = await _accountRepository.GetAllEmployeesAsync(filter);
+            
+
             if (!string.IsNullOrEmpty(search))
             {
                 employees = employees.Where(x => x.UserName.ToLower().Contains(search.ToLower()) || (x.FullName != null && x.Email.ToLower().Contains(search.ToLower())) || x.PhoneNumber.Contains(search));
@@ -202,5 +204,6 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
         }
 
 
+        
     }
 }

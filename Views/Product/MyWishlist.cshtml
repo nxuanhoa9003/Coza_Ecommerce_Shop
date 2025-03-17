@@ -44,7 +44,11 @@
                                 </td>
 
                                 <td class="column-2">
-                                    <span class="fs-15">@product.Title</span>
+                                    <a class="stext-104 cl4 hov-cl1 trans-04 js-name-detail p-b-6" 
+                                        asp-controller="Product" asp-action="ProductDetail" asp-route-slug="@product.Slug">
+                                        <span class="fs-15">@product.Title</span>
+                                    </a>
+                           
                                 </td>
 
                                 <td class="column-3">@price</td>

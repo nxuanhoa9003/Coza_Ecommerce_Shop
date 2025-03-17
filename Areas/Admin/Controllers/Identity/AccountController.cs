@@ -1,4 +1,5 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using Coza_Ecommerce_Shop.Extentions;
 using Coza_Ecommerce_Shop.Models;
 using Coza_Ecommerce_Shop.Models.Entities;
 using Coza_Ecommerce_Shop.Repositories.Interfaces;
@@ -91,6 +92,7 @@ namespace Coza_Ecommerce_Shop.Areas.Admin.Controllers.Identity
                         }
                         return RedirectToAction("VerifyAccount", new { email = user.Email });
                     }
+
                     _notifyService.Error(errorMessage);
                 }
             }

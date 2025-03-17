@@ -73,7 +73,7 @@
                             <td>
                                 @Html.DisplayFor(modelItem => item.Name)
                             </td>
-                            
+
                             <td>
                                 @item.CreateDate.ToString("hh:mm:ss tt dd/MM/yyyy")
                             </td>
@@ -86,7 +86,7 @@
                                 @Html.DisplayFor(modelItem => item.Message)
                             </td>
                             <td class="text-center">
-                                <button class="btn btn-sm btn-info btn-detail-message" data-bs-toggle="modal" data-bs-target="#messageModal" type="button">Chi tiết</button>
+                                <button class="btn btn-sm btn-info btn-detail-message" data-id="@item.Id" type="button">Chi tiết</button>
                             </td>
                         </tr>
                     }
@@ -121,20 +121,46 @@
     </div>
 </div>
 
-@section Scripts{
+@section Scripts {
     <script>
         $(document).ready(function () {
             $(".btn-detail-message").click(function () {
-                const messageData = {
-                    name: "Nguyễn Văn A",
-                    email: "nguyenvana@example.com",
-                    createDate: "05/03/2025 10:30 AM",
-                    content: "Đây là nội dung tin nhắn."
-                };
-                document.getElementById("modalName").innerText = messageData.name;
-                document.getElementById("modalEmail").innerText = messageData.email;
-                document.getElementById("modalCreateDate").innerText = messageData.createDate;
-                document.getElementById("modalContent").innerText = messageData.content;
+
+                let id = $(this).data("id");
+                id = id ? id.toString() : "";
+                $.ajax({
+                    url: "/admin/contact/load-detail-message",
+                    method: "POST",
+                    contentType: "application/json", // Định dạng JSON
+                    data: JSON.stringify({ id: id }), // Chuyển dữ liệu thành JSON
+                    success: function (response) {
+                        if (response && response.data) {
+                            console.log("Dữ liệu nhận được:", response.data);
+                            const result =response.data;
+                            const messageData = {
+                                name: result.name,
+                                email: result.email,
+                                createDate: result.createDate,
+                                content: result.message
+                            };
+
+                            $("#modalName").text(messageData.name);
+                            $("#modalEmail").text(messageData.email);
+                            $("#modalCreateDate").text(messageData.createDate);
+                            $("#modalContent").text(messageData.content);
+                            $("#messageModal").modal("show");
+
+                        }
+                         else {
+                            alert("Không tìm thấy dữ liệu tin nhắn!");
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Lỗi khi tải tin nhắn, vui lòng thử lại!");
+                    }
+                });
+
+
             });
         });
     </script>
